@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS items (
 
 conn.commit()
 cursor.close()
-print("✅ Таблица 'items' успешно создана.")
+print("✅ Table 'items' created successfully.")
