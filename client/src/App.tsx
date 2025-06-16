@@ -1,23 +1,13 @@
-// // import './index.css'
-
-// export default function App() {
-//   return (
-//     <div className="bg-red-500 text-white text-2xl p-6 text-center rounded">
-//       Test Tailwind
-//     </div>
-//   );
-// }
-
 import React, { useEffect, useState } from 'react';
 import ProductCard from './components/ProductCardSmall';
 import API_BASE_URL from './config';
 
 type Product = {
   id: number;
-  name: string;
+  title: string;
   price: number;
   description?: string;
-  image: string;
+  main_photo_url: string;
 };
 
 const App: React.FC = () => {
@@ -27,12 +17,15 @@ const App: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        console.log("API_BASE_URL:", API_BASE_URL);
         const response = await fetch(`${API_BASE_URL}/products`);
         if (!response.ok) {
+          console.log("Response status:", response.status);
           throw new Error(`Ошибка загрузки: ${response.status}`);
         }
         const data = await response.json();
         setProducts(data);
+        console.log("Данные с сервера:", data);
       } catch (err) {
         console.error("Ошибка при загрузке товаров:", err);
         setError("Не удалось загрузить товары. Попробуйте позже.");
@@ -47,14 +40,14 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-6">
+    <div className="flex flex-wrap gap-2">
       {products.map(product => (
         <ProductCard
           key={product.id}
-          image={product.image}
-          title={product.name}
+          image={product.main_photo_url}
+          title={product.title}
           price={product.price}
-          description="Описание пока отсутствует"
+          description={product.description || "Описание пока отсутствует"}
         />
       ))}
     </div>
