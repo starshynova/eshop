@@ -1,9 +1,57 @@
-// import './index.css'
+import React, { useEffect, useState } from 'react';
+import ProductCard from './components/ProductCardSmall';
+import API_BASE_URL from './config';
 
-export default function App() {
+type Product = {
+  id: number;
+  title: string;
+  price: number;
+  description?: string;
+  main_photo_url: string;
+};
+
+const App: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        console.log("API_BASE_URL:", API_BASE_URL);
+        const response = await fetch(`${API_BASE_URL}/products`);
+        if (!response.ok) {
+          console.log("Response status:", response.status);
+          throw new Error(`Ошибка загрузки: ${response.status}`);
+        }
+        const data = await response.json();
+        setProducts(data);
+        console.log("Данные с сервера:", data);
+      } catch (err) {
+        console.error("Ошибка при загрузке товаров:", err);
+        setError("Не удалось загрузить товары. Попробуйте позже.");
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  if (error) {
+    return <div className="text-red-500 p-4">{error}</div>;
+  }
+
   return (
-    <div className="bg-red-500 text-white text-2xl p-6 text-center rounded">
-      Test Tailwind
+    <div className="flex flex-wrap gap-2">
+      {products.map(product => (
+        <ProductCard
+          key={product.id}
+          image={product.main_photo_url}
+          title={product.title}
+          price={product.price}
+          description={product.description || "Описание пока отсутствует"}
+        />
+      ))}
     </div>
   );
-}
+};
+
+export default App;
