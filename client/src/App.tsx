@@ -36,9 +36,25 @@ const App: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const handleSearch = (query: string) => {
-    console.log('Поиск:', query);
+  const handleSearch = async (query: string) => {
+  console.log('Поиск:', query);
+  setError(null); // Сброс ошибки
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      throw new Error(`Ошибка при поиске: ${response.status}`);
+    }
+
+    const data = await response.json();
+    setProducts(data);
+    console.log('Результаты поиска:', data);
+  } catch (err) {
+    console.error("Ошибка при поиске:", err);
+    setError("Не удалось выполнить поиск. Попробуйте позже.");
+    }
   };
+
 
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
