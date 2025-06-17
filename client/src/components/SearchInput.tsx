@@ -26,12 +26,6 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder = 'Search...', on
         placeholder={placeholder}
         className="w-full h-[32px] px-[20px] py-[20px] border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      <button
-        type="submit"
-        className="px-[12px] py-[8px] bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Search
-      </button>
     </form>
   );
 };
