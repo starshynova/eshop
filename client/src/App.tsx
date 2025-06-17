@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from './components/ProductCardSmall';
 import API_BASE_URL from './config';
+import SearchInput from './components/SearchInput';
 
 type Product = {
   id: number;
@@ -35,12 +36,18 @@ const App: React.FC = () => {
     fetchProducts();
   }, []);
 
+  const handleSearch = (query: string) => {
+    console.log('Поиск:', query);
+  };
+
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div>
+    <SearchInput onSearch={handleSearch}/>
+    <div className="flex flex-wrap gap-y-8 justify-around px-8">
       {products.map(product => (
         <ProductCard
           key={product.id}
@@ -50,6 +57,7 @@ const App: React.FC = () => {
           description={product.description || "Описание пока отсутствует"}
         />
       ))}
+    </div>
     </div>
   );
 };

@@ -9,12 +9,12 @@ type ProductCardProps = {
 
 const ProductCard: React.FC<ProductCardProps> = ({ image, title, price, description }) => {
   return (
-<div className="w-[25%] bg-white flex flex-col">
-  <div className="justify-center items-center">
+<div className="w-[22%] bg-white flex flex-col border-2 border-red-500 justify-center items-center pb-8">
+  <div className="w-[80%] justify-center items-center">
     <img
       src={image}
       alt={title}
-      className="w-[80%] object-cover"
+      className="w-full object-cover aspect-[3/5]"
     />
   </div>
   <div className="p-4 flex flex-col flex-grow">

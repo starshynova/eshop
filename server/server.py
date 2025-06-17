@@ -20,3 +20,7 @@ app.add_middleware(
 def read_root():
     print("Запрос к / получен!")
     return {"message": "Server is running!"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("server:app", host="127.0.0.1", port=8080, reload=True)
