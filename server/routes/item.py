@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Query
 from db.connectDB import get_connection
+from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 
 router = APIRouter()
 
 @router.get("/products")
-
 def get_products():
     try:
         print("Запрос /products получен!")
@@ -43,4 +43,24 @@ def search_products(q: str = Query(..., min_length=1)):
         ]
     except Exception as e:
         print(f"❌ Ошибка при получении продуктов в поиске: {e}")
+        return {"error": str(e)}
+
+@router.post("/products/init-image-vectors")
+def init_image_vectors():
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
+                rows = cur.fetchall()
+
+        products = [
+            {"id": row[0], "title": row[1], "price": float(row[2]), "description": row[3], "main_photo_url": row[4]}
+            for row in rows
+        ]
+
+        init_image_collection()
+        add_products_with_image_vectors(products)
+
+        return {"message": "Продукты добавлены в Qdrant с image-векторами!"}
+    except Exception as e:
         return {"error": str(e)}
