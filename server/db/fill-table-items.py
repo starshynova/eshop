@@ -1,5 +1,5 @@
 import uuid
-from connectDB import conn
+from connectDB import get_connection
 
 items = [
     {
@@ -20,7 +20,7 @@ items = [
         "id": uuid.uuid4(),
         "title": "Blue shirt and pants",
         "price": 89,
-        "description": None,
+        "description": " Blue shirt and pants set ",
         "main_photo_url": "https://e-commerce-img.s3.eu-north-1.amazonaws.com/img-03.jpg"
     },
 {
@@ -46,6 +46,7 @@ items = [
     },
 ]
 
+conn = get_connection()
 cursor = conn.cursor()
 
 for item in items:
