@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from db.connectDB import get_connection
-from services.qdrant_utils import init_qdrant_collection, add_products_to_qdrant
+from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
+
 
 router = APIRouter()
 
@@ -17,8 +18,8 @@ def init_qdrant():
             for row in rows
         ]
 
-        init_qdrant_collection()
-        add_products_to_qdrant(products)
+        init_image_collection()
+        add_products_with_image_vectors(products)
 
         return {"message": "Продукты добавлены в Qdrant!"}
     except Exception as e:
