@@ -56,6 +56,25 @@ const App: React.FC = () => {
     }
   };
 
+  const handleSemanticSearch = async (query: string) => {
+  console.log('Semantic txt Поиск:', query);
+  setError(null); // Сброс ошибки
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/products/semantic-image-search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      throw new Error(`Ошибка при semantic txt поиске: ${response.status}`);
+    }
+
+    const data = await response.json();
+    setProducts(data);
+    console.log('Результаты semantic txt поиска:', data);
+  } catch (err) {
+    console.error("Ошибка при semantic txt поиске:", err);
+    setError("Не удалось выполнить semantic поиск. Попробуйте позже.");
+    }
+  };
+
 
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
@@ -79,7 +98,8 @@ const App: React.FC = () => {
 
   return (
     <div>
-    <SearchInputTxt onSearch={handleSearch}/>
+    <SearchInputTxt placeholder='Search...' onSearch={handleSearch}/>
+    <SearchInputTxt placeholder='Semantic search...' onSearch={handleSemanticSearch}/>
     <SearchInputImg onSearchImg={(imgUrl) => {
       console.log("Uploaded to S3: ", imgUrl);
       handleSearchImg(imgUrl);

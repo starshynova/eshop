@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 type SearchInputProps = {
-  placeholder?: string;
+  placeholder: string;
   onSearch: (query: string) => void;
 };
 
