@@ -1,13 +1,11 @@
-from fastapi import APIRouter
-from pydantic import BaseModel
-from services.aws_s3_utils import create_presigned_url
+from fastapi import APIRouter, File, UploadFile
+from services.aws_s3_utils import upload_file_to_s3
 
 router = APIRouter()
 
-class UploadRequest(BaseModel):
-    filename: str
-
-@router.post("/generate-upload-url")
-def get_upload_url(data: UploadRequest):
-    url = create_presigned_url(data.filename)
-    return {"upload_url": url}
+@router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...)):
+    print("✔ Got file:", file.filename, file.content_type)
+    url = await upload_file_to_s3(file)
+    print("✔ Uploaded to S3, returning URL:", url)
+    return {"image_url": url}

@@ -1,32 +1,59 @@
-const uploadImageToS3 = async (file: File) => {
-  // 1. Получить signed URL
-  try {
-    if (!file || !(file instanceof File)) {
-      throw new Error("Invalid file provided");
+import React, { useState } from "react";
+import API_BASE_URL from "../config";
+
+type SearchButtonProps = {
+  onSearchImg: (fileUrl: string) => void;
+};
+
+const SearchInputImg: React.FC<SearchButtonProps> = ({ onSearchImg }) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
     }
-    
-  const res = await fetch("/api/generate-upload-url", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename: file.name }),
-  });
+  };
 
-  const { upload_url } = await res.json();
+const uploadImageToBackend = async () => {
+  if (!selectedFile) {
+    return;
+  }
 
-  // 2. Загрузить файл напрямую в S3
-  await fetch(upload_url, {
-    method: "PUT",
-    headers: { "Content-Type": file.type },
-    body: file,
-  });
+  const formData = new FormData();
+  formData.append("file", selectedFile);
 
-  // 3. Получаем публичный URL (если бакет открыт)
-  const imageUrl = upload_url.split("?")[0];
-  return imageUrl;
-} catch (error) {
-  console.error("Error uploading image to S3:", error);
-  throw new Error("Failed to upload image");
+  try {
+    const res = await fetch(`${API_BASE_URL}/upload-image`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    const imageUrl = data.image_url;
+    onSearchImg(imageUrl);
+  } catch (err) {
+    console.error("Ошибка при загрузке на сервер:", err);
+  }
 };
+
+
+  return (
+    <div className="flex items-center space-x-2 w-[50%] max-w-md mx-auto p-2">
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="w-full h-[32px] px-[20px] py-[20px] border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <button
+        onClick={uploadImageToBackend}
+        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+      >
+        Search
+      </button>
+    </div>
+  );
 };
 
-export default uploadImageToS3;
+export default SearchInputImg;
