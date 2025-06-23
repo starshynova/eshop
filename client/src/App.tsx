@@ -61,15 +61,28 @@ const App: React.FC = () => {
     return <div className="text-red-500 p-4">{error}</div>;
   }
 
-  // const handleSearchImg = async (file: File) => {
-  //   console.log('Поиск по изображению:', file.name);
-  // };
+  const handleSearchImg = async (imgUrl: string) => {
+    // console.log('Поиск по изображению:', file.name);
+    const encodedUrl = encodeURIComponent(imgUrl);
+    const response = await fetch(`${API_BASE_URL}/products/semantic-image-search?q=${encodedUrl}`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+     if (!response.ok) {
+      throw new Error(`Ошибка при поиске: ${response.status}`);
+    }
+    const data = await response.json();
+    setProducts(data);
+  };
 
   return (
     <div>
     <SearchInputTxt onSearch={handleSearch}/>
     <SearchInputImg onSearchImg={(imgUrl) => {
       console.log("Uploaded to S3: ", imgUrl);
+      handleSearchImg(imgUrl);
     }} />
     <div className="flex flex-wrap gap-y-8 justify-around px-8">
       {products.map(product => (
