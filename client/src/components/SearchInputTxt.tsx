@@ -5,7 +5,7 @@ type SearchInputProps = {
   onSearch: (query: string) => void;
 };
 
-const SearchInput: React.FC<SearchInputProps> = ({ placeholder = 'Search...', onSearch }) => {
+const SearchInputTxt: React.FC<SearchInputProps> = ({ placeholder = 'Search...', onSearch }) => {
   const [query, setQuery] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,4 +30,4 @@ const SearchInput: React.FC<SearchInputProps> = ({ placeholder = 'Search...', on
   );
 };
 
-export default SearchInput;
+export default SearchInputTxt;

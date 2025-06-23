@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ProductCard from './components/ProductCardSmall';
 import API_BASE_URL from './config';
-import SearchInput from './components/SearchInput';
+import SearchInputTxt from './components/SearchInputTxt';
+import SearchInputImg from './components/SearchInputImg';
 
 type Product = {
   id: number;
@@ -60,9 +61,16 @@ const App: React.FC = () => {
     return <div className="text-red-500 p-4">{error}</div>;
   }
 
+  // const handleSearchImg = async (file: File) => {
+  //   console.log('Поиск по изображению:', file.name);
+  // };
+
   return (
     <div>
-    <SearchInput onSearch={handleSearch}/>
+    <SearchInputTxt onSearch={handleSearch}/>
+    <SearchInputImg onSearchImg={(imgUrl) => {
+      console.log("Uploaded to S3: ", imgUrl);
+    }} />
     <div className="flex flex-wrap gap-y-8 justify-around px-8">
       {products.map(product => (
         <ProductCard
