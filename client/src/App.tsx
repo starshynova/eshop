@@ -3,6 +3,10 @@ import ProductCard from './components/ProductCardSmall';
 import API_BASE_URL from './config';
 import SearchInputTxt from './components/SearchInputTxt';
 import SearchInputImg from './components/SearchInputImg';
+// import Example from './components/Header';
+import Header from './components/Header';
+import SearchInterface from './components/SearchInterface';
+import { SearchQueryProvider } from './context/SearchQueryContext';
 
 type Product = {
   id: number;
@@ -99,10 +103,9 @@ const App: React.FC = () => {
 
   return (
     <div>
-      <SearchInputTxt placeholder="Search..." onSearch={handleSearch} />
-      <SearchInputTxt placeholder="Semantic search..." onSearch={handleSemanticSearch} />
-      <SearchInputImg onSearchImg={handleSearchImg} />
-      <div className="flex flex-wrap gap-y-8 justify-around px-8">
+      <SearchQueryProvider>
+      <Header />
+      <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 fixed top-[80px]">
         {products.map(product => (
           <ProductCard
             key={product.id}
@@ -113,6 +116,7 @@ const App: React.FC = () => {
           />
         ))}
       </div>
+      </SearchQueryProvider>
     </div>
   );
 };
