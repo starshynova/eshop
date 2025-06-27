@@ -18,13 +18,13 @@ const SearchInputTxt: React.FC<SearchInputProps> = ({ placeholder = 'Search...',
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center space-x-2 w-[50%] max-w-md mx-auto p-2">
+    <form onSubmit={handleSubmit} className="flex items-center space-x-2 w-full mx-auto p-2">
       <input
         type="text"
         value={query}
         onChange={handleInputChange}
         placeholder={placeholder}
-        className="w-full h-[32px] px-[20px] py-[20px] border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full h-[32px] px-[20px] py-[20px] border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     </form>
   );
