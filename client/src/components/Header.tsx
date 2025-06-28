@@ -10,11 +10,14 @@ import {
 } from '@heroicons/react/24/outline'
 import{ useState } from 'react';
 import SearchInterface from './SearchInterface';
+import { useNavigate } from 'react-router-dom';
+
 
 
 
 const Header: React.FC = () => {
     const [searchMenuOpen, setSearchMenuOpen] = useState<boolean>(false);
+    const navigate = useNavigate();
     return (
         <div className="w-full flex flex-col items-center justify-center">
         <div className="bg-black w-full h-[80px] flex items-center justify-between px-20 ">
@@ -24,7 +27,7 @@ const Header: React.FC = () => {
             </div>
             <div className="flex w-[60%] items-center justify-start px-10 gap-8  ">
                 <button className="text-sm/6 font-semibold bg-white/20 hover:bg-white/50 transition-colors duration-200 px-4 py-2 rounded-lg text-white"
-                    onClick={() => console.log("Home page")}>Home</button>
+                    onClick={() => navigate('/')}>Home</button>
                 <Popover>
           <PopoverButton className="block text-sm/6 font-semibold bg-white/20 px-4 py-2 rounded-lg hover:bg-white/50 transition-colors duration-200 text-white focus:outline-none data-active:text-white data-focus:outline data-focus:outline-white data-hover:text-white">
             Catalog
@@ -69,9 +72,9 @@ const Header: React.FC = () => {
                 anchor="bottom"
                 className="divide-y divide-white rounded-xl mt-2 bg-[#818181] text-sm/6 transition duration-200 ease-in-out [--anchor-gap:--spacing(5)] data-closed:-translate-y-1 data-closed:opacity-0">
                     <div className="p-2">
-                        <a className="block rounded-lg px-3 py-2 transition hover:bg-white/20" href="#">
+                        <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => navigate('/login')}>
                           <p className="font-semibold text-white">Log In</p>
-                        </a>
+                        </button>
                         <a className="block rounded-lg px-3 py-2 transition hover:bg-white/20" href="#">
                           <p className="font-semibold text-white">Log Out</p>
                         </a>
