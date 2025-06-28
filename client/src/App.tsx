@@ -105,7 +105,7 @@ const App: React.FC = () => {
     <div>
       <SearchQueryProvider>
       <Header />
-      <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 fixed top-[80px]">
+      <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px]">
         {products.map(product => (
           <ProductCard
             key={product.id}
