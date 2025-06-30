@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, EmailStr, constr
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
+from jose import JWTError, jwt as jose_jwt  # Поменяли импорт для JWT
 
 from db.connectDB import get_connection
 
@@ -11,6 +12,22 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 # Настройка контекста для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# Настройки JWT
+SECRET_KEY = "your_secret_key_here"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
+
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    """Создаёт JWT токен с указанием exp"""
+    to_encode = data.copy()
+    expire_time = expires_delta if expires_delta is not None else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.now(timezone.utc) + expire_time
+    to_encode.update({"exp": expire})
+    # Используем encode из python-jose
+    token = jose_jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return token
 
 
 class UserCreate(BaseModel):
@@ -23,30 +40,26 @@ class UserCreate(BaseModel):
     post_code: constr(min_length=6, max_length=6)
     city: str
 
+
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
 
 @router.post("/register", status_code=201)
-def register_user(credentials: UserLogin):
+def register_user(user: UserCreate):
     """Регистрация нового пользователя с проверкой и хешированием пароля"""
-    # Хешируем пароль
     hashed_password = pwd_context.hash(user.password)
-
-    # Генерируем UUID и текущую дату/время в UTC (timezone-aware)
     user_id = str(uuid.uuid4())
     created_date = datetime.now(timezone.utc)
 
     try:
         conn = get_connection()
         cur = conn.cursor()
-        # Проверяем, существует ли пользователь с таким email
-        cur.execute("SELECT id FROM users WHERE email = %s", (credentials.email,))
+        cur.execute("SELECT id FROM users WHERE email = %s", (user.email,))
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
 
-        # Вставляем нового пользователя
         insert_query = """
             INSERT INTO users (
                 id, email, password, first_name, last_name,
@@ -69,7 +82,6 @@ def register_user(credentials: UserLogin):
     except HTTPException:
         raise
     except Exception:
-        # Логирование ошибки можно добавить здесь
         raise HTTPException(status_code=500, detail="Не удалось зарегистрировать пользователя")
     finally:
         cur.close()
@@ -77,9 +89,10 @@ def register_user(credentials: UserLogin):
 
     return {"message": "Пользователь успешно зарегистрирован", "user_id": user_id}
 
+
 @router.post("/login", status_code=200)
 def login_user(credentials: UserLogin):
-    """Логин пользователя: проверка email и пароля"""
+    """Логин пользователя: проверка email и пароля и выдача JWT токена"""
     try:
         conn = get_connection()
         cur = conn.cursor()
@@ -99,5 +112,5 @@ def login_user(credentials: UserLogin):
         cur.close()
         conn.close()
 
-    return {"message": "Успешный вход", "user_id": user_id}
-
+    access_token = create_access_token(data={"sub": str(user_id)})
+    return {"access_token": access_token, "token_type": "bearer"}
