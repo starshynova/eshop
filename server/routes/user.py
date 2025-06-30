@@ -7,7 +7,7 @@ from passlib.context import CryptContext
 from db.connectDB import get_connection
 
 # Инициализация роутера для пользовательских маршрутов
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["users"])
 
 # Настройка контекста для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -23,9 +23,13 @@ class UserCreate(BaseModel):
     post_code: constr(min_length=6, max_length=6)
     city: str
 
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+
 
 @router.post("/register", status_code=201)
-def register_user(user: UserCreate):
+def register_user(credentials: UserLogin):
     """Регистрация нового пользователя с проверкой и хешированием пароля"""
     # Хешируем пароль
     hashed_password = pwd_context.hash(user.password)
@@ -38,7 +42,7 @@ def register_user(user: UserCreate):
         conn = get_connection()
         cur = conn.cursor()
         # Проверяем, существует ли пользователь с таким email
-        cur.execute("SELECT id FROM users WHERE email = %s", (user.email,))
+        cur.execute("SELECT id FROM users WHERE email = %s", (credentials.email,))
         if cur.fetchone():
             raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
 
@@ -72,3 +76,28 @@ def register_user(user: UserCreate):
         conn.close()
 
     return {"message": "Пользователь успешно зарегистрирован", "user_id": user_id}
+
+@router.post("/login", status_code=200)
+def login_user(credentials: UserLogin):
+    """Логин пользователя: проверка email и пароля"""
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT id, password FROM users WHERE email = %s", (credentials.email,))
+        result = cur.fetchone()
+        if not result:
+            raise HTTPException(status_code=400, detail="Неверный email или пароль")
+
+        user_id, stored_hash = result
+        if not pwd_context.verify(credentials.password, stored_hash):
+            raise HTTPException(status_code=400, detail="Неверный email или пароль")
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Ошибка при попытке входа")
+    finally:
+        cur.close()
+        conn.close()
+
+    return {"message": "Успешный вход", "user_id": user_id}
+
