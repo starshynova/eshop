@@ -16,6 +16,7 @@ const LoginPage = () => {
         <div className="flex flex-col w-[40%] max-w-[500px] mx-auto mt-[120px] p-[40px]  bg-[#cacaca] rounded-xl shadow-lg justify-center items-center">
             <Input
                 type="text"
+                
                 placeholder="E-mail"
                 value={email}
                 onChange={e => setEmail(e.currentTarget.value)}
