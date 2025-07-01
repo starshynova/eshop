@@ -20,7 +20,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """Создаёт JWT токен с указанием exp"""
+    """Создаёт JWT токен с указанием exp
+    :rtype: str
+    """
     to_encode = data.copy()
     expire_time = expires_delta if expires_delta is not None else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     expire = datetime.now(timezone.utc) + expire_time
@@ -113,4 +115,4 @@ def login_user(credentials: UserLogin):
         conn.close()
 
     access_token = create_access_token(data={"sub": str(user_id)})
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"token": access_token, "token_type": "bearer"}
