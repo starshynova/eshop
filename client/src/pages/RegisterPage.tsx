@@ -7,6 +7,7 @@ import { SearchQueryProvider } from '../context/SearchQueryContext';
 import API_BASE_URL from '../config';
 import { Dialog, DialogPanel } from '@headlessui/react';
 import { useNavigate } from 'react-router-dom';
+import CustomDialog from '../components/CustomDialog';
 
 interface Step1Data {
   email: string;
@@ -209,35 +210,14 @@ const RegisterPage: React.FC = () => {
                 <a href="/login" className="text-base text-blue-500 hover:underline">Login</a>
             </div>
         </div>
-
-        
       )}
-      <Dialog
-                  open={isOpen}
-                  onClose={() => setIsOpen(false)}
-                  as="div"
-                  className="fixed inset-0 z-50 flex items-center justify-center"
-                >
-                  <div
-                    className="fixed inset-0 bg-black bg-opacity-50"
-                    aria-hidden="true"
-                  />
-                  <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <DialogPanel className="flex flex-col bg-white rounded-lg shadow-lg p-8 max-w-sm w-full justify-center items-center">
-                      <p className="text-gray-700 mb-4">
-                        You have successfully registered.
-                      </p>
-                      <Button
-                        onClick={() => {
-                          setIsOpen(false)
-                          navigate('/')
-                        }}
-                      >
-                        Go to Main Page
-                      </Button>
-                    </DialogPanel>
-                  </div>
-                </Dialog>
+                <CustomDialog
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    message="You have successfully registered."
+                    buttonTitle="Go to Main Page"
+                    onClickButton={() => navigate('/')}
+                />
     </div>
     </SearchQueryProvider>
     </>

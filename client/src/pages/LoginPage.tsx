@@ -1,12 +1,11 @@
 import React, { useState } from 'react'
-import { Dialog, DialogPanel } from '@headlessui/react';
 import Header from '../components/Header';
 import { SearchQueryProvider } from '../context/SearchQueryContext';
 import Button from '../components/Button';
 import API_BASE_URL from '../config';
-import MainPage from './MainPage';
 import { useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
+import CustomDialog from '../components/CustomDialog';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -75,32 +74,13 @@ const LoginPage = () => {
                 <a href="/register" className="text-base text-blue-500 hover:underline">Signup</a>
             </div>
         </div>
-            <Dialog
-                  open={isOpen}
-                  onClose={() => setIsOpen(false)}
-                  as="div"
-                  className="fixed inset-0 z-50 flex items-center justify-center"
-                >
-                  <div
-                    className="fixed inset-0 bg-black bg-opacity-50"
-                    aria-hidden="true"
-                  />
-                  <div className="fixed inset-0 flex items-center justify-center p-4">
-                    <DialogPanel className="flex flex-col bg-white rounded-lg shadow-lg p-8 max-w-sm w-full justify-center items-center">
-                      <p className="text-gray-700 mb-4">
-                        You have successfully logged in.
-                      </p>
-                      <Button
-                        onClick={() => {
-                          setIsOpen(false)
-                          navigate('/')
-                        }}
-                      >
-                        Go to Main Page
-                      </Button>
-                    </DialogPanel>
-                  </div>
-                </Dialog>
+                <CustomDialog
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    message="You have successfully logged in."
+                    buttonTitle="Go to Main Page"
+                    onClickButton={() => navigate('/')}
+                />
                 </div>
                 </div>
         </SearchQueryProvider>
