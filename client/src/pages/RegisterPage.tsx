@@ -4,6 +4,9 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import Header from '../components/Header';
 import { SearchQueryProvider } from '../context/SearchQueryContext';
+import API_BASE_URL from '../config';
+import { Dialog, DialogPanel } from '@headlessui/react';
+import { useNavigate } from 'react-router-dom';
 
 interface Step1Data {
   email: string;
@@ -41,6 +44,9 @@ const RegisterPage: React.FC = () => {
     city: '',
   });
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const validateStep1 = () => {
     const { email, password, confirmPassword } = step1;
@@ -73,32 +79,38 @@ const RegisterPage: React.FC = () => {
       return;
     }
 
+    const userData = {
+        email: credentials.email,
+        password: credentials.password,
+        first_name: step2.firstName,
+        last_name: step2.lastName,
+        address_line1: step2.address1,
+        address_line2: step2.address2 || null,
+        post_code: step2.postcode,
+        city: step2.city,
+    };
+
     try {
-        const response = await fetch(`@{API_BASE_URL}/users/register`, {
+        const response = await fetch(`${API_BASE_URL}/users/register`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-                ...credentials, step2,
-            }),
+             body: JSON.stringify(userData),
         });
         if (!response.ok) {
             const errorData = await response.json();
             setError(errorData.message || 'Registration failed');
             throw new Error(`Registration failed: ${response.status}`);
         }
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        setIsOpen(true);
     } catch (err) {
         console.error('Error during registration:', err);
         setError('Registration failed. Please try again later.');
     };
 };
-
-//     console.log('Registering user with data:', {
-//       ...credentials,
-//       ...step2,
-//     });
-//   };
 
   return (
     <>
@@ -133,9 +145,7 @@ const RegisterPage: React.FC = () => {
           />
           {error && <p className="text-red-600">{error}</p>}
           <div className="flex w-full justify-end">
-          <Button className="justify-end w-[45%]" onClick={handleNext}>
-            Next
-          </Button>
+          <Button className="justify-end w-[45%]" onClick={handleNext} children="Next" />
           
           </div>
           <div className="flex flex-row gap-3 mt-7 w-full justify-center">
@@ -191,17 +201,43 @@ const RegisterPage: React.FC = () => {
             className="w-full px-3 py-2 border rounded"
           />
           <div className="flex justify-between">
-            <Button className="w-[45%]" onClick={() => setStep(Step.Credentials)}>Back</Button>
-            <Button className="w-[45%]" onClick={handleRegister}>
-              Register
-            </Button>
+            <Button className="w-[45%]" onClick={() => setStep(Step.Credentials)} children="Back" />
+            <Button className="w-[45%]" onClick={handleRegister} children="Register" />
           </div>
           <div className="flex flex-row gap-3 mt-7 w-full justify-center">
                 <p className="text-base text-gray-700">Do you have an account?</p>
                 <a href="/login" className="text-base text-blue-500 hover:underline">Login</a>
             </div>
         </div>
+
+        
       )}
+      <Dialog
+                  open={isOpen}
+                  onClose={() => setIsOpen(false)}
+                  as="div"
+                  className="fixed inset-0 z-50 flex items-center justify-center"
+                >
+                  <div
+                    className="fixed inset-0 bg-black bg-opacity-50"
+                    aria-hidden="true"
+                  />
+                  <div className="fixed inset-0 flex items-center justify-center p-4">
+                    <DialogPanel className="flex flex-col bg-white rounded-lg shadow-lg p-8 max-w-sm w-full justify-center items-center">
+                      <p className="text-gray-700 mb-4">
+                        You have successfully registered.
+                      </p>
+                      <Button
+                        onClick={() => {
+                          setIsOpen(false)
+                          navigate('/')
+                        }}
+                      >
+                        Go to Main Page
+                      </Button>
+                    </DialogPanel>
+                  </div>
+                </Dialog>
     </div>
     </SearchQueryProvider>
     </>
