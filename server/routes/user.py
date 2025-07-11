@@ -81,6 +81,9 @@ def register_user(user: UserCreate):
             created_date
         ))
         conn.commit()
+
+        access_token = create_access_token(data={"sub": user_id})
+
     except HTTPException:
         raise
     except Exception:
@@ -89,8 +92,12 @@ def register_user(user: UserCreate):
         cur.close()
         conn.close()
 
-    return {"message": "Пользователь успешно зарегистрирован", "user_id": user_id}
-
+    return {
+        "message": "Пользователь успешно зарегистрирован",
+        "user_id": user_id,
+        "token": access_token,
+        "token_type": "bearer"
+    }
 
 @router.post("/login", status_code=200)
 def login_user(credentials: UserLogin):
