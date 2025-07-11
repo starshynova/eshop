@@ -9,7 +9,11 @@ CREATE TABLE IF NOT EXISTS items (
     title TEXT NOT NULL,
     price NUMERIC NOT NULL,
     description TEXT NOT NULL,
-    main_photo_url TEXT NOT NULL
+    main_photo_url TEXT NOT NULL,
+    additional_photo_1_url TEXT,
+    additional_photo_2_url TEXT,
+    additional_photo_3_url TEXT,
+    quantity NUMERIC NOT NULL
 );
 """)
 

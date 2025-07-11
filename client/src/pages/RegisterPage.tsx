@@ -14,7 +14,8 @@ interface Step1Data {
 interface Step2Data {
   firstName: string;
   lastName: string;
-  address: string;
+  address1: string;
+  address2?: string;
   postcode: string;
   city: string;
 }
@@ -34,7 +35,8 @@ const RegisterPage: React.FC = () => {
   const [step2, setStep2] = useState<Step2Data>({
     firstName: '',
     lastName: '',
-    address: '',
+    address1: '',
+    address2: '',
     postcode: '',
     city: '',
   });
@@ -63,13 +65,40 @@ const RegisterPage: React.FC = () => {
     if (validateStep1()) setStep(Step.Profile);
   };
 
-  const handleRegister = () => {
-    // final submission
-    console.log('Registering user with data:', {
-      ...step1,
-      ...step2,
-    });
-  };
+  const handleRegister = async () => {
+    const { confirmPassword, ...credentials } = step1;
+
+    if (!step2.firstName || !step2.lastName || !step2.address1 || !step2.postcode || !step2.city) {
+      setError('All fields in step 2 are required.');
+      return;
+    }
+
+    try {
+        const response = await fetch(`@{API_BASE_URL}/users/register`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                ...credentials, step2,
+            }),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            setError(errorData.message || 'Registration failed');
+            throw new Error(`Registration failed: ${response.status}`);
+        }
+    } catch (err) {
+        console.error('Error during registration:', err);
+        setError('Registration failed. Please try again later.');
+    };
+};
+
+//     console.log('Registering user with data:', {
+//       ...credentials,
+//       ...step2,
+//     });
+//   };
 
   return (
     <>
@@ -135,9 +164,16 @@ const RegisterPage: React.FC = () => {
           />
           <Input
             type="text"
-            placeholder="Address"
-            value={step2.address}
-            onChange={e => setStep2({ ...step2, address: e.currentTarget.value })}
+            placeholder="Address 1"
+            value={step2.address1}
+            onChange={e => setStep2({ ...step2, address1: e.currentTarget.value })}
+            className="w-full px-3 py-2 border rounded"
+          />
+          <Input
+            type="text"
+            placeholder="Address 2 (optional)"
+            value={step2.address2}
+            onChange={e => setStep2({ ...step2, address2: e.currentTarget.value })}
             className="w-full px-3 py-2 border rounded"
           />
           <Input
