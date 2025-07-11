@@ -11,13 +11,21 @@ import {
 import{ useState } from 'react';
 import SearchInterface from './SearchInterface';
 import { useNavigate } from 'react-router-dom';
-
+import CustomDialog from './CustomDialog';
 
 
 
 const Header: React.FC = () => {
     const [searchMenuOpen, setSearchMenuOpen] = useState<boolean>(false);
+    const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
+
+    const handleLogOut = () => {  
+        sessionStorage.removeItem('token');
+        console.log("User logged out");
+        setIsOpen(true);
+    };
+
     return (
         <div className="w-full flex flex-col items-center justify-center">
         <div className="bg-black w-full h-[80px] flex items-center justify-between px-20 ">
@@ -76,15 +84,20 @@ const Header: React.FC = () => {
                           <p className="font-semibold text-white">Log In</p>
                         </button>
                         <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => 
-                          {sessionStorage.removeItem('token');
-                            console.log("Logged out");
-                          navigate('/')}
-                          }>
+                          {handleLogOut(); }
+                        }>
                           <p className="font-semibold text-white">Log Out</p>
                         </button>
                     </div>
                 </PopoverPanel>
                 </Popover>
+                <CustomDialog
+                    isOpen={isOpen}
+                    onClose={() => setIsOpen(false)}
+                    message="You have successfully logged out."
+                    buttonTitle="Go to Main Page"
+                    onClickButton={() => navigate('/')}
+                />
             </div>
         </div>
         <div className={`flex w-full ${searchMenuOpen} ? "" : "hidden"`}>
