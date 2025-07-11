@@ -75,9 +75,13 @@ const Header: React.FC = () => {
                         <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => navigate('/login')}>
                           <p className="font-semibold text-white">Log In</p>
                         </button>
-                        <a className="block rounded-lg px-3 py-2 transition hover:bg-white/20" href="#">
+                        <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => 
+                          {sessionStorage.removeItem('token');
+                            console.log("Logged out");
+                          navigate('/')}
+                          }>
                           <p className="font-semibold text-white">Log Out</p>
-                        </a>
+                        </button>
                     </div>
                 </PopoverPanel>
                 </Popover>
