@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import ProductCardSmall from '../components/ProductCardSmall';
 import API_BASE_URL from '../config';
 import Header from '../components/Header';
-
+import Loader from '../components/Loader';
 
 interface Product {
   id: number;
@@ -20,6 +20,7 @@ const SearchPage = () => {
   const mode = searchParams.get('mode') ?? 'regular';
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     if (!term) return;
@@ -46,36 +47,36 @@ const SearchPage = () => {
 
   return (
     <>
-    <Header />
-      {!term ? (
-        <p>Введите запрос в поисковую строку выше.</p>
-      ) : loading ? (
-        // <p>Загрузка результатов по «{q}»…</p>
-        <p>Загрузка результатов по «{term}»…</p>
+      <Header />
+
+      {loading ? (
+        <div className="fixed inset-0 z-50 flex justify-center items-center bg-white bg-opacity-75">
+          <Loader />
+        </div>
+      ) : !term ? (
+        <p className="p-8 text-center">Введите запрос в поисковую строку выше.</p>
+      ) : products.length > 0 ? (
+        <div className="w-full flex flex-col items-center justify-center mt-8">
+          <h1 className="mb-4 text-2xl">
+            Результаты поиска: «{term}» ({mode})
+          </h1>
+          <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-4 w-full">
+            {products.map(product => (
+              <ProductCardSmall
+                key={product.id}
+                image={product.main_photo_url}
+                title={product.title}
+                price={product.price}
+                description={product.description || "Описание пока отсутствует"}
+              />
+            ))}
+          </div>
+        </div>
       ) : (
-        <>
-          {/* <h1>Результаты поиска: «{q}»</h1> */}
-          <div className="w-full flex flex-col items-center justify-center">
-          <h1>Результаты поиска: «{term}» ({mode})</h1>
-          {products.length > 0 ? (
-           <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px] w-full">
-        {products.map(product => (
-          <ProductCardSmall
-            key={product.id}
-            image={product.main_photo_url}
-            title={product.title}
-            price={product.price}
-            description={product.description || "Описание пока отсутствует"}
-          />
-        ))}
-      </div>
-          ) : (
-            <p>Ничего не найдено.</p>
-          )}</div>
-        </>
+        <p className="p-8 text-center">Ничего не найдено.</p>
       )}
     </>
   );
-}
+};
 
 export default SearchPage;
