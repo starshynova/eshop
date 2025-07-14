@@ -23,7 +23,10 @@ def get_products():
 
 
 @router.get("/products/search")
-def search_products(q: str = Query(..., min_length=1)):
+def search_products(
+    q: str = Query(..., alias="term", min_length=1),
+    mode: str = Query("regular")
+):
     try:
         conn = get_connection()
         cur = conn.cursor()
