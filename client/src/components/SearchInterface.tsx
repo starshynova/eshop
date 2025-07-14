@@ -1,18 +1,42 @@
 import React from 'react';
 import { MagnifyingGlassIcon, AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline';
+import { useNavigate, createSearchParams } from 'react-router-dom';
 import SearchInputTxt from './SearchInputTxt';
-import { useSearchQuery } from '../context/SearchQueryContext';
 
 
-const SearchInterface: React.FC<{show: boolean}> = ({ show }) => {
-  const { setQuery } = useSearchQuery();
+interface Props {
+  show: boolean;
+  onClose: () => void;
+}
+
+const SearchInterface: React.FC<Props> = ({ show, onClose }) => {
+  const navigate = useNavigate();
 
   const handleRegularSearch = (q: string) => {
-    setQuery(q);
+    if (!q.trim()) return;
+    navigate({
+      pathname: '/search',
+      // отправляем имя term (алиас для q на бэкенде) и mode
+      search: createSearchParams({
+        term: q.trim(),
+        mode: 'regular'
+      }).toString()
+    });
+
+    onClose();
   };
 
   const handleSemanticSearch = (q: string) => {
-    setQuery(q);
+    if (!q.trim()) return;
+    navigate({
+      pathname: '/search',
+      // отправляем имя term (алиас для q на бэкенде) и mode
+      search: createSearchParams({
+        term: q.trim(),
+        mode: 'semantic'
+      }).toString()
+    });
+    onClose();
   };
 
   if (!show) return null;
@@ -35,7 +59,7 @@ const SearchInterface: React.FC<{show: boolean}> = ({ show }) => {
         <div className="bg-white w-[50%] shadow-md rounded-lg p-6">
           <div className="flex items-center mb-4">
             <AdjustmentsHorizontalIcon className="w-6 h-6 text-indigo-600 mr-2" aria-hidden="true" />
-            <h2 className="text-xl font-medium">Seamntic search</h2>
+            <h2 className="text-xl font-medium">Semantic search</h2>
           </div>
           <SearchInputTxt
             placeholder="Semantic search..."

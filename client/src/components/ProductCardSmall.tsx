@@ -7,7 +7,7 @@ type ProductCardProps = {
   description: string;
 };
 
-const ProductCard: React.FC<ProductCardProps> = ({ image, title, price, description }) => {
+const ProductCardSmall: React.FC<ProductCardProps> = ({ image, title, price, description }) => {
   return (
 <div className="w-[22%] bg-white flex flex-col border-2 border-red-500 justify-center items-center pb-8">
   <div className="w-[80%] justify-center items-center">
@@ -29,4 +29,4 @@ const ProductCard: React.FC<ProductCardProps> = ({ image, title, price, descript
 
 };
 
-export default ProductCard;
+export default ProductCardSmall;

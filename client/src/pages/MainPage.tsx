@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import ProductCard from '../components/ProductCardSmall';
+import ProductCardSmall from '../components/ProductCardSmall';
 import API_BASE_URL from '../config';
 import SearchInputTxt from '../components/SearchInputTxt';
 import SearchInputImg from '../components/SearchInputImg';
@@ -107,7 +107,7 @@ const MainPage: React.FC = () => {
       <Header />
       <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px]">
         {products.map(product => (
-          <ProductCard
+          <ProductCardSmall
             key={product.id}
             image={product.main_photo_url}
             title={product.title}

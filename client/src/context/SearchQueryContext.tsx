@@ -12,7 +12,7 @@ const SearchQueryContext = createContext<SearchQueryContextType | undefined>(und
 type SearchQueryProviderProps = { children: ReactNode };
 
 // 3) Провайдер, который будем оборачивать приложение или определённые разделы
-export function SearchQueryProvider({ children }: SearchQueryProviderProps) {
+export const SearchQueryProvider = ({ children }: SearchQueryProviderProps) => {
   const [query, setQuery] = useState<string>('');
 
   return (

@@ -19,6 +19,7 @@ const Header: React.FC = () => {
     const [searchMenuOpen, setSearchMenuOpen] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState(false);
     const navigate = useNavigate();
+    const toggleSearch = () => setSearchMenuOpen(open => !open);
 
     const handleLogOut = () => {  
         sessionStorage.removeItem('token');
@@ -65,7 +66,7 @@ const Header: React.FC = () => {
             </div>
             <div className="w-[30%] flex flex-row gap-8 items-center justify-end pr-4">
                 <button className="flex size-11 flex-none items-center justify-center rounded-[50%] bg-white group-hover:bg-white"
-                onClick={() => setSearchMenuOpen(!searchMenuOpen)}>
+                onClick={toggleSearch}>
                     <MagnifyingGlassIcon aria-hidden="true" className="size-6 text-gray-600 hover:text-indigo-600" />
                 </button>
                 <button className="flex w-10 h-10 flex-none items-center justify-center rounded-full bg-white group-hover:bg-white">
@@ -101,7 +102,7 @@ const Header: React.FC = () => {
             </div>
         </div>
         <div className={`flex w-full ${searchMenuOpen} ? "" : "hidden"`}>
-        <SearchInterface show={searchMenuOpen} />
+        <SearchInterface show={searchMenuOpen} onClose={() => setSearchMenuOpen(false)} />
         </div>
         </div>
     )
