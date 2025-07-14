@@ -15,7 +15,7 @@ interface Product {
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
-  const q = searchParams.get('q') || '';
+//   const q = searchParams.get('q') || '';
   const term = searchParams.get('term') || '';
   const mode = searchParams.get('mode') ?? 'regular';
   const [products, setProducts] = useState<Product[]>([]);
@@ -55,20 +55,23 @@ const SearchPage = () => {
       ) : (
         <>
           {/* <h1>Результаты поиска: «{q}»</h1> */}
+          <div className="w-full flex flex-col items-center justify-center">
           <h1>Результаты поиска: «{term}» ({mode})</h1>
           {products.length > 0 ? (
-            <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px]">
-              {products.map(product => (
-                  <ProductCardSmall key={product.id}
-                        image={product.main_photo_url}
-                        title={product.title}
-                        price={product.price}
-                        description={product.description || "Описание пока отсутствует"} />
-              ))}
-            </div>
+           <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px] w-full">
+        {products.map(product => (
+          <ProductCardSmall
+            key={product.id}
+            image={product.main_photo_url}
+            title={product.title}
+            price={product.price}
+            description={product.description || "Описание пока отсутствует"}
+          />
+        ))}
+      </div>
           ) : (
             <p>Ничего не найдено.</p>
-          )}
+          )}</div>
         </>
       )}
     </>

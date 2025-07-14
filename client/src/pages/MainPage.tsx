@@ -38,64 +38,64 @@ const MainPage: React.FC = () => {
     fetchProducts();
   }, []);
 
-  const handleSearch = async (query: string) => {
-    setError(null);
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`
-      );
-      if (!response.ok) {
-        throw new Error(`Ошибка при поиске: ${response.status}`);
-      }
-      const data = await response.json();
-      setProducts(data);
-    } catch (err) {
-      console.error("Ошибка при поиске:", err);
-      setError("Не удалось выполнить поиск. Попробуйте позже.");
-    }
-  };
+  // const handleSearch = async (query: string) => {
+  //   setError(null);
+  //   try {
+  //     const response = await fetch(
+  //       `${API_BASE_URL}/products/search?q=${encodeURIComponent(query)}`
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error(`Ошибка при поиске: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     setProducts(data);
+  //   } catch (err) {
+  //     console.error("Ошибка при поиске:", err);
+  //     setError("Не удалось выполнить поиск. Попробуйте позже.");
+  //   }
+  // };
 
-  const handleSemanticSearch = async (query: string) => {
-    setError(null);
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/products/semantic-image-search?q=${encodeURIComponent(query)}`
-      );
-      if (!response.ok) {
-        throw new Error(`Ошибка при semantic txt поиске: ${response.status}`);
-      }
-      const data = await response.json();
-      setProducts(data);
-    } catch (err) {
-      console.error("Ошибка при semantic txt поиске:", err);
-      setError("Не удалось выполнить semantic поиск. Попробуйте позже.");
-    }
-  };
+  // const handleSemanticSearch = async (query: string) => {
+  //   setError(null);
+  //   try {
+  //     const response = await fetch(
+  //       `${API_BASE_URL}/products/semantic-image-search?q=${encodeURIComponent(query)}`
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error(`Ошибка при semantic txt поиске: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     setProducts(data);
+  //   } catch (err) {
+  //     console.error("Ошибка при semantic txt поиске:", err);
+  //     setError("Не удалось выполнить semantic поиск. Попробуйте позже.");
+  //   }
+  // };
 
-  const handleSearchImg = async (imgUrl: string) => {
-    setError(null);
-    try {
-      const payload = { image_url: imgUrl };
-      const response = await fetch(
-        `${API_BASE_URL}/products/image-search`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`Ошибка при поиске изображений: ${response.status}`);
-      }
-      const data = await response.json();
-      setProducts(data);
-    } catch (err) {
-      console.error("Ошибка при поиске по изображению:", err);
-      setError("Не удалось выполнить поиск по изображению. Попробуйте позже.");
-    }
-  };
+  // const handleSearchImg = async (imgUrl: string) => {
+  //   setError(null);
+  //   try {
+  //     const payload = { image_url: imgUrl };
+  //     const response = await fetch(
+  //       `${API_BASE_URL}/products/image-search`,
+  //       {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify(payload),
+  //       }
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error(`Ошибка при поиске изображений: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     setProducts(data);
+  //   } catch (err) {
+  //     console.error("Ошибка при поиске по изображению:", err);
+  //     setError("Не удалось выполнить поиск по изображению. Попробуйте позже.");
+  //   }
+  // };
 
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
