@@ -6,6 +6,16 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt as jose_jwt  # Поменяли импорт для JWT
 
 from db.connectDB import get_connection
+from authlib.integrations.starlette_client import OAuth
+from starlette.requests import Request
+from starlette.responses import RedirectResponse
+
+import os
+from dotenv import load_dotenv
+from pathlib import Path
+
+import traceback
+
 
 # Инициализация роутера для пользовательских маршрутов
 router = APIRouter(prefix="/users", tags=["users"])
@@ -18,6 +28,19 @@ SECRET_KEY = "your_secret_key_here"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+oauth = OAuth()
+oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    access_token_url='https://oauth2.googleapis.com/token',
+    authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
+    api_base_url='https://www.googleapis.com/oauth2/v3/',  # важно!
+    client_kwargs={'scope': 'email profile'}
+)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """Создаёт JWT токен с указанием exp
@@ -123,3 +146,62 @@ def login_user(credentials: UserLogin):
 
     access_token = create_access_token(data={"sub": str(user_id)})
     return {"token": access_token, "token_type": "bearer"}
+
+
+@router.get("/oauth/google/login")
+async def google_login(request: Request):
+    redirect_uri = request.url_for('google_auth_callback')
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+@router.get("/oauth/google/callback", name="google_auth_callback")
+async def google_auth_callback(request: Request):
+    try:
+        token = await oauth.google.authorize_access_token(request)
+
+        # более надёжный способ получить данные пользователя
+        resp = await oauth.google.get("userinfo", token=token)
+        user_info = resp.json()
+        user_email = user_info.get("email")
+        first_name = user_info.get("given_name")
+        last_name = user_info.get("family_name")
+
+        if not user_email:
+            raise HTTPException(status_code=400, detail="Не удалось получить email из профиля Google")
+
+        # БД и генерация токена
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("SELECT id FROM users WHERE email = %s", (user_email,))
+        row = cur.fetchone()
+
+        if row:
+            user_id = row[0]
+        else:
+            user_id = str(uuid.uuid4())
+            created_date = datetime.now(timezone.utc)
+            cur.execute("""
+                INSERT INTO users (
+                    id, email, password, first_name, last_name,
+                    address_line1, address_line2, post_code, city, created_date
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                user_id, user_email, "", first_name or "GoogleUser", last_name or "",
+                "", "", "", "", created_date
+            ))
+            conn.commit()
+
+        access_token = create_access_token(data={"sub": user_id})
+
+    except Exception as e:
+        import traceback
+        print("OAuth ERROR:", e)
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail="OAuth login failed")
+
+    finally:
+        if 'cur' in locals(): cur.close()
+        if 'conn' in locals(): conn.close()
+
+    return RedirectResponse(f"http://localhost:5173/welcome?token={access_token}")
+

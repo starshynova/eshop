@@ -1,5 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+import os
+from dotenv import load_dotenv
+from pathlib import Path
 
 app = FastAPI()
 
@@ -9,6 +13,11 @@ origins = [
     "http://127.0.0.1:5173",
 ]
 
+env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
+
+secret_key_session_middleware=os.getenv("SECRET_KEY_SESSION_MIDDLEWARE")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,       # вместо ["*"]
@@ -16,6 +25,8 @@ app.add_middleware(
     allow_methods=["*"],         # GET, POST, PUT и т. д.
     allow_headers=["*"],         # Content-Type и прочие
 )
+
+app.add_middleware(SessionMiddleware, secret_key=secret_key_session_middleware)
 
 # теперь подключаем все роутеры
 from routes.item import router as item_router
