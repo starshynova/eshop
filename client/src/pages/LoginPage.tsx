@@ -42,6 +42,12 @@ const LoginPage = () => {
         }
     }
 
+    const handleGoogleLogin = () => {
+        // setError(null);
+        window.location.href = `${API_BASE_URL}/users/oauth/google/login`;
+    };
+
+
     return (
         <>
         <SearchQueryProvider>
@@ -69,6 +75,7 @@ const LoginPage = () => {
                     </p>
                 )}
             <Button className="w-full" onClick={handleLogin} children="Log In" />
+            <Button className="w-full" onClick={handleGoogleLogin} children="Log In with Google" />
             <div className="flex flex-row gap-3 mt-7 w-full justify-center">
                 <p className="text-base text-gray-700">Don't have an account?</p>
                 <a href="/register" className="text-base text-blue-500 hover:underline">Signup</a>
