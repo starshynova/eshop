@@ -6,6 +6,7 @@ cursor = conn.cursor()
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
+    role TEXT NOT NULL DEFAULT 'user',
     email TEXT NOT NULL,
     password TEXT NOT NULL,
     first_name TEXT NOT NULL
