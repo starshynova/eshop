@@ -33,7 +33,7 @@ const LoginPage = () => {
                 throw new Error(`Login failed: ${response.status}`);
             } else {
                 console.log("Login successful:", data);
-                sessionStorage.setItem('token', data.token);
+                localStorage.setItem('token', data.token);
                 setIsOpen(true);
             }
         } catch (err) {

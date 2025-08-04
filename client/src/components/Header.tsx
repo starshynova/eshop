@@ -22,7 +22,7 @@ const Header: React.FC = () => {
     const toggleSearch = () => setSearchMenuOpen(open => !open);
 
     const handleLogOut = () => {  
-        sessionStorage.removeItem('token');
+        localStorage.removeItem('token');
         console.log("User logged out");
         setIsOpen(true);
     };
