@@ -187,7 +187,11 @@ async def google_auth_callback(request: Request):
                 ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 user_id, user_email, "", first_name or "GoogleUser", last_name or "",
-                "", "", "", "", created_date
+                None,  # address_line1
+                None,  # address_line2
+                None,  # post_code
+                None,  # city
+                created_date
             ))
             conn.commit()
 

@@ -9,12 +9,14 @@ const Welcome = () =>{
         const token = params.get("token");
 
         if (token) {
-            sessionStorage.setItem("token", token);
-            navigate("/"); // или главная страница после входа
+            localStorage.setItem("token", token);
+            setTimeout(() => {
+                navigate("/");
+            }, 200);
         } else {
             navigate("/login"); // если токена нет
         }
-    }, []);
+    }, [navigate]);
 
     return <p>Завершаем вход через Google...</p>;
 }
