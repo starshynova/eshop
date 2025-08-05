@@ -8,16 +8,21 @@ import {
   ShoppingCartIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import{ useState } from 'react';
+import{ useState, useEffect } from 'react';
 import SearchInterface from './SearchInterface';
 import { useNavigate } from 'react-router-dom';
 import CustomDialog from './CustomDialog';
+import API_BASE_URL from '../config';
 
-
+type Category = {
+  id: string;
+  category_name: string;
+};
 
 const Header: React.FC = () => {
     const [searchMenuOpen, setSearchMenuOpen] = useState<boolean>(false);
     const [isOpen, setIsOpen] = useState(false);
+    const [categories, setCategories] = useState<Category[]>([]);
     const navigate = useNavigate();
     const toggleSearch = () => setSearchMenuOpen(open => !open);
 
@@ -26,6 +31,20 @@ const Header: React.FC = () => {
         console.log("User logged out");
         setIsOpen(true);
     };
+
+     useEffect(() => {
+      const fetchCategories = async () => {
+        try {
+          const res = await fetch(`${API_BASE_URL}/products/categories`);
+          const data = await res.json();
+          setCategories(data);
+        } catch (error) {
+          console.error("Error getting categories:", error);
+        }
+      };
+
+    fetchCategories();
+  }, []);
 
     return (
         <div className="w-full flex flex-col items-center justify-center">
@@ -47,15 +66,14 @@ const Header: React.FC = () => {
             className="divide-y divide-white rounded-xl mt-2 bg-[#ff5353] text-sm/6 transition duration-200 ease-in-out [--anchor-gap:--spacing(5)] data-closed:-translate-y-1 data-closed:opacity-0"
           >
             <div className="p-3">
-              <a className="block rounded-lg px-3 py-2 transition hover:bg-white/20" href="#">
-                <p className="font-semibold text-white">Section 1</p>
-              </a>
-              <a className="block rounded-lg px-3 py-2 transition hover:bg-white/20" href="#">
-                <p className="font-semibold text-white">Section 2</p>
-              </a>
-              <a className="block rounded-lg px-3 py-2 transition hover:bg-white/20" href="#">
-                <p className="font-semibold text-white">Section 3</p>
-              </a>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  className="block rounded-lg px-3 py-2 transition hover:bg-white/20"
+                >
+                  <p className="font-semibold text-white">{category.category_name}</p>
+                </button>
+              ))}
             </div>
           </PopoverPanel>
         </Popover>
