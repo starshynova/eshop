@@ -8,7 +8,7 @@ cursor.execute("""
 CREATE TABLE IF NOT EXISTS subcategory (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     category_id UUID NOT NULL REFERENCES category(id) ON DELETE CASCADE,  
-    name TEXT NOT NULL
+    subcategory_name TEXT NOT NULL
 );
 
 
