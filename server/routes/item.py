@@ -2,9 +2,9 @@ from fastapi import APIRouter, Query
 from db.connectDB import get_connection
 from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 
-router = APIRouter()
+router = APIRouter(prefix="/products", tags=["products"])
 
-@router.get("/products")
+@router.get("/")
 def get_products():
     try:
         print("Запрос /products получен!")
@@ -22,7 +22,7 @@ def get_products():
         return {"error": str(e)}
 
 
-@router.get("/products/search")
+@router.get("/search")
 def search_products(
     q: str = Query(..., alias="term", min_length=1),
     mode: str = Query("regular")
@@ -48,7 +48,7 @@ def search_products(
         print(f"❌ Ошибка при получении продуктов в поиске: {e}")
         return {"error": str(e)}
 
-@router.post("/products/init-image-vectors")
+@router.post("/init-image-vectors")
 def init_image_vectors():
     try:
         with get_connection() as conn:
@@ -66,4 +66,20 @@ def init_image_vectors():
 
         return {"message": "Продукты добавлены в Qdrant с image-векторами!"}
     except Exception as e:
+        return {"error": str(e)}
+
+@router.get("/categories")
+def get_categories():
+    try:
+        with get_connection() as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT * FROM category;")
+                rows = cur.fetchall()
+
+            return [
+                {"id": row[0], "category_name": row[1]}
+                for row in rows
+            ]
+    except Exception as e:
+        print(f"❌ Ошибка при получении категорий: {e}")
         return {"error": str(e)}
