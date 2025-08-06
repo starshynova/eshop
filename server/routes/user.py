@@ -6,6 +6,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt as jose_jwt  # Поменяли импорт для JWT
 
 from db.connectDB import get_connection
+from db.context import get_db_cursor
 from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request
 from starlette.responses import RedirectResponse
@@ -56,6 +57,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
 
 
 class UserCreate(BaseModel):
+    role: str
     email: EmailStr
     password: str
     first_name: constr(min_length=2, max_length=30)
@@ -73,47 +75,46 @@ class UserLogin(BaseModel):
 
 @router.post("/register", status_code=201)
 def register_user(user: UserCreate):
-    """Регистрация нового пользователя с проверкой и хешированием пароля"""
     hashed_password = pwd_context.hash(user.password)
     user_id = str(uuid.uuid4())
     created_date = datetime.now(timezone.utc)
+    access_token = None  # 👈 инициализируем переменную заранее
 
     try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id FROM users WHERE email = %s", (user.email,))
-        if cur.fetchone():
-            raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
+        with get_db_cursor() as cur:
+            cur.execute("SELECT id FROM users WHERE email = %s", (user.email,))
+            if cur.fetchone():
+                raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
 
-        insert_query = """
-            INSERT INTO users (
-                id, email, password, first_name, last_name,
-                address_line1, address_line2, post_code, city, created_date
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        """
-        cur.execute(insert_query, (
-            user_id,
-            user.email,
-            hashed_password,
-            user.first_name,
-            user.last_name,
-            user.address_line1,
-            user.address_line2,
-            user.post_code,
-            user.city,
-            created_date
-        ))
-        conn.commit()
+            insert_query = """
+                INSERT INTO users (
+                    id, role, email, password, first_name, last_name,
+                    address_line1, address_line2, post_code, city, created_date
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """
+            cur.execute(insert_query, (
+                user_id,
+                user.role,
+                user.email,
+                hashed_password,
+                user.first_name,
+                user.last_name,
+                user.address_line1,
+                user.address_line2,
+                user.post_code,
+                user.city,
+                created_date
+            ))
 
-        access_token = create_access_token(data={"sub": user_id})
+            access_token = create_access_token(data={
+                "id": str(user_id),
+                "role": user.role
+            })
 
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(status_code=500, detail="Не удалось зарегистрировать пользователя")
-    finally:
-        cur.close()
-        conn.close()
 
     return {
         "message": "Пользователь успешно зарегистрирован",
@@ -122,30 +123,31 @@ def register_user(user: UserCreate):
         "token_type": "bearer"
     }
 
+
 @router.post("/login", status_code=200)
 def login_user(credentials: UserLogin):
     """Логин пользователя: проверка email и пароля и выдача JWT токена"""
     try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("SELECT id, password FROM users WHERE email = %s", (credentials.email,))
-        result = cur.fetchone()
-        if not result:
-            raise HTTPException(status_code=400, detail="Неверный email или пароль")
+        with get_db_cursor() as cur:
+            cur.execute("SELECT id, password, role FROM users WHERE email = %s", (credentials.email,))
+            result = cur.fetchone()
+            if not result:
+                raise HTTPException(status_code=400, detail="Неверный email или пароль")
 
-        user_id, stored_hash = result
-        if not pwd_context.verify(credentials.password, stored_hash):
-            raise HTTPException(status_code=400, detail="Неверный email или пароль")
+            user_id, stored_hash, role = result
+            if not pwd_context.verify(credentials.password, stored_hash):
+                raise HTTPException(status_code=400, detail="Неверный email или пароль")
+
+            access_token = create_access_token(data={
+                "id": str(user_id),
+                "role": role
+            })
+            return {"token": access_token, "token_type": "bearer"}
+
     except HTTPException:
         raise
     except Exception:
         raise HTTPException(status_code=500, detail="Ошибка при попытке входа")
-    finally:
-        cur.close()
-        conn.close()
-
-    access_token = create_access_token(data={"sub": str(user_id)})
-    return {"token": access_token, "token_type": "bearer"}
 
 
 @router.get("/oauth/google/login")
@@ -169,43 +171,38 @@ async def google_auth_callback(request: Request):
             raise HTTPException(status_code=400, detail="Не удалось получить email из профиля Google")
 
         # БД и генерация токена
-        conn = get_connection()
-        cur = conn.cursor()
+        with get_db_cursor() as cur:
 
-        cur.execute("SELECT id FROM users WHERE email = %s", (user_email,))
-        row = cur.fetchone()
+            cur.execute("SELECT id, role FROM users WHERE email = %s", (user_email,))
+            row = cur.fetchone()
 
-        if row:
-            user_id = row[0]
-        else:
-            user_id = str(uuid.uuid4())
-            created_date = datetime.now(timezone.utc)
-            cur.execute("""
-                INSERT INTO users (
-                    id, email, password, first_name, last_name,
-                    address_line1, address_line2, post_code, city, created_date
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                user_id, user_email, "", first_name or "GoogleUser", last_name or "",
-                None,  # address_line1
-                None,  # address_line2
-                None,  # post_code
-                None,  # city
-                created_date
-            ))
-            conn.commit()
+            if row:
+                user_id, role = row
+            else:
+                user_id = str(uuid.uuid4())
+                role = "user"
+                created_date = datetime.now(timezone.utc)
+                cur.execute("""
+                    INSERT INTO users (
+                        id, role, email, password, first_name, last_name,
+                        address_line1, address_line2, post_code, city, created_date
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    user_id, "user", user_email, "", first_name or "GoogleUser", last_name or "",
+                    None,  # address_line1
+                    None,  # address_line2
+                    None,  # post_code
+                    None,  # city
+                    created_date
+                ))
 
-        access_token = create_access_token(data={"sub": user_id})
+            access_token = create_access_token(data={"id": user_id, "role": role})
 
     except Exception as e:
         import traceback
         print("OAuth ERROR:", e)
         traceback.print_exc()
         raise HTTPException(status_code=500, detail="OAuth login failed")
-
-    finally:
-        if 'cur' in locals(): cur.close()
-        if 'conn' in locals(): conn.close()
 
     return RedirectResponse(f"http://localhost:5173/welcome?token={access_token}")
 
