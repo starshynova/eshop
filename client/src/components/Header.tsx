@@ -7,12 +7,16 @@ import {
   UserIcon,
   ShoppingCartIcon,
   MagnifyingGlassIcon
-} from '@heroicons/react/24/outline'
+} from '@heroicons/react/24/outline';
+import {UserIcon as UserIconSolid} from '@heroicons/react/24/solid';
 import{ useState, useEffect } from 'react';
 import SearchInterface from './SearchInterface';
 import { useNavigate } from 'react-router-dom';
 import CustomDialog from './CustomDialog';
 import API_BASE_URL from '../config';
+import getUserRole from '../utils/getUserRole';
+// import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext'; 
 
 type Subcategory = {
   id: string;
@@ -37,9 +41,12 @@ const Header: React.FC = () => {
       setOpenCategoryId(prev => (prev === categoryId ? null : categoryId));
     };
 
+    const role = getUserRole();
+    const { isAuthenticated, logout, login } = useAuth();
+
 
     const handleLogOut = () => {  
-        localStorage.removeItem('token');
+        logout();;
         console.log("User logged out");
         setIsOpen(true);
     };
@@ -135,7 +142,11 @@ const Header: React.FC = () => {
                 </button>
                 <Popover>
                  <PopoverButton className="flex w-10 h-10 flex-none items-center justify-center rounded-full bg-white group-hover:bg-white">
-                    <UserIcon aria-hidden="true" className="size-6 text-gray-600 hover:text-indigo-600" />
+                    {isAuthenticated ? (
+                      <UserIconSolid aria-hidden="true" className="size-6 text-gray-600 hover:text-indigo-600" />
+                    ) : (
+                      <UserIcon aria-hidden="true" className="size-6 text-gray-600 hover:text-indigo-600" />
+                    )}
                 </PopoverButton>
                 <PopoverPanel
                 transition

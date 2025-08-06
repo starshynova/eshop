@@ -6,6 +6,7 @@ import API_BASE_URL from '../config';
 import { useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
 import CustomDialog from '../components/CustomDialog';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -14,6 +15,7 @@ const LoginPage = () => {
     const [isOpen, setIsOpen] = useState(false);
     
     const navigate = useNavigate();
+    const { login } = useAuth();
 
 
     const handleLogin = async () => {
@@ -33,7 +35,7 @@ const LoginPage = () => {
                 throw new Error(`Login failed: ${response.status}`);
             } else {
                 console.log("Login successful:", data);
-                localStorage.setItem('token', data.token);
+                login(data.token);
                 setIsOpen(true);
             }
         } catch (err) {
@@ -43,7 +45,6 @@ const LoginPage = () => {
     }
 
     const handleGoogleLogin = () => {
-        // setError(null);
         window.location.href = `${API_BASE_URL}/users/oauth/google/login`;
     };
 
