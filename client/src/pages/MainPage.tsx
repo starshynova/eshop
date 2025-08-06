@@ -3,6 +3,7 @@ import ProductCardSmall from '../components/ProductCardSmall';
 import API_BASE_URL from '../config';
 import Header from '../components/Header';
 import { SearchQueryProvider } from '../context/SearchQueryContext';
+import { useSearchParams } from 'react-router-dom';
 
 type Product = {
   id: number;
@@ -15,11 +16,21 @@ type Product = {
 const MainPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get('category');
+  const subcategory = searchParams.get('subcategory');
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/products`);
+        let url = `${API_BASE_URL}/products`;
+        if (subcategory) {
+          url += `?subcategory_id=${subcategory}`;
+        } else if (category) {
+          url += `?category_id=${category}`;
+        }
+
+        const response = await fetch(url);
         if (!response.ok) {
           throw new Error(`Ошибка загрузки: ${response.status}`);
         }
@@ -32,8 +43,7 @@ const MainPage: React.FC = () => {
     };
 
     fetchProducts();
-  }, []);
-
+  }, [category, subcategory]); // ← теперь эффект зависит от параметров
 
   if (error) {
     return <div className="text-red-500 p-4">{error}</div>;
@@ -42,18 +52,18 @@ const MainPage: React.FC = () => {
   return (
     <div>
       <SearchQueryProvider>
-      <Header />
-      <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px]">
-        {products.map(product => (
-          <ProductCardSmall
-            key={product.id}
-            image={product.main_photo_url}
-            title={product.title}
-            price={product.price}
-            description={product.description || "Описание пока отсутствует"}
-          />
-        ))}
-      </div>
+        <Header />
+        <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px]">
+          {products.map(product => (
+            <ProductCardSmall
+              key={product.id}
+              image={product.main_photo_url}
+              title={product.title}
+              price={product.price}
+              description={product.description || "Описание пока отсутствует"}
+            />
+          ))}
+        </div>
       </SearchQueryProvider>
     </div>
   );

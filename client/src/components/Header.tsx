@@ -14,9 +14,15 @@ import { useNavigate } from 'react-router-dom';
 import CustomDialog from './CustomDialog';
 import API_BASE_URL from '../config';
 
+type Subcategory = {
+  id: string;
+  subcategory_name: string;
+};
+
 type Category = {
   id: string;
   category_name: string;
+  subcategories?: Subcategory[];
 };
 
 const Header: React.FC = () => {
@@ -25,6 +31,12 @@ const Header: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const navigate = useNavigate();
     const toggleSearch = () => setSearchMenuOpen(open => !open);
+    const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
+
+    const toggleCategory = (categoryId: string) => {
+      setOpenCategoryId(prev => (prev === categoryId ? null : categoryId));
+    };
+
 
     const handleLogOut = () => {  
         localStorage.removeItem('token');
@@ -65,17 +77,48 @@ const Header: React.FC = () => {
             anchor="bottom"
             className="divide-y divide-white rounded-xl mt-2 bg-[#ff5353] text-sm/6 transition duration-200 ease-in-out [--anchor-gap:--spacing(5)] data-closed:-translate-y-1 data-closed:opacity-0"
           >
-            <div className="p-3">
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className="block rounded-lg px-3 py-2 transition hover:bg-white/20"
-                >
-                  <p className="font-semibold text-white">{category.category_name}</p>
-                </button>
-              ))}
+            <div className="p-3 space-y-1">
+              {categories.map((category) => {
+                const isOpen = openCategoryId === category.id;          
+
+                return (
+                  <div key={category.id}>
+                    <button
+                      onClick={() => {
+                        if (category.subcategories?.length) {
+                          toggleCategory(category.id);
+                        } else {
+                          navigate(`/?category=${category.id}`);
+                        }
+                      }}
+                      className="flex w-full items-center justify-between rounded-lg px-3 py-2 transition hover:bg-white/20 text-left"
+                    >
+                      <span className="font-semibold text-white">{category.category_name}</span>
+                      {(category.subcategories && category.subcategories.length > 0) && (
+                        <span className="text-white text-sm">{isOpen ? '▼' : '▶'}</span>
+                      )}
+                    </button>         
+
+                    {isOpen && category.subcategories && category.subcategories.length > 0 && (
+                      <div className="ml-4 mt-1 flex flex-col gap-1 transition-all duration-200">
+                        {category.subcategories.map((subcat) => (
+                          <button
+                            key={subcat.id}
+                            onClick={() => navigate(`/?subcategory=${subcat.id}`)}
+                            className="block w-full text-left rounded-lg px-3 py-1 transition hover:bg-white/10 text-white text-sm"
+                          >
+                            {subcat.subcategory_name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
-          </PopoverPanel>
+          </PopoverPanel>         
+
+            
         </Popover>
         <button className="text-sm/6 font-semibold bg-white/20 hover:bg-white/50 transition-colors duration-200 px-4 py-2 rounded-lg text-white"
                     onClick={() => console.log("Delivery page")}>Delivery</button>
