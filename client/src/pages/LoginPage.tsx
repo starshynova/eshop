@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Input from '../components/Input';
 import CustomDialog from '../components/CustomDialog';
 import { useAuth } from '../context/AuthContext';
+import { FcGoogle } from 'react-icons/fc';
 
 const LoginPage = () => {
     const [email, setEmail] = useState('');
@@ -76,7 +77,12 @@ const LoginPage = () => {
                     </p>
                 )}
             <Button className="w-full" onClick={handleLogin} children="Log In" />
-            <Button className="w-full" onClick={handleGoogleLogin} children="Log In with Google" />
+            {/* <Button className="w-full" onClick={handleGoogleLogin} children="Log In with Google" /> */}
+            <Button className="w-full flex items-center justify-center gap-2" onClick={handleGoogleLogin}>
+              <FcGoogle className="w-5 h-5" />
+              <span>Log In with Google</span>
+            </Button>           
+
             <div className="flex flex-row gap-3 mt-7 w-full justify-center">
                 <p className="text-base text-gray-700">Don't have an account?</p>
                 <a href="/register" className="text-base text-blue-500 hover:underline">Signup</a>

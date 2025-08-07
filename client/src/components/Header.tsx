@@ -160,16 +160,29 @@ const Header: React.FC = () => {
                 transition
                 anchor="bottom"
                 className="divide-y divide-white rounded-xl mt-2 bg-[#818181] text-sm/6 transition duration-200 ease-in-out [--anchor-gap:--spacing(5)] data-closed:-translate-y-1 data-closed:opacity-0">
-                    <div className="p-2">
-                        <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => navigate('/login')}>
+                    
+                      {!isAuthenticated ? (
+                        <div className="p-2">
+                          <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => navigate('/login')}>
                           <p className="font-semibold text-white">Log In</p>
+                        </button>
+                        </div>
+                      ) : (
+                        <div className="p-2">
+                          <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => console.log("Profile page")}>
+                          <p className="font-semibold text-white">Profile</p>
                         </button>
                         <button className="block rounded-lg px-3 py-2 transition hover:bg-white/20" onClick={() => 
                           {handleLogOut(); }
+                          
                         }>
                           <p className="font-semibold text-white">Log Out</p>
                         </button>
-                    </div>
+                        </div>
+                      )}
+                        
+                        
+                    
                 </PopoverPanel>
                 </Popover>
                 <CustomDialog
