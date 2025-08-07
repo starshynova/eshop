@@ -4,11 +4,11 @@ from connectDB import get_connection
 subcategories = [
     {
         "category_name": "set",
-        "name": "shirt+pants",
+        "name": "shirt pants",
     },
     {
         "category_name": "set",
-        "name": "shirt+skirt",
+        "name": "shirt skirt",
     },
 ]
 
