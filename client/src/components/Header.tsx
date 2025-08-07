@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 import CustomDialog from "./CustomDialog";
 import API_BASE_URL from "../config";
 import getUserRole from "../utils/getUserRole";
-// import { useAuth } from '../hooks/useAuth';
 import { useAuth } from "../context/AuthContext";
 
 type Subcategory = {
@@ -94,7 +93,9 @@ const Header: React.FC = () => {
                           if (category.subcategories?.length) {
                             toggleCategory(category.id);
                           } else {
-                            navigate(`/?category=${category.id}`);
+                            navigate(
+                              `/?category_name=${category.category_name}`,
+                            );
                           }
                         }}
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 transition hover:bg-white/20 text-left"
@@ -118,7 +119,9 @@ const Header: React.FC = () => {
                               <button
                                 key={subcat.id}
                                 onClick={() =>
-                                  navigate(`/?subcategory=${subcat.id}`)
+                                  navigate(
+                                    `/?subcategory_name=${subcat.subcategory_name}`,
+                                  )
                                 }
                                 className="block w-full text-left rounded-lg px-3 py-1 transition hover:bg-white/10 text-white text-sm"
                               >

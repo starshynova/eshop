@@ -17,17 +17,17 @@ const MainPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
-  const category = searchParams.get("category");
-  const subcategory = searchParams.get("subcategory");
+  const category = searchParams.get("category_name");
+  const subcategory = searchParams.get("subcategory_name");
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         let url = `${API_BASE_URL}/products`;
         if (subcategory) {
-          url += `?subcategory_id=${subcategory}`;
+          url += `?subcategory_name=${subcategory}`;
         } else if (category) {
-          url += `?category_id=${category}`;
+          url += `?category_name=${category}`;
         }
 
         const response = await fetch(url);

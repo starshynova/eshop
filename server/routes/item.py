@@ -1,16 +1,33 @@
 from fastapi import APIRouter, Query
 from db.connectDB import get_connection
+from db.context import get_db_cursor
 from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 
 router = APIRouter(prefix="/products", tags=["products"])
 
 # @router.get("/")
-# def get_products():
+# def get_products(
+#         category_id: str = None,
+#         subcategory_id: str = None):
 #     try:
-#         print("Запрос /products получен!")
-#         with get_connection() as conn:
-#             with conn.cursor() as cur:
-#                 cur.execute("SELECT * FROM items;")
+#         with get_db_cursor() as cur:
+#                 if subcategory_id:
+#                     cur.execute("""
+#                         SELECT i.id, i.title, i.price, i.description, i.main_photo_url
+#                         FROM items i
+#                         JOIN item_subcategory isc ON i.id = isc.item_id
+#                         WHERE isc.subcategory_id = %s;
+#                     """, (subcategory_id,))
+#                 elif category_id:
+#                     cur.execute("""
+#                         SELECT i.id, i.title, i.price, i.description, i.main_photo_url
+#                         FROM items i
+#                         JOIN item_category ic ON i.id = ic.item_id
+#                         WHERE ic.category_id = %s;
+#                     """, (category_id,))
+#                 else:
+#                     cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
+#
 #                 rows = cur.fetchall()
 #
 #         return [
@@ -20,33 +37,66 @@ router = APIRouter(prefix="/products", tags=["products"])
 #     except Exception as e:
 #         print(f"❌ Ошибка при получении продуктов: {e}")
 #         return {"error": str(e)}
-
 @router.get("/")
-def get_products(category_id: str = None, subcategory_id: str = None):
+def get_products(
+    category_name: str = None,
+    subcategory_name: str = None,
+    sort: str = Query(default=None)
+):
     try:
-        with get_connection() as conn:
-            with conn.cursor() as cur:
-                if subcategory_id:
-                    cur.execute("""
-                        SELECT i.id, i.title, i.price, i.description, i.main_photo_url
-                        FROM items i
-                        JOIN item_subcategory isc ON i.id = isc.item_id
-                        WHERE isc.subcategory_id = %s;
-                    """, (subcategory_id,))
-                elif category_id:
-                    cur.execute("""
-                        SELECT i.id, i.title, i.price, i.description, i.main_photo_url
-                        FROM items i
-                        JOIN item_category ic ON i.id = ic.item_id
-                        WHERE ic.category_id = %s;
-                    """, (category_id,))
-                else:
-                    cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
+        with get_db_cursor() as cur:
+            base_query = """
+                SELECT i.id, i.title, i.price, i.description, i.main_photo_url
+                FROM items i
+            """
+            joins = []
+            filters = []
+            values = []
 
-                rows = cur.fetchall()
+            if subcategory_name:
+                joins.append("""
+                    JOIN item_subcategory isc ON i.id = isc.item_id
+                    JOIN subcategory sc ON isc.subcategory_id = sc.id
+                """)
+                filters.append("sc.subcategory_name = %s")
+                values.append(subcategory_name)
+
+            elif category_name:
+                joins.append("""
+                    JOIN item_category ic ON i.id = ic.item_id
+                    JOIN category c ON ic.category_id = c.id
+                """)
+                filters.append("c.category_name = %s")
+                values.append(category_name)
+
+            if joins:
+                base_query += " " + " ".join(joins)
+            if filters:
+                base_query += " WHERE " + " AND ".join(filters)
+
+            # Сортировка
+            if sort == "price_asc":
+                base_query += " ORDER BY i.price ASC"
+            elif sort == "price_desc":
+                base_query += " ORDER BY i.price DESC"
+            # elif sort == "newest":
+            #     base_query += " ORDER BY i.created_at DESC"
+            # elif sort == "name_asc":
+            #     base_query += " ORDER BY i.title ASC"
+            # elif sort == "name_desc":
+            #     base_query += " ORDER BY i.title DESC"
+
+            cur.execute(base_query, tuple(values))
+            rows = cur.fetchall()
 
         return [
-            {"id": row[0], "title": row[1], "price": float(row[2]), "description": row[3], "main_photo_url": row[4]}
+            {
+                "id": row[0],
+                "title": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "main_photo_url": row[4]
+            }
             for row in rows
         ]
     except Exception as e:
@@ -61,17 +111,14 @@ def search_products(
     mode: str = Query("regular")
 ):
     try:
-        conn = get_connection()
-        cur = conn.cursor()
-        cur.execute("""
-                    SELECT id, title, price, description, main_photo_url
-                    FROM items
-                     WHERE title ILIKE %s OR description ILIKE %s;
-                    """, (f"%{q}%", f"%{q}%"))
+        with get_db_cursor() as cur:
+            cur.execute("""
+                        SELECT id, title, price, description, main_photo_url
+                        FROM items
+                         WHERE title ILIKE %s OR description ILIKE %s;
+                        """, (f"%{q}%", f"%{q}%"))
 
-        rows = cur.fetchall()
-        cur.close()
-        conn.close()
+            rows = cur.fetchall()
 
         return [
         {"id": row[0], "title": row[1], "price": float(row[2]), "description": row[3], "main_photo_url": row[4]}
@@ -84,8 +131,7 @@ def search_products(
 @router.post("/init-image-vectors")
 def init_image_vectors():
     try:
-        with get_connection() as conn:
-            with conn.cursor() as cur:
+        with get_db_cursor() as cur:
                 cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
                 rows = cur.fetchall()
 
@@ -101,27 +147,11 @@ def init_image_vectors():
     except Exception as e:
         return {"error": str(e)}
 
-# @router.get("/categories")
-# def get_categories():
-#     try:
-#         with get_connection() as conn:
-#             with conn.cursor() as cur:
-#                 cur.execute("SELECT * FROM category;")
-#                 rows = cur.fetchall()
-#
-#             return [
-#                 {"id": row[0], "category_name": row[1]}
-#                 for row in rows
-#             ]
-#     except Exception as e:
-#         print(f"❌ Ошибка при получении категорий: {e}")
-#         return {"error": str(e)}
 
 @router.get("/categories")
 def get_categories():
     try:
-        with get_connection() as conn:
-            with conn.cursor() as cur:
+        with get_db_cursor() as cur:
                 cur.execute("SELECT id, category_name FROM category;")
                 category_rows = cur.fetchall()
 
