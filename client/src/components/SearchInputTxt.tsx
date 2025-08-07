@@ -1,12 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 type SearchInputProps = {
   placeholder: string;
   onSearch: (query: string) => void;
 };
 
-const SearchInputTxt: React.FC<SearchInputProps> = ({ placeholder = 'Search...', onSearch }) => {
-  const [query, setQuery] = useState('');
+const SearchInputTxt: React.FC<SearchInputProps> = ({
+  placeholder = "Search...",
+  onSearch,
+}) => {
+  const [query, setQuery] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value);
@@ -18,7 +21,10 @@ const SearchInputTxt: React.FC<SearchInputProps> = ({ placeholder = 'Search...',
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center space-x-2 w-full mx-auto p-2">
+    <form
+      onSubmit={handleSubmit}
+      className="flex items-center space-x-2 w-full mx-auto p-2"
+    >
       <input
         type="text"
         value={query}

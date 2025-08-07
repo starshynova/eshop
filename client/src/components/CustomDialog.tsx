@@ -1,6 +1,6 @@
-import { Dialog, DialogPanel } from '@headlessui/react';
-import Button from './Button';
-import React from 'react';
+import { Dialog, DialogPanel } from "@headlessui/react";
+import Button from "./Button";
+import React from "react";
 
 interface CustomDialogProps {
   isOpen: boolean;
@@ -24,7 +24,10 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
       as="div"
       className="fixed inset-0 z-50 flex items-center justify-center"
     >
-      <div className="fixed inset-0 bg-black bg-opacity-50" aria-hidden="true" />
+      <div
+        className="fixed inset-0 bg-black bg-opacity-50"
+        aria-hidden="true"
+      />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <DialogPanel className="flex flex-col bg-white rounded-lg shadow-lg p-8 max-w-sm w-full justify-center items-center">
           <p className="text-gray-700 mb-4">{message}</p>
