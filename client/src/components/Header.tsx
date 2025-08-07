@@ -6,7 +6,8 @@ import {
 import {
   UserIcon,
   ShoppingCartIcon,
-  MagnifyingGlassIcon
+  MagnifyingGlassIcon,
+  ChartBarIcon
 } from '@heroicons/react/24/outline';
 import {UserIcon as UserIconSolid} from '@heroicons/react/24/solid';
 import{ useState, useEffect } from 'react';
@@ -42,11 +43,11 @@ const Header: React.FC = () => {
     };
 
     const role = getUserRole();
-    const { isAuthenticated, logout, login } = useAuth();
+    const { isAuthenticated, logout } = useAuth();
 
 
     const handleLogOut = () => {  
-        logout();;
+        logout();
         console.log("User logged out");
         setIsOpen(true);
     };
@@ -133,8 +134,15 @@ const Header: React.FC = () => {
                     onClick={() => console.log("About page")}>About us</button>
             </div>
             <div className="w-[30%] flex flex-row gap-8 items-center justify-end pr-4">
+                
+                  {role === "admin" && (
+                    <button className="flex size-11 flex-none items-center justify-center rounded-[50%] bg-white group-hover:bg-white"
+                onClick={() => console.log("Admin page")}>
+                        <ChartBarIcon aria-hidden="true" className="size-6 text-gray-600 hover:text-indigo-600" />
+                      </button>)}
                 <button className="flex size-11 flex-none items-center justify-center rounded-[50%] bg-white group-hover:bg-white"
                 onClick={toggleSearch}>
+                  
                     <MagnifyingGlassIcon aria-hidden="true" className="size-6 text-gray-600 hover:text-indigo-600" />
                 </button>
                 <button className="flex w-10 h-10 flex-none items-center justify-center rounded-full bg-white group-hover:bg-white">
