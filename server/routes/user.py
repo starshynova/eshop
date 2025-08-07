@@ -15,16 +15,11 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-import traceback
 
-
-# Инициализация роутера для пользовательских маршрутов
 router = APIRouter(prefix="/users", tags=["users"])
 
-# Настройка контекста для хеширования паролей
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# Настройки JWT
 SECRET_KEY = "your_secret_key_here"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
@@ -126,7 +121,6 @@ def register_user(user: UserCreate):
 
 @router.post("/login", status_code=200)
 def login_user(credentials: UserLogin):
-    """Логин пользователя: проверка email и пароля и выдача JWT токена"""
     try:
         with get_db_cursor() as cur:
             cur.execute("SELECT id, password, role FROM users WHERE email = %s", (credentials.email,))
@@ -160,7 +154,6 @@ async def google_auth_callback(request: Request):
     try:
         token = await oauth.google.authorize_access_token(request)
 
-        # более надёжный способ получить данные пользователя
         resp = await oauth.google.get("userinfo", token=token)
         user_info = resp.json()
         user_email = user_info.get("email")
@@ -170,7 +163,6 @@ async def google_auth_callback(request: Request):
         if not user_email:
             raise HTTPException(status_code=400, detail="Не удалось получить email из профиля Google")
 
-        # БД и генерация токена
         with get_db_cursor() as cur:
 
             cur.execute("SELECT id, role FROM users WHERE email = %s", (user_email,))
