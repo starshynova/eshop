@@ -5,38 +5,6 @@ from services.qdrant_utils import init_image_collection, add_products_with_image
 
 router = APIRouter(prefix="/products", tags=["products"])
 
-# @router.get("/")
-# def get_products(
-#         category_id: str = None,
-#         subcategory_id: str = None):
-#     try:
-#         with get_db_cursor() as cur:
-#                 if subcategory_id:
-#                     cur.execute("""
-#                         SELECT i.id, i.title, i.price, i.description, i.main_photo_url
-#                         FROM items i
-#                         JOIN item_subcategory isc ON i.id = isc.item_id
-#                         WHERE isc.subcategory_id = %s;
-#                     """, (subcategory_id,))
-#                 elif category_id:
-#                     cur.execute("""
-#                         SELECT i.id, i.title, i.price, i.description, i.main_photo_url
-#                         FROM items i
-#                         JOIN item_category ic ON i.id = ic.item_id
-#                         WHERE ic.category_id = %s;
-#                     """, (category_id,))
-#                 else:
-#                     cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
-#
-#                 rows = cur.fetchall()
-#
-#         return [
-#             {"id": row[0], "title": row[1], "price": float(row[2]), "description": row[3], "main_photo_url": row[4]}
-#             for row in rows
-#         ]
-#     except Exception as e:
-#         print(f"❌ Ошибка при получении продуктов: {e}")
-#         return {"error": str(e)}
 @router.get("/")
 def get_products(
     category_name: str = None,
@@ -81,10 +49,10 @@ def get_products(
                 base_query += " ORDER BY i.price DESC"
             # elif sort == "newest":
             #     base_query += " ORDER BY i.created_at DESC"
-            # elif sort == "name_asc":
-            #     base_query += " ORDER BY i.title ASC"
-            # elif sort == "name_desc":
-            #     base_query += " ORDER BY i.title DESC"
+            elif sort == "name_asc":
+                base_query += " ORDER BY i.title ASC"
+            elif sort == "name_desc":
+                base_query += " ORDER BY i.title DESC"
 
             cur.execute(base_query, tuple(values))
             rows = cur.fetchall()
@@ -177,4 +145,30 @@ def get_categories():
         ]
     except Exception as e:
         print(f"❌ Ошибка при получении категорий: {e}")
+        return {"error": str(e)}
+
+@router.get("/{item_id}")
+def get_product_by_id(item_id: str):
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT id, title, price, description, main_photo_url, quantity
+                FROM items
+                WHERE id = %s;
+            """, (item_id,))
+            row = cur.fetchone()
+
+        if row:
+            return {
+                "id": row[0],
+                "title": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "main_photo_url": row[4],
+                "quantity": row[5]
+            }
+        else:
+            return {"error": f"Product with id {item_id} not found"}
+    except Exception as e:
+        print(f"❌ Ошибка при получении продукта по ID: {e}")
         return {"error": str(e)}
