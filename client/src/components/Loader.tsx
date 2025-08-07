@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 const Loader: React.FC = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-75 z-50">

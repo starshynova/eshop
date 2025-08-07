@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import ProductCardSmall from '../components/ProductCardSmall';
-import API_BASE_URL from '../config';
-import Header from '../components/Header';
-import { SearchQueryProvider } from '../context/SearchQueryContext';
-import { useSearchParams } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import ProductCardSmall from "../components/ProductCardSmall";
+import API_BASE_URL from "../config";
+import Header from "../components/Header";
+import { SearchQueryProvider } from "../context/SearchQueryContext";
+import { useSearchParams } from "react-router-dom";
 
 type Product = {
   id: number;
@@ -17,8 +17,8 @@ const MainPage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchParams] = useSearchParams();
-  const category = searchParams.get('category');
-  const subcategory = searchParams.get('subcategory');
+  const category = searchParams.get("category");
+  const subcategory = searchParams.get("subcategory");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -54,7 +54,7 @@ const MainPage: React.FC = () => {
       <SearchQueryProvider>
         <Header />
         <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[80px]">
-          {products.map(product => (
+          {products.map((product) => (
             <ProductCardSmall
               key={product.id}
               image={product.main_photo_url}

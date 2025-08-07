@@ -1,14 +1,14 @@
-import { useState } from 'react'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
-import SearchInputTxt from './SearchInputTxt'
+import { useState } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import SearchInputTxt from "./SearchInputTxt";
 
 export default function SearchSlideInline() {
-  const [showSearch, setShowSearch] = useState(false)
+  const [showSearch, setShowSearch] = useState(false);
 
   const handleSearch = (query: string) => {
-    console.log('Ищем:', query)
+    console.log("Ищем:", query);
     // ваша логика поиска
-  }
+  };
 
   return (
     <div className="flex w-full items-center justify-end gap-2">
@@ -17,17 +17,15 @@ export default function SearchSlideInline() {
         className={`
           flex-1 overflow-hidden 
           transition-[max-width,opacity] duration-300 ease-in-out
-          ${showSearch 
-            ? 'max-w-full opacity-100' 
-            : 'max-w-0 opacity-0'}
+          ${showSearch ? "max-w-full opacity-100" : "max-w-0 opacity-0"}
         `}
       >
         {/* Сам инпут подгоняется под ширину контейнера */}
         <SearchInputTxt
           placeholder="Search..."
-          onSearch={query => {
-            handleSearch(query)
-            setShowSearch(false)
+          onSearch={(query) => {
+            handleSearch(query);
+            setShowSearch(false);
           }}
         />
       </div>
@@ -37,7 +35,7 @@ export default function SearchSlideInline() {
         className={`
           flex-none w-10 h-10 flex items-center justify-center 
           rounded-full bg-white hover:bg-gray-100 transition-colors
-          ${showSearch ? 'hidden' : ''}
+          ${showSearch ? "hidden" : ""}
         `}
         onClick={() => setShowSearch(true)}
         aria-label="Показать поиск"
@@ -48,5 +46,5 @@ export default function SearchSlideInline() {
         />
       </button>
     </div>
-  )
+  );
 }

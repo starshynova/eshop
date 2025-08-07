@@ -15,28 +15,27 @@ const SearchInputImg: React.FC<SearchButtonProps> = ({ onSearchImg }) => {
     }
   };
 
-const uploadImageToBackend = async () => {
-  if (!selectedFile) {
-    return;
-  }
+  const uploadImageToBackend = async () => {
+    if (!selectedFile) {
+      return;
+    }
 
-  const formData = new FormData();
-  formData.append("file", selectedFile);
+    const formData = new FormData();
+    formData.append("file", selectedFile);
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/upload-image`, {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/upload-image`, {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await res.json();
-    const imageUrl = data.image_url;
-    onSearchImg(imageUrl);
-  } catch (err) {
-    console.error("Ошибка при загрузке на сервер:", err);
-  }
-};
-
+      const data = await res.json();
+      const imageUrl = data.image_url;
+      onSearchImg(imageUrl);
+    } catch (err) {
+      console.error("Ошибка при загрузке на сервер:", err);
+    }
+  };
 
   return (
     <div className="flex items-center space-x-2 w-[50%] max-w-md mx-auto p-2">

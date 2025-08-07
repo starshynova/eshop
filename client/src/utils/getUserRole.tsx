@@ -7,6 +7,6 @@ const getUserRole = (): string | null => {
   } catch {
     return null;
   }
-}
+};
 
 export default getUserRole;
