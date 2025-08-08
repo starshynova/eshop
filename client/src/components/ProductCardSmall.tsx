@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./Button";
 
 type ProductCardProps = {
   image: string;
@@ -14,7 +15,8 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
   description,
 }) => {
   return (
-    <div className="w-[22%] bg-white flex flex-col border-2 border-red-500 justify-center items-center pb-8">
+    <div className="flex flex-col gap-y-4 w-[22%] bg-white border-2 border-red-500 pb-8">
+      <div className="w-full h-full flex flex-col cursor-pointer justify-center items-center">
       <div className="w-[80%] justify-center items-center">
         <img
           src={image}
@@ -29,7 +31,11 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
         <div className="mt-2 font-bold text-indigo-600 text-md">
           €{price.toFixed(2)}
+          </div>
         </div>
+      </div>
+      <div className="w-full flex justify-center">
+        <Button children="Add ro Cart" />
       </div>
     </div>
   );
