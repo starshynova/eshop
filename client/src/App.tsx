@@ -5,6 +5,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import SearchPage from "./pages/SearchPage";
 import Welcome from "./components/Welcome";
+import ProductDetails from "./pages/ProductDetails";
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -14,6 +15,7 @@ const App: React.FC = () => (
       <Route path="/welcome" element={<Welcome />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/search" element={<SearchPage />} />
+      <Route path="/products/:id" element={<ProductDetails />} />
     </Routes>
   </BrowserRouter>
 );

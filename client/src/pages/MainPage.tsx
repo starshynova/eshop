@@ -7,7 +7,7 @@ import { useSearchParams } from "react-router-dom";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 
 type Product = {
-  id: number;
+  id: string;
   title: string;
   price: number;
   description?: string;
@@ -42,23 +42,23 @@ const MainPage: React.FC = () => {
 
         const response = await fetch(url);
         if (!response.ok) {
-          throw new Error(`Ошибка загрузки: ${response.status}`);
+          throw new Error(`Download error: ${response.status}`);
         }
         const data = await response.json();
         setProducts(data);
       } catch (err) {
-        console.error("Ошибка при загрузке товаров:", err);
-        setError("Не удалось загрузить товары. Попробуйте позже.");
+        console.error("Error loading products:", err);
+        setError("Unable to load products. Please try again later.");
       }
     };
 
     fetchProducts();
-  }, [category, subcategory, sort]); // добавили sort
+  }, [category, subcategory, sort]); 
 
   const handleSortChange = (value: string) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set("sort", value);
-    setSearchParams(newParams); // это обновит URL и триггернет useEffect
+    setSearchParams(newParams); 
   };
 
   if (error) {
@@ -113,10 +113,11 @@ const MainPage: React.FC = () => {
           {products.map((product) => (
             <ProductCardSmall
               key={product.id}
+              id={product.id}
               image={product.main_photo_url}
               title={product.title}
               price={product.price}
-              description={product.description || "Описание пока отсутствует"}
+              description={product.description || "No description available yet"}
             />
           ))}
         </div>
