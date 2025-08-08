@@ -1,6 +1,9 @@
 import React from "react";
+import Button from "./Button";
+import { useNavigate } from "react-router-dom";
 
 type ProductCardProps = {
+  id: string;
   image: string;
   title: string;
   price: number;
@@ -8,13 +11,25 @@ type ProductCardProps = {
 };
 
 const ProductCardSmall: React.FC<ProductCardProps> = ({
+  id,
   image,
   title,
   price,
   description,
 }) => {
+  const navigate = useNavigate();
+  
+  const handleProductCardClick = async () => {
+    if (!id) {
+      console.error("Product ID is undefined!");
+      return;
+    }
+    navigate(`/products/${id}`);
+  };
+
   return (
-    <div className="w-[22%] bg-white flex flex-col border-2 border-red-500 justify-center items-center pb-8">
+    <div className="flex flex-col gap-y-4 w-[22%] bg-white border-2 border-red-500 pb-8">
+      <button className="w-full h-full flex flex-col cursor-pointer justify-center items-center" onClick={handleProductCardClick}>
       <div className="w-[80%] justify-center items-center">
         <img
           src={image}
@@ -29,7 +44,11 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
         <p className="text-sm text-gray-600 mt-1 line-clamp-2">{description}</p>
         <div className="mt-2 font-bold text-indigo-600 text-md">
           €{price.toFixed(2)}
+          </div>
         </div>
+      </button>
+      <div className="w-full flex justify-center">
+        <Button children="Add to Cart" />
       </div>
     </div>
   );
