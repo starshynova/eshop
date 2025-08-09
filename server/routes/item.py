@@ -41,13 +41,10 @@ def get_products(
             if filters:
                 base_query += " WHERE " + " AND ".join(filters)
 
-            # Сортировка
             if sort == "price_asc":
                 base_query += " ORDER BY i.price ASC"
             elif sort == "price_desc":
                 base_query += " ORDER BY i.price DESC"
-            # elif sort == "newest":
-            #     base_query += " ORDER BY i.created_at DESC"
             elif sort == "name_asc":
                 base_query += " ORDER BY i.title ASC"
             elif sort == "name_desc":
@@ -67,7 +64,7 @@ def get_products(
             for row in rows
         ]
     except Exception as e:
-        print(f"❌ Ошибка при получении продуктов: {e}")
+        print(f"Error receiving products: {e}")
         return {"error": str(e)}
 
 
@@ -92,7 +89,7 @@ def search_products(
         for row in rows
         ]
     except Exception as e:
-        print(f"❌ Ошибка при получении продуктов в поиске: {e}")
+        print(f"Error receiving products in search: {e}")
         return {"error": str(e)}
 
 @router.post("/init-image-vectors")
@@ -110,7 +107,7 @@ def init_image_vectors():
         init_image_collection()
         add_products_with_image_vectors(products)
 
-        return {"message": "Продукты добавлены в Qdrant с image-векторами!"}
+        return {"message": "Products added to Qdrant with image vectors!"}
     except Exception as e:
         return {"error": str(e)}
 
@@ -122,18 +119,15 @@ def get_categories():
                 cur.execute("SELECT id, category_name FROM category;")
                 category_rows = cur.fetchall()
 
-                # Получим подкатегории
                 cur.execute("SELECT id, category_id, subcategory_name FROM subcategory;")
                 subcategory_rows = cur.fetchall()
 
-        # Преобразуем в словарь: {category_id: [subcategories]}
         subcategories_by_category = {}
         for sub in subcategory_rows:
             sub_id, cat_id, name = sub
             sub_obj = {"id": sub_id, "subcategory_name": name}
             subcategories_by_category.setdefault(cat_id, []).append(sub_obj)
 
-        # Собираем ответ
         return [
             {
                 "id": cat_id,
@@ -143,7 +137,7 @@ def get_categories():
             for cat_id, cat_name in category_rows
         ]
     except Exception as e:
-        print(f"❌ Ошибка при получении категорий: {e}")
+        print(f"Error getting categories: {e}")
         return {"error": str(e)}
 
 @router.get("/{item_id}")
@@ -169,5 +163,5 @@ def get_product_by_id(item_id: str):
         else:
             return {"error": f"Product with id {item_id} not found"}
     except Exception as e:
-        print(f"❌ Ошибка при получении продукта по ID: {e}")
+        print(f"❌ Error getting product by id: {e}")
         return {"error": str(e)}
