@@ -3,9 +3,8 @@ from pydantic import BaseModel, EmailStr, constr
 import uuid
 from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
-from jose import JWTError, jwt as jose_jwt  # Поменяли импорт для JWT
+from jose import JWTError, jwt as jose_jwt
 
-# from ..db.connectDB import get_connection
 from db.context import get_db_cursor
 from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request
@@ -14,18 +13,15 @@ from starlette.responses import RedirectResponse
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from core.auth import create_access_token
 
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = "your_secret_key_here"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60
-
-env_path = Path(__file__).resolve().parent.parent.parent / '.env'
-load_dotenv(dotenv_path=env_path)
+# env_path = Path(__file__).resolve().parent.parent.parent / '.env'
+# load_dotenv(dotenv_path=env_path)
 
 oauth = OAuth()
 oauth.register(
@@ -34,21 +30,9 @@ oauth.register(
     client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
     access_token_url='https://oauth2.googleapis.com/token',
     authorize_url='https://accounts.google.com/o/oauth2/v2/auth',
-    api_base_url='https://www.googleapis.com/oauth2/v3/',  # важно!
+    api_base_url='https://www.googleapis.com/oauth2/v3/',
     client_kwargs={'scope': 'email profile'}
 )
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    """Создаёт JWT токен с указанием exp
-    :rtype: str
-    """
-    to_encode = data.copy()
-    expire_time = expires_delta if expires_delta is not None else timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    expire = datetime.now(timezone.utc) + expire_time
-    to_encode.update({"exp": expire})
-    # Используем encode из python-jose
-    token = jose_jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return token
 
 
 class UserCreate(BaseModel):
@@ -73,13 +57,13 @@ def register_user(user: UserCreate):
     hashed_password = pwd_context.hash(user.password)
     user_id = str(uuid.uuid4())
     created_date = datetime.now(timezone.utc)
-    access_token = None  # 👈 инициализируем переменную заранее
+    access_token = None
 
     try:
         with get_db_cursor() as cur:
             cur.execute("SELECT id FROM users WHERE email = %s", (user.email,))
             if cur.fetchone():
-                raise HTTPException(status_code=400, detail="Пользователь с таким email уже существует")
+                raise HTTPException(status_code=400, detail="A user with this email address already exists.")
 
             insert_query = """
                 INSERT INTO users (
@@ -109,10 +93,10 @@ def register_user(user: UserCreate):
     except HTTPException:
         raise
     except Exception:
-        raise HTTPException(status_code=500, detail="Не удалось зарегистрировать пользователя")
+        raise HTTPException(status_code=500, detail="Failed to register user")
 
     return {
-        "message": "Пользователь успешно зарегистрирован",
+        "message": "User successfully registered",
         "user_id": user_id,
         "token": access_token,
         "token_type": "bearer"
@@ -126,11 +110,11 @@ def login_user(credentials: UserLogin):
             cur.execute("SELECT id, password, role FROM users WHERE email = %s", (credentials.email,))
             result = cur.fetchone()
             if not result:
-                raise HTTPException(status_code=400, detail="Неверный email или пароль")
+                raise HTTPException(status_code=400, detail="Invalid email or password")
 
             user_id, stored_hash, role = result
             if not pwd_context.verify(credentials.password, stored_hash):
-                raise HTTPException(status_code=400, detail="Неверный email или пароль")
+                raise HTTPException(status_code=400, detail="Invalid email or password")
 
             access_token = create_access_token(data={
                 "id": str(user_id),
@@ -141,7 +125,7 @@ def login_user(credentials: UserLogin):
     except HTTPException:
         raise
     except Exception:
-        raise HTTPException(status_code=500, detail="Ошибка при попытке входа")
+        raise HTTPException(status_code=500, detail="Error when trying to log in")
 
 
 @router.get("/oauth/google/login")
@@ -161,7 +145,7 @@ async def google_auth_callback(request: Request):
         last_name = user_info.get("family_name")
 
         if not user_email:
-            raise HTTPException(status_code=400, detail="Не удалось получить email из профиля Google")
+            raise HTTPException(status_code=400, detail="Email from Google profile could not be retrieved")
 
         with get_db_cursor() as cur:
 
