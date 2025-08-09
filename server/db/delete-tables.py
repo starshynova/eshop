@@ -4,7 +4,7 @@ conn = get_connection()
 cursor = conn.cursor()
 
 cursor.execute("""
-DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS cart_item CASCADE;
 
 
 """)
@@ -12,4 +12,4 @@ DROP TABLE IF EXISTS users CASCADE;
 conn.commit()
 cursor.close()
 conn.close()
-print("✅ Tables deleted successfully.")
+print("✅ Table deleted successfully.")

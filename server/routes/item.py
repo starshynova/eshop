@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Query
-from db.connectDB import get_connection
 from db.context import get_db_cursor
 from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 

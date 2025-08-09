@@ -5,7 +5,7 @@ from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
 from jose import JWTError, jwt as jose_jwt  # Поменяли импорт для JWT
 
-from db.connectDB import get_connection
+# from ..db.connectDB import get_connection
 from db.context import get_db_cursor
 from authlib.integrations.starlette_client import OAuth
 from starlette.requests import Request

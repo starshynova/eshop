@@ -34,12 +34,14 @@ from routes.init_qdrant import router as init_qdrant_router
 from routes.item_qdrant import router as item_qdrant_router
 from routes.img_upload import router as img_upload_router
 from routes.user import router as user_router
+# from routes.cart import router as cart_router
 
 app.include_router(item_router)
 app.include_router(init_qdrant_router)
 app.include_router(item_qdrant_router)
 app.include_router(img_upload_router)
 app.include_router(user_router)
+# app.include_router(cart_router)
 
 
 @app.get("/")
