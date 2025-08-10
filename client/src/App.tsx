@@ -6,6 +6,7 @@ import RegisterPage from "./pages/RegisterPage";
 import SearchPage from "./pages/SearchPage";
 import Welcome from "./components/Welcome";
 import ProductDetails from "./pages/ProductDetails";
+import CartPage from "./pages/CartPage";
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -16,6 +17,7 @@ const App: React.FC = () => (
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/search" element={<SearchPage />} />
       <Route path="/products/:id" element={<ProductDetails />} />
+      <Route path="/cart" element={<CartPage />} />
     </Routes>
   </BrowserRouter>
 );
