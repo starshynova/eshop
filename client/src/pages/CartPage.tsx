@@ -73,14 +73,20 @@ const CartPage: React.FC = () => {
       <Header />
       {loading && <Loader />}
 
-      <div className="max-w-4xl mx-auto mt-8 p-4 bg-white shadow rounded">
-        <h2 className="text-xl font-bold mb-4">Your Cart</h2>
-
+      <div className="w-full flex flex-row mx-auto mt-8 p-4 bg-white shadow rounded">
+        <div className="flex w-full flex-col items-center">
+            <div className="w-[80%] flex flex-col">
+                <div className="border-b-4 border-gray-400">
+                    <h1 className="text-xl font-bold mt-8 mb-8 text-left">MY SHOPPING CART</h1>
+                </div>
+            </div>
+            <div className="w-[80%] flex flex-col">
         {cartItems.length === 0 ? (
           <p className="text-gray-600">Your cart is empty.</p>
         ) : (
-          <>
-            <ul className="divide-y divide-gray-200">
+          
+            <div className="flex flex-col  pt-4">
+            <ul className="divide-y-2 divide-gray-200">
               {cartItems.map((item) => (
                 <li
                   key={item.id}
@@ -90,7 +96,7 @@ const CartPage: React.FC = () => {
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-16 h-16 object-cover rounded"
+                    className=" h-32 object-cover rounded"
                   />
                   <div className="ml-4 flex-1">
                     <h3 className="text-lg font-semibold">{item.title}</h3>
@@ -105,19 +111,27 @@ const CartPage: React.FC = () => {
               ))}
             </ul>
 
-            <div className="mt-6 flex justify-end">
-              <span className="text-lg font-bold">
-                Total: €
+            
+          </div>
+        )}
+        </div>
+        
+          </div> 
+          <div className="w-[20%] flex flex-col  bg-gray-400 px-4">
+            <div className="mt-6 flex justify-start border-b-2 border-black pb-4">
+                <span className="text-lg font-bold">Order Summary</span>
+                </div>
+                <div className="mt-4 flex justify-end border-b-2 border-black pb-4">
+              <span className="text-lg font-bold text-gray-700">
                 {cartItems
                   .reduce(
                     (total, item) => total + item.price * item.quantity,
                     0,
                   )
-                  .toFixed(2)}
+                  .toFixed(2)} €
               </span>
             </div>
-          </>
-        )}
+        </div>
       </div>
     </SearchQueryProvider>
   );
