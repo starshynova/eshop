@@ -17,11 +17,12 @@ def add_to_cart(
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                    INSERT INTO cart_items (user_id, item_id, quantity)
+                    INSERT INTO cart_item (user_id, item_id, quantity)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (user_id, item_id)
-                    DO UPDATE SET quantity = cart_items.quantity + EXCLUDED.quantity;
+                    DO UPDATE SET quantity = cart_item.quantity + EXCLUDED.quantity;
                 """, (user_id, req.item_id, req.quantity))
         return {"status": "ok"}
     except Exception as e:
+        print("Add to cart error:", e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

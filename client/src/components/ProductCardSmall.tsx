@@ -1,6 +1,7 @@
 import React from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
+import addToCart from "../utils/addToCart";
 
 type ProductCardProps = {
   id: string;
@@ -25,6 +26,10 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
       return;
     }
     navigate(`/products/${id}`);
+  };
+
+  const handleAddToCart = () => {
+    addToCart(id, 1);
   };
 
   return (
@@ -53,7 +58,7 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
         </div>
       </button>
       <div className="w-full flex justify-center">
-        <Button children="Add to Cart" />
+        <Button children="Add to Cart" onClick={handleAddToCart} />
       </div>
     </div>
   );
