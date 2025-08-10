@@ -105,14 +105,13 @@ const CartPage: React.FC = () => {
               ))}
             </ul>
 
-            {/* Общая сумма */}
             <div className="mt-6 flex justify-end">
               <span className="text-lg font-bold">
                 Total: €
                 {cartItems
                   .reduce(
                     (total, item) => total + item.price * item.quantity,
-                    0
+                    0,
                   )
                   .toFixed(2)}
               </span>
