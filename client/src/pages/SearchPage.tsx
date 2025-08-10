@@ -66,6 +66,7 @@ const SearchPage = () => {
             {products.map((product) => (
               <ProductCardSmall
                 key={product.id}
+                id={product.id.toString()}
                 image={product.main_photo_url}
                 title={product.title}
                 price={product.price}
