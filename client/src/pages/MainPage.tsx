@@ -53,12 +53,12 @@ const MainPage: React.FC = () => {
     };
 
     fetchProducts();
-  }, [category, subcategory, sort]); 
+  }, [category, subcategory, sort]);
 
   const handleSortChange = (value: string) => {
     const newParams = new URLSearchParams(searchParams);
     newParams.set("sort", value);
-    setSearchParams(newParams); 
+    setSearchParams(newParams);
   };
 
   if (error) {
@@ -117,7 +117,9 @@ const MainPage: React.FC = () => {
               image={product.main_photo_url}
               title={product.title}
               price={product.price}
-              description={product.description || "No description available yet"}
+              description={
+                product.description || "No description available yet"
+              }
             />
           ))}
         </div>

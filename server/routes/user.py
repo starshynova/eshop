@@ -13,7 +13,7 @@ from starlette.responses import RedirectResponse
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-from core.auth import create_access_token
+from core.auth import create_access_token_for_user
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -85,10 +85,7 @@ def register_user(user: UserCreate):
                 created_date
             ))
 
-            access_token = create_access_token(data={
-                "id": str(user_id),
-                "role": user.role
-            })
+            access_token = create_access_token_for_user(user_id=user_id, role=user.role)
 
     except HTTPException:
         raise
@@ -116,10 +113,8 @@ def login_user(credentials: UserLogin):
             if not pwd_context.verify(credentials.password, stored_hash):
                 raise HTTPException(status_code=400, detail="Invalid email or password")
 
-            access_token = create_access_token(data={
-                "id": str(user_id),
-                "role": role
-            })
+            access_token = create_access_token_for_user(user_id=str(user_id), role=role)
+
             return {"token": access_token, "token_type": "bearer"}
 
     except HTTPException:
@@ -172,7 +167,7 @@ async def google_auth_callback(request: Request):
                     created_date
                 ))
 
-            access_token = create_access_token(data={"id": user_id, "role": role})
+            access_token = create_access_token_for_user(user_id=user_id, role=role)
 
     except Exception as e:
         import traceback
