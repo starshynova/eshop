@@ -76,7 +76,6 @@ const LoginPage = () => {
                 onClick={handleLogin}
                 children="Log In"
               />
-              {/* <Button className="w-full" onClick={handleGoogleLogin} children="Log In with Google" /> */}
               <Button
                 className="w-full flex items-center justify-center gap-2"
                 onClick={handleGoogleLogin}
