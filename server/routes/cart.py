@@ -26,3 +26,14 @@ def add_to_cart(
     except Exception as e:
         print("Add to cart error:", e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+@router.get("/count")
+def get_cart_count(user_id: str = Depends(get_current_user_id)):
+    with get_db_cursor() as cur:
+        cur.execute("""
+            SELECT COALESCE(SUM(quantity), 0)
+            FROM cart_item
+            WHERE user_id = %s
+        """, (user_id,))
+        (count,) = cur.fetchone()
+    return {"count": int(count)}

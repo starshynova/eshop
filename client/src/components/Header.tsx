@@ -13,6 +13,7 @@ import CustomDialog from "./CustomDialog";
 import API_BASE_URL from "../config";
 import getUserRole from "../utils/getUserRole";
 import { useAuth } from "../context/AuthContext";
+import CartIconWithBadge from "./CartIconWithBadge";
 
 type Subcategory = {
   id: string;
@@ -170,12 +171,13 @@ const Header: React.FC = () => {
               className="size-6 text-gray-600 hover:text-indigo-600"
             />
           </button>
-          <button className="flex w-10 h-10 flex-none items-center justify-center rounded-full bg-white group-hover:bg-white">
+          <CartIconWithBadge />
+          {/* <button className="flex w-10 h-10 flex-none items-center justify-center rounded-full bg-white group-hover:bg-white">
             <ShoppingCartIcon
               aria-hidden="true"
               className="size-6 text-[#cf3232] hover:text-indigo-600"
             />
-          </button>
+          </button> */}
           <Popover>
             <PopoverButton className="flex w-10 h-10 flex-none items-center justify-center rounded-full bg-white group-hover:bg-white">
               {isAuthenticated ? (

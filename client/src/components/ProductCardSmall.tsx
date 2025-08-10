@@ -1,7 +1,7 @@
 import React from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
-import addToCart from "../utils/addToCart";
+import { useCart } from "../context/CartContext";
 
 type ProductCardProps = {
   id: string;
@@ -19,8 +19,9 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
   description,
 }) => {
   const navigate = useNavigate();
+  const { addAndRefresh } = useCart();
 
-  const handleProductCardClick = async () => {
+  const handleProductCardClick = () => {
     if (!id) {
       console.error("Product ID is undefined!");
       return;
@@ -28,8 +29,9 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
     navigate(`/products/${id}`);
   };
 
-  const handleAddToCart = () => {
-    addToCart(id, 1);
+  const handleAddToCart = async () => {
+    if (!id) return;
+    await addAndRefresh(id, 1);
   };
 
   return (
@@ -58,7 +60,7 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
         </div>
       </button>
       <div className="w-full flex justify-center">
-        <Button children="Add to Cart" onClick={handleAddToCart} />
+        <Button onClick={handleAddToCart} children="Add to Cart" />
       </div>
     </div>
   );
