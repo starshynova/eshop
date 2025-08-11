@@ -30,7 +30,7 @@ const SearchInputTxt: React.FC<SearchInputProps> = ({
         value={query}
         onChange={handleInputChange}
         placeholder={placeholder}
-        className="w-full h-[32px] px-[20px] py-[20px] border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full h-[32px] px-[20px] py-[20px] border border-gray-300 rounded-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-[#d0ff00]"
       />
     </form>
   );

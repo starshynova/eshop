@@ -88,51 +88,51 @@ const CartPage: React.FC = () => {
         ) : (
           <div className="flex flex-1 overflow-hidden">
             <div className="w-[80%] flex flex-col px-16 overflow-y-auto pb-8">
-                <div className="border-b-4 border-gray-400 shrink-0">
-                  <h2 className="text-2xl font-bold mt-8 mb-8 text-left uppercase">
-                    your shopping cart
-                  </h2>
-                </div>
-                <div className="flex flex-col pt-4">
-                  <ul className="divide-y-2 divide-gray-200">
-                    {cartItems.map((item) => (
-                      <li
-                        key={item.id}
-                        className="py-4 flex items-center w-full cursor-pointer hover:bg-gray-50 rounded px-2"
-                        onClick={() => handleProductCardClick(item.id)}
-                      >
-                        <img
-                          src={item.image}
-                          alt={item.title}
-                          className="h-32 object-cover rounded"
-                        />
-                        <div className="ml-4 flex-1 h-32">
-                          <div className="flex flex-col justify-between h-full">
-                            <div className="flex flex-col">
-                              <h3 className="text-lg  font-semibold">
-                                {item.title}
-                              </h3>
-                              <p className="text-gray-600">
-                                Price: €{item.price.toFixed(2)}
-                              </p>
-                              <p className="text-gray-600">
-                                Quantity: {item.quantity}
-                              </p>
-                            </div>
-                            <div className="flex flex-row">
-                              <ButtonSecond children="Remove" />
-                              <div className=" h-8 w-[2px] bg-black mx-4 "></div>
-                              <ButtonSecond children="Edit" />
-                            </div>
+              <div className="border-b-4 border-gray-400 shrink-0">
+                <h2 className="text-2xl font-bold mt-8 mb-8 text-left uppercase">
+                  your shopping cart
+                </h2>
+              </div>
+              <div className="flex flex-col pt-4">
+                <ul className="divide-y-2 divide-gray-200">
+                  {cartItems.map((item) => (
+                    <li
+                      key={item.id}
+                      className="py-4 flex items-center w-full cursor-pointer hover:bg-gray-50 rounded px-2"
+                      onClick={() => handleProductCardClick(item.id)}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-32 object-cover rounded"
+                      />
+                      <div className="ml-4 flex-1 h-32">
+                        <div className="flex flex-col justify-between h-full">
+                          <div className="flex flex-col">
+                            <h3 className="text-lg  font-semibold">
+                              {item.title}
+                            </h3>
+                            <p className="text-gray-600">
+                              Price: €{item.price.toFixed(2)}
+                            </p>
+                            <p className="text-gray-600">
+                              Quantity: {item.quantity}
+                            </p>
+                          </div>
+                          <div className="flex flex-row">
+                            <ButtonSecond children="Remove" />
+                            <div className=" h-8 w-[2px] bg-black mx-4 "></div>
+                            <ButtonSecond children="Edit" />
                           </div>
                         </div>
-                        <div className="font-bold">
-                          €{(item.price * item.quantity).toFixed(2)}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                      </div>
+                      <div className="font-bold">
+                        €{(item.price * item.quantity).toFixed(2)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             </div>
 
             <div className="w-[20%] bg-[#ededed] px-8 py-8 flex flex-col justify-between">

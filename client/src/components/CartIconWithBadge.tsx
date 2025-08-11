@@ -31,7 +31,8 @@ const CartIconWithBadge: React.FC = () => {
     <ButtonSecond
       // className="text-base"
       onClick={() => navigate("/cart")}
-      children={`cart (${isAuthenticated ? count : 0})`} />
+      children={`cart (${isAuthenticated ? count : 0})`}
+    />
   );
 };
 
