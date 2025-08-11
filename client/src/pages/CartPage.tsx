@@ -5,6 +5,8 @@ import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { useAuth } from "../context/AuthContext";
 import API_BASE_URL from "../config";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
+import ButtonSecond from "../components/ButtonSecond";
 
 type CartItem = {
   id: string;
@@ -70,54 +72,91 @@ const CartPage: React.FC = () => {
 
   return (
     <SearchQueryProvider>
-      <Header />
-      {loading && <Loader />}
+      <div className="w-full h-screen flex flex-col">
+        <div className="shrink-0">
+          <Header />
+          {loading && <Loader />}
+        </div>
 
-      <div className="max-w-4xl mx-auto mt-8 p-4 bg-white shadow rounded">
-        <h2 className="text-xl font-bold mb-4">Your Cart</h2>
-
-        {cartItems.length === 0 ? (
-          <p className="text-gray-600">Your cart is empty.</p>
-        ) : (
-          <>
-            <ul className="divide-y divide-gray-200">
-              {cartItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="py-4 flex items-center w-full cursor-pointer hover:bg-gray-50 rounded px-2"
-                  onClick={() => handleProductCardClick(item.id)}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div className="ml-4 flex-1">
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                    <p className="text-gray-600">
-                      €{item.price.toFixed(2)} × {item.quantity}
-                    </p>
-                  </div>
-                  <div className="font-bold">
-                    €{(item.price * item.quantity).toFixed(2)}
-                  </div>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-6 flex justify-end">
-              <span className="text-lg font-bold">
-                Total: €
-                {cartItems
-                  .reduce(
-                    (total, item) => total + item.price * item.quantity,
-                    0,
-                  )
-                  .toFixed(2)}
-              </span>
+        <div className="flex flex-1 overflow-hidden">
+          <div className="w-[80%] flex flex-col px-16 overflow-y-auto">
+            <div className="border-b-4 border-gray-400 shrink-0">
+              <h2 className="text-xl font-urbanist font-bold mt-8 mb-8 text-left">
+                MY SHOPPING CART
+              </h2>
             </div>
-          </>
-        )}
+
+            {cartItems.length === 0 ? (
+              <h3 className="text-gray-800 text-xl font-urbanist mt-8">
+                Your cart is empty.
+              </h3>
+            ) : (
+              <div className="flex flex-col pt-4">
+                <ul className="divide-y-2 divide-gray-200">
+                  {cartItems.map((item) => (
+                    <li
+                      key={item.id}
+                      className="py-4 flex items-center w-full cursor-pointer hover:bg-gray-50 rounded px-2"
+                      onClick={() => handleProductCardClick(item.id)}
+                    >
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="h-32 object-cover rounded"
+                      />
+                      <div className="ml-4 flex-1 h-32">
+                        <div className="flex flex-col justify-between h-full">
+                          <div className="flex flex-col">
+                            <h3 className="text-lg font-urbanist font-semibold">
+                              {item.title}
+                            </h3>
+                            <p className="text-gray-600 font-urbanist">
+                              €{item.price.toFixed(2)} × {item.quantity}
+                            </p>
+                          </div>
+                          <div className="flex flex-row">
+                            <ButtonSecond children="Remove" />
+                            <div className=" h-8 w-[2px] bg-black mx-4 "></div>
+                            <ButtonSecond children="Edit" />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="font-bold font-urbanist">
+                        €{(item.price * item.quantity).toFixed(2)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+
+          <div className="w-[20%] bg-[#e4e4e4] px-8 py-8 flex flex-col justify-between">
+            <div>
+              <div className="border-b-4 border-black">
+                <h2 className="font-urbanist text-xl font-bold mb-8 text-left">
+                  Order Summary
+                </h2>
+              </div>
+              <div className="mt-4 flex justify-end border-b-2 border-black pb-4">
+                <span className="text-lg font-urbanist font-bold text-gray-700">
+                  {cartItems
+                    .reduce(
+                      (total, item) => total + item.price * item.quantity,
+                      0,
+                    )
+                    .toFixed(2)}{" "}
+                  €
+                </span>
+              </div>
+            </div>
+            <Button
+              children="Checkout"
+              className="mt-8 w-full"
+              onClick={() => navigate("/checkout")}
+            />
+          </div>
+        </div>
       </div>
     </SearchQueryProvider>
   );
