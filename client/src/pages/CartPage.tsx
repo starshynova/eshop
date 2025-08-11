@@ -79,7 +79,7 @@ const CartPage: React.FC = () => {
         {cartItems.length === 0 ? (
           <div className="flex justify-center">
             <div className="flex flex-col gap-16 mt-16 ml-16 w-fit">
-              <h3 className="text-gray-800 text-3xl font-bold font-urbanist  uppercase">
+              <h3 className="text-gray-800 text-3xl font-bold  uppercase">
                 your cart is empty
               </h3>
               <Button children="start shopping" onClick={() => navigate("/")} />
@@ -87,10 +87,9 @@ const CartPage: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-[80%] flex flex-col px-16 overflow-y-auto">
-              <div>
+            <div className="w-[80%] flex flex-col px-16 overflow-y-auto pb-8">
                 <div className="border-b-4 border-gray-400 shrink-0">
-                  <h2 className="text-2xl font-urbanist font-bold mt-8 mb-8 text-left uppercase">
+                  <h2 className="text-2xl font-bold mt-8 mb-8 text-left uppercase">
                     your shopping cart
                   </h2>
                 </div>
@@ -110,13 +109,13 @@ const CartPage: React.FC = () => {
                         <div className="ml-4 flex-1 h-32">
                           <div className="flex flex-col justify-between h-full">
                             <div className="flex flex-col">
-                              <h3 className="text-lg font-urbanist font-semibold">
+                              <h3 className="text-lg  font-semibold">
                                 {item.title}
                               </h3>
-                              <p className="text-gray-600 font-urbanist">
+                              <p className="text-gray-600">
                                 Price: €{item.price.toFixed(2)}
                               </p>
-                              <p className="text-gray-600 font-urbanist">
+                              <p className="text-gray-600">
                                 Quantity: {item.quantity}
                               </p>
                             </div>
@@ -127,25 +126,24 @@ const CartPage: React.FC = () => {
                             </div>
                           </div>
                         </div>
-                        <div className="font-bold font-urbanist">
+                        <div className="font-bold">
                           €{(item.price * item.quantity).toFixed(2)}
                         </div>
                       </li>
                     ))}
                   </ul>
                 </div>
-              </div>
             </div>
 
-            <div className="w-[20%] bg-[#e4e4e4] px-8 py-8 flex flex-col justify-between">
+            <div className="w-[20%] bg-[#ededed] px-8 py-8 flex flex-col justify-between">
               <div>
                 <div className="border-b-4 border-black">
-                  <h2 className="font-urbanist text-xl font-bold mb-8 text-left">
+                  <h2 className="text-xl font-bold mb-8 text-left">
                     Order Summary
                   </h2>
                 </div>
                 <div className="mt-4 flex justify-end border-b-2 border-black pb-4">
-                  <span className="text-lg font-urbanist font-bold text-gray-700">
+                  <span className="text-lg font-bold text-gray-700">
                     {cartItems
                       .reduce(
                         (total, item) => total + item.price * item.quantity,
