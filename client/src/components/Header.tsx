@@ -1,7 +1,6 @@
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import {
   UserIcon,
-  ShoppingCartIcon,
   MagnifyingGlassIcon,
   ChartBarIcon,
 } from "@heroicons/react/24/outline";

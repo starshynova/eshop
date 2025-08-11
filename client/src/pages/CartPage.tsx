@@ -5,6 +5,7 @@ import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { useAuth } from "../context/AuthContext";
 import API_BASE_URL from "../config";
 import { useNavigate } from "react-router-dom";
+import Button from "../components/Button";
 
 type CartItem = {
   id: string;
@@ -70,22 +71,25 @@ const CartPage: React.FC = () => {
 
   return (
     <SearchQueryProvider>
+  <div className="w-full h-screen flex flex-col">
+    {/* Header и Loader фиксированы сверху */}
+    <div className="shrink-0">
       <Header />
       {loading && <Loader />}
+    </div>
 
-      <div className="w-full flex flex-row mx-auto mt-8 p-4 bg-white shadow rounded">
-        <div className="flex w-full flex-col items-center">
-            <div className="w-[80%] flex flex-col">
-                <div className="border-b-4 border-gray-400">
-                    <h1 className="text-xl font-bold mt-8 mb-8 text-left">MY SHOPPING CART</h1>
-                </div>
-            </div>
-            <div className="w-[80%] flex flex-col">
+    {/* Основной flex-контейнер: товары + Order Summary */}
+    <div className="flex flex-1 overflow-hidden">
+      {/* Левый контейнер с товарами и скроллом */}
+      <div className="w-[80%] flex flex-col px-16 overflow-y-auto">
+        <div className="border-b-4 border-gray-400 shrink-0">
+          <h2 className="text-xl font-urbanist font-bold mt-8 mb-8 text-left">MY SHOPPING CART</h2>
+        </div>
+
         {cartItems.length === 0 ? (
-          <p className="text-gray-600">Your cart is empty.</p>
+          <h3 className="text-gray-800 text-xl font-urbanist mt-8">Your cart is empty.</h3>
         ) : (
-          
-            <div className="flex flex-col  pt-4">
+          <div className="flex flex-col pt-4">
             <ul className="divide-y-2 divide-gray-200">
               {cartItems.map((item) => (
                 <li
@@ -96,44 +100,47 @@ const CartPage: React.FC = () => {
                   <img
                     src={item.image}
                     alt={item.title}
-                    className=" h-32 object-cover rounded"
+                    className="h-32 object-cover rounded"
                   />
                   <div className="ml-4 flex-1">
-                    <h3 className="text-lg font-semibold">{item.title}</h3>
-                    <p className="text-gray-600">
+                    <h3 className="text-lg font-urbanist font-semibold">{item.title}</h3>
+                    <p className="text-gray-600 font-urbanist">
                       €{item.price.toFixed(2)} × {item.quantity}
                     </p>
                   </div>
-                  <div className="font-bold">
+                  <div className="font-bold font-urbanist">
                     €{(item.price * item.quantity).toFixed(2)}
                   </div>
                 </li>
               ))}
             </ul>
-
-            
           </div>
         )}
-        </div>
-        
-          </div> 
-          <div className="w-[20%] flex flex-col  bg-gray-400 px-4">
-            <div className="mt-6 flex justify-start border-b-2 border-black pb-4">
-                <span className="text-lg font-bold">Order Summary</span>
-                </div>
-                <div className="mt-4 flex justify-end border-b-2 border-black pb-4">
-              <span className="text-lg font-bold text-gray-700">
-                {cartItems
-                  .reduce(
-                    (total, item) => total + item.price * item.quantity,
-                    0,
-                  )
-                  .toFixed(2)} €
-              </span>
-            </div>
-        </div>
       </div>
-    </SearchQueryProvider>
+
+      {/* Правый контейнер фиксированной высоты */}
+      <div className="w-[20%] bg-gray-400 px-8 py-8 flex flex-col justify-between">
+        <div>
+          <div className="border-b-4 border-black">
+            <h2 className="font-urbanist text-xl font-bold mb-8 text-left">Order Summary</h2>
+          </div>
+          <div className="mt-4 flex justify-end border-b-2 border-black pb-4">
+            <span className="text-lg font-urbanist font-bold text-gray-700">
+              {cartItems
+                .reduce((total, item) => total + item.price * item.quantity, 0)
+                .toFixed(2)} €
+            </span>
+          </div>
+        </div>
+        <Button
+          children="Checkout"
+          className="mt-8 w-full"
+          onClick={() => navigate("/checkout")}
+        />
+      </div>
+    </div>
+  </div>
+</SearchQueryProvider>
   );
 };
 
