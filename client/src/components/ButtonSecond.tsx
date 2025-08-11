@@ -7,9 +7,9 @@ const ButtonSecond: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
 }) => {
   return (
     <button
-      className={`self-start bg-[#ffffff] text-[#000000] text-lg font-urbanist pt-2 px-1
-  border-b-4 border-transparent hover:border-[#000000] transition-colors ${className}`}
-  {...props}
+      className={`self-start h-8 bg-transparent text-[#000000] text-lg font-urbanist  px-1 justify-center
+  border-b-2 border-transparent hover:border-[#000000] transition-colors ${className}`}
+      {...props}
     >
       {children}
     </button>
