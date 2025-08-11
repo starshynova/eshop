@@ -111,7 +111,10 @@ const CartPage: React.FC = () => {
                               {item.title}
                             </h3>
                             <p className="text-gray-600 font-urbanist">
-                              €{item.price.toFixed(2)} × {item.quantity}
+                              Price: €{item.price.toFixed(2)}
+                            </p>
+                            <p className="text-gray-600 font-urbanist">
+                              Quantity: {item.quantity}
                             </p>
                           </div>
                           <div className="flex flex-row">
