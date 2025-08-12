@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr, constr
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -50,6 +50,21 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+
+def serialize_user(row) -> dict:
+    return {
+        "id": str(row[0]),
+        "role": row[1] or "",
+        "email": row[2] or "",
+        "first_name": row[3] or "",
+        "last_name": row[4] or "",
+        "address_line1": row[5] or "",
+        "address_line2": row[6] or "",
+        "post_code": row[7] or "",
+        "city": row[8] or "",
+    }
+
 
 
 @router.post("/register", status_code=201)
@@ -176,4 +191,47 @@ async def google_auth_callback(request: Request):
         raise HTTPException(status_code=500, detail="OAuth login failed")
 
     return RedirectResponse(f"http://localhost:5173/welcome?token={access_token}")
+
+
+@router.get("/all_users")
+def list_users():
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT id, role, email, first_name, last_name, address_line1, address_line2, post_code, city
+                FROM users;
+            """)
+            rows = cur.fetchall()
+
+        return [serialize_user(r) for r in rows]
+
+    except Exception as e:
+        # логируем e
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Failed to get users")
+
+
+@router.get("/{user_id}")
+def get_user_by_id(user_id: str):
+    print("Received user_id:", user_id)
+
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("""
+                SELECT id, role, email, first_name, last_name, address_line1, address_line2, post_code, city
+                FROM users
+                WHERE id = %s;
+            """, (str(user_id),))
+            row = cur.fetchone()
+
+        if not row:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                                detail=f"User {user_id} not found")
+        return serialize_user(row)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Failed to get user")
 
