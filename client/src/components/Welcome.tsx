@@ -16,11 +16,11 @@ const Welcome = () => {
         navigate("/");
       }, 200);
     } else {
-      navigate("/login"); // если токена нет
+      navigate("/login"); 
     }
   }, [navigate]);
 
-  return <p>Завершаем вход через Google...</p>;
+  return <p>Completing login via Google...</p>;
 };
 
 export default Welcome;
