@@ -19,7 +19,7 @@ const App: React.FC = () => (
       <Route path="/search" element={<SearchPage />} />
       <Route path="/products/:id" element={<ProductDetails />} />
       <Route path="/cart" element={<CartPage />} />
-      <Route path="/account" element={<AccountPage />} />
+      <Route path="/users/:id" element={<AccountPage />} />
     </Routes>
   </BrowserRouter>
 );

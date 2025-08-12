@@ -8,6 +8,8 @@ import CartIconWithBadge from "./CartIconWithBadge";
 import ButtonSecond from "./ButtonSecond";
 import { Menu } from "@ark-ui/react/menu";
 import { ChevronRightIcon, ChevronDownIcon } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
+
 
 type Subcategory = {
   id: string;
@@ -18,6 +20,18 @@ type Category = {
   id: string;
   category_name: string;
   subcategories?: Subcategory[];
+};
+
+type UserDetails = {
+  id: string;
+  role: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  address_line1: string;
+  address_line2?: string;
+  post_code: string;
+  city: string;
 };
 
 const Header: React.FC = () => {
@@ -31,6 +45,36 @@ const Header: React.FC = () => {
   const [leftHover, setLeftHover] = useState(false);
   const role = getUserRole();
   const { isAuthenticated } = useAuth();
+
+  const handleUserAccountClick = async () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    const token = localStorage.getItem("token");
+    console.log("Token:", token);
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+    try {
+      type DecodedToken = {
+        id: string;
+        [key: string]: any;
+      };
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      console.log("Decoded Token:", decodedToken);
+      if (!decodedToken || !decodedToken.sub) {
+        console.error("Invalid token structure");
+        navigate("/login");
+        return;
+      }
+      navigate(`/users/${decodedToken.sub}`);
+    } catch (error) {
+      console.error("Error decoding token:", error);  
+      navigate("/login");
+    };
+  }
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -174,7 +218,7 @@ const Header: React.FC = () => {
             <CartIconWithBadge />
             {isAuthenticated ? (
               <ButtonSecond
-                onClick={() => navigate("/account")}
+                onClick={handleUserAccountClick}
                 children="account"
               />
             ) : (
