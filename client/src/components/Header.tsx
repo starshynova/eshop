@@ -8,8 +8,7 @@ import CartIconWithBadge from "./CartIconWithBadge";
 import ButtonSecond from "./ButtonSecond";
 import { Menu } from "@ark-ui/react/menu";
 import { ChevronRightIcon, ChevronDownIcon } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
-
+import { getUserId } from "../utils/getUserId";
 
 type Subcategory = {
   id: string;
@@ -20,18 +19,6 @@ type Category = {
   id: string;
   category_name: string;
   subcategories?: Subcategory[];
-};
-
-type UserDetails = {
-  id: string;
-  role: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  address_line1: string;
-  address_line2?: string;
-  post_code: string;
-  city: string;
 };
 
 const Header: React.FC = () => {
@@ -46,7 +33,7 @@ const Header: React.FC = () => {
   const role = getUserRole();
   const { isAuthenticated } = useAuth();
 
-  const handleUserAccountClick = async () => {
+  const handleUserAccountClick = () => {
     if (!isAuthenticated) {
       navigate("/login");
       return;
@@ -57,24 +44,13 @@ const Header: React.FC = () => {
       console.error("No token found in localStorage");
       return;
     }
-    try {
-      type DecodedToken = {
-        id: string;
-        [key: string]: any;
-      };
-      const decodedToken = jwtDecode<DecodedToken>(token);
-      console.log("Decoded Token:", decodedToken);
-      if (!decodedToken || !decodedToken.sub) {
-        console.error("Invalid token structure");
-        navigate("/login");
-        return;
-      }
-      navigate(`/users/${decodedToken.sub}`);
-    } catch (error) {
-      console.error("Error decoding token:", error);  
+    const userId = getUserId();
+    if (!userId) {
       navigate("/login");
-    };
-  }
+      return;
+    }
+    navigate(`/users/${userId}`);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
