@@ -4,7 +4,8 @@ import API_BASE_URL from "../config";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { useSearchParams } from "react-router-dom";
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
+import SortMenu from "../components/SortMenu";
+import CustomDialog from "../components/CustomDialog";
 
 type Product = {
   id: string;
@@ -62,53 +63,22 @@ const MainPage: React.FC = () => {
   };
 
   if (error) {
-    return <div className="text-red-500 p-4">{error}</div>;
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+    //  <div className="text-red-500 p-4">{error}</div>;
   }
 
   return (
     <div>
       <SearchQueryProvider>
         <Header />
-        <div className="flex mt-8 h-[40px] px-16 items-center justify-end ">
-          <Menu as="div" className="relative inline-block text-left ml-auto">
-            <MenuButton className="px-4 py-1 bg-white rounded text-sm font-semibold">
-              Sort:{" "}
-              {
-                {
-                  price_asc: "Price: Low to High",
-                  price_desc: "Price: High to Low",
-                  name_asc: "Name: A-Z",
-                  name_desc: "Name: Z-A",
-                  default: "By default",
-                  undefined: "By default",
-                  null: "By default",
-                }[sort ?? "undefined"]
-              }
-            </MenuButton>
-
-            <MenuItems className="absolute mt-2 right-0 origin-top-right bg-white border rounded shadow w-40 z-10">
-              {[
-                { label: "By default", value: "default" },
-                { label: "Price: Low to High", value: "price_asc" },
-                { label: "Price: High to Low", value: "price_desc" },
-                { label: "Name: A-Z", value: "name_asc" },
-                { label: "Name: Z-A", value: "name_desc" },
-              ].map(({ label, value }) => (
-                <MenuItem key={value}>
-                  <button
-                    onClick={() => handleSortChange(value)}
-                    className={`block w-full px-4 py-2 text-left hover:bg-gray-100 ${
-                      sort === value ? "font-semibold text-blue-600" : ""
-                    }`}
-                  >
-                    {label}
-                  </button>
-                </MenuItem>
-              ))}
-            </MenuItems>
-          </Menu>
-        </div>
-
+        <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
         <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[140px]">
           {products.map((product) => (
             <ProductCardSmall

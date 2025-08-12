@@ -67,7 +67,7 @@ const Header: React.FC = () => {
               <Menu.Root open={catalogOpen}>
                 <Menu.Trigger
                   className="self-start h-8 bg-transparent text-[#000000] text-lg px-1 uppercase
-                 border-b-2 border-transparent hover:border-[#000000] transition-colors"
+                 border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
                 >
                   Catalog
                 </Menu.Trigger>
@@ -115,7 +115,7 @@ const Header: React.FC = () => {
                           >
                             <Menu.TriggerItem
                               className="flex items-center justify-between px-3 py-2 bg-transparent text-[#000000] text-[16px]
-                             uppercase border-b-2 border-transparent hover:border-[#000000] transition-colors cursor-pointer"
+                             uppercase border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
                             >
                               {category.category_name}
                               {openCategoryId === category.id ? (
@@ -136,8 +136,8 @@ const Header: React.FC = () => {
                                         `/?subcategory_name=${subcat.subcategory_name}`,
                                       )
                                     }
-                                    className="flex items-center justify-between px-3 py-2 bg-transparent text-[#000000] text-sm uppercase
-                                   border-b-2 border-transparent hover:border-[#000000] transition-colors cursor-pointer"
+                                    className="flex items-center justify-between px-3 py-2.5 bg-transparent text-[#000000] text-sm uppercase
+                                   border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
                                   >
                                     {subcat.subcategory_name}
                                   </Menu.Item>
