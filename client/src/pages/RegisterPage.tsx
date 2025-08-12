@@ -4,7 +4,6 @@ import Input from "../components/Input";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import API_BASE_URL from "../config";
-import { Dialog, DialogPanel } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import CustomDialog from "../components/CustomDialog";
 
