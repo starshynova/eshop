@@ -37,6 +37,10 @@ const LoginPage = () => {
         console.log("Login successful:", data);
         login(data.token);
         setIsOpen(true);
+        setTimeout(() => {
+          setIsOpen(false);
+          navigate("/");
+        }, 2000);
       }
     } catch (err) {
       console.error("Error during login:", err);
@@ -57,14 +61,14 @@ const LoginPage = () => {
             <div className="space-y-4">
               <h2 className="text-3xl font-semibold">Login</h2>
               <Input
+                label="E-mail"
                 type="text"
-                placeholder="E-mail"
                 value={email}
                 onChange={(e) => setEmail(e.currentTarget.value)}
               />
               <Input
+                label="Password"
                 type="password"
-                placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.currentTarget.value)}
               />
@@ -100,8 +104,7 @@ const LoginPage = () => {
               isOpen={isOpen}
               onClose={() => setIsOpen(false)}
               message="You have successfully logged in."
-              buttonTitle="Go to Main Page"
-              onClickButton={() => navigate("/")}
+              isVisibleButton={false}
             />
           </div>
         </div>

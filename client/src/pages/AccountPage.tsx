@@ -11,6 +11,7 @@ import { Tabs } from "@ark-ui/react/tabs";
 import UserInfoPanel from "../components/UserInfoPanel";
 import UserOrdersPanel from "../components/UserOrdersPanel";
 import type { UserDetails } from "../types/UserDetails";
+import ButtonOutline from "../components/ButtonOutline";
 
 type TabKey = "profile" | "orders";
 
@@ -78,13 +79,13 @@ const AccountPage: React.FC = () => {
             <h1 className="text-3xl font-bold mb-4 uppercase">
               Welcome, {userDetails ? userDetails.first_name : "client"}
             </h1>
-            <ButtonSecond
+            <ButtonOutline
               className="mt-4 flex items-center gap-2"
               onClick={() => handleLogOut()}
             >
               <LogOut size={16} />
               Log Out
-            </ButtonSecond>
+            </ButtonOutline>
             <CustomDialog
               isOpen={isOpen}
               onClose={() => setIsOpen(false)}
@@ -114,12 +115,11 @@ const AccountPage: React.FC = () => {
                 </Tabs.Trigger>
               </Tabs.List>
             </Tabs.Root>
-            </div>
-            <div className="p-4">
-              {active === "profile" && <UserInfoPanel userId={userId ?? ""} />}
-              {active === "orders" && <UserOrdersPanel userId={userId ?? ""} />}
-            </div>
-          
+          </div>
+          <div className="w-full flex flex-row justify-between p-4">
+            {active === "profile" && <UserInfoPanel userId={userId ?? ""} />}
+            {active === "orders" && <UserOrdersPanel userId={userId ?? ""} />}
+          </div>
         </div>
       </div>
     </SearchQueryProvider>
