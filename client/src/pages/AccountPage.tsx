@@ -74,7 +74,7 @@ const AccountPage: React.FC = () => {
       <div className="w-full h-screen flex flex-col">
         <Header />
         <div className="w-full absolute top-[140px] flex flex-col px-8 items-center justify-center">
-          <div className="w-full  flex flex-row items-center justify-between ">
+          <div className="w-full  flex flex-row items-center justify-between pt-8 pb-12">
             <h1 className="text-3xl font-bold mb-4 uppercase">
               Welcome, {userDetails ? userDetails.first_name : "client"}
             </h1>
@@ -92,31 +92,34 @@ const AccountPage: React.FC = () => {
               isVisibleButton={false}
             />
           </div>
-          <div className="w-full border-b-2 border-b-gray-400">
+          <div className="flex w-full border-b-[1px] border-b-gray-400 items-center justify-center">
             <Tabs.Root
               value={active}
               onValueChange={(e) => setActive(e.value as TabKey)}
             >
-              <Tabs.List className="flex gap-2 p-4">
+              <Tabs.List className="flex gap-2 px-4">
                 <Tabs.Trigger
                   value="profile"
-                  className="px-3 py-2 rounded-lg border data-[selected]:bg-gray-100 uppercase"
+                  className="self-start h-8 bg-transparent text-[#000000] text-sm  px-5 justify-center  
+                  border-b-2 border-b-transparent hover:text-[#505050] transition-colors data-[selected]:border-b-[#000000] "
                 >
-                  profile
+                  Profile
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="orders"
-                  className="px-3 py-2 rounded-lg border data-[selected]:bg-gray-100 uppercase"
+                  className="self-start h-8 bg-transparent text-[#000000] text-sm  px-5 justify-center  
+                  border-b-2 border-b-transparent hover:text-[#505050] transition-colors data-[selected]:border-b-[#000000]"
                 >
-                  orders
+                  Orders
                 </Tabs.Trigger>
               </Tabs.List>
             </Tabs.Root>
+            </div>
             <div className="p-4">
               {active === "profile" && <UserInfoPanel userId={userId ?? ""} />}
               {active === "orders" && <UserOrdersPanel userId={userId ?? ""} />}
             </div>
-          </div>
+          
         </div>
       </div>
     </SearchQueryProvider>

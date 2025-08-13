@@ -52,11 +52,6 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
       <div className="text-gray-700">{userData.email}</div>
 
       {/* если нужны адресные поля, выводи с проверками */}
-      {/* {data.addresponses_line1 && <div>{data.addresponses_line1}</div>}
-      {data.addresponses_line2 && <div>{data.addresponses_line2}</div>}
-      {(data.post_code || data.city) && (
-        <div>{[data.post_code, data.city].filter(Boolean).join(", ")}</div>
-      )} */}
     </article>
   );
 };
