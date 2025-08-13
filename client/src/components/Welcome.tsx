@@ -16,7 +16,7 @@ const Welcome = () => {
         navigate("/");
       }, 200);
     } else {
-      navigate("/login"); 
+      navigate("/login");
     }
   }, [navigate]);
 
