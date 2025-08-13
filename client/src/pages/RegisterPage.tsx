@@ -111,6 +111,10 @@ const RegisterPage: React.FC = () => {
       const data = await response.json();
       localStorage.setItem("token", data.token);
       setIsOpen(true);
+      setTimeout(() => {
+        setIsOpen(false);
+        navigate("/");
+      }, 2000);
     } catch (err) {
       console.error("Error during registration:", err);
       setError("Registration failed. Please try again later.");
@@ -129,7 +133,7 @@ const RegisterPage: React.FC = () => {
               <h3 className="text-xl font-semibold">Step 1 of 2</h3>
               <Input
                 type="email"
-                placeholder="E-mail"
+                label="E-mail"
                 value={step1.email}
                 onChange={(e) =>
                   setStep1({ ...step1, email: e.currentTarget.value })
@@ -138,7 +142,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="password"
-                placeholder="Password"
+                label="Password"
                 value={step1.password}
                 onChange={(e) =>
                   setStep1({ ...step1, password: e.currentTarget.value })
@@ -147,7 +151,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="password"
-                placeholder="Confirm Password"
+                label="Confirm Password"
                 value={step1.confirmPassword}
                 onChange={(e) =>
                   setStep1({ ...step1, confirmPassword: e.currentTarget.value })
@@ -181,7 +185,7 @@ const RegisterPage: React.FC = () => {
               <h2 className="text-2xl font-semibold">Step 2 of 2</h2>
               <Input
                 type="text"
-                placeholder="First Name"
+                label="First Name"
                 value={step2.firstName}
                 onChange={(e) =>
                   setStep2({ ...step2, firstName: e.currentTarget.value })
@@ -190,7 +194,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="text"
-                placeholder="Last Name"
+                label="Last Name"
                 value={step2.lastName}
                 onChange={(e) =>
                   setStep2({ ...step2, lastName: e.currentTarget.value })
@@ -199,7 +203,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="text"
-                placeholder="Address 1"
+                label="Address 1"
                 value={step2.address1}
                 onChange={(e) =>
                   setStep2({ ...step2, address1: e.currentTarget.value })
@@ -208,7 +212,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="text"
-                placeholder="Address 2 (optional)"
+                label="Address 2 (optional)"
                 value={step2.address2}
                 onChange={(e) =>
                   setStep2({ ...step2, address2: e.currentTarget.value })
@@ -217,7 +221,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="text"
-                placeholder="Postcode"
+                label="Postcode"
                 value={step2.postcode}
                 onChange={(e) =>
                   setStep2({ ...step2, postcode: e.currentTarget.value })
@@ -226,7 +230,7 @@ const RegisterPage: React.FC = () => {
               />
               <Input
                 type="text"
-                placeholder="City"
+                label="City"
                 value={step2.city}
                 onChange={(e) =>
                   setStep2({ ...step2, city: e.currentTarget.value })
@@ -262,8 +266,7 @@ const RegisterPage: React.FC = () => {
             isOpen={isOpen}
             onClose={() => setIsOpen(false)}
             message="You have successfully registered."
-            buttonTitle="Go to Main Page"
-            onClickButton={() => navigate("/")}
+            isVisibleButton={false}
           />
         </div>
       </SearchQueryProvider>
