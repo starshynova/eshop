@@ -8,6 +8,7 @@ import CartIconWithBadge from "./CartIconWithBadge";
 import ButtonSecond from "./ButtonSecond";
 import { Menu } from "@ark-ui/react/menu";
 import { ChevronRightIcon, ChevronDownIcon } from "lucide-react";
+import { getUserId } from "../utils/getUserId";
 
 type Subcategory = {
   id: string;
@@ -31,6 +32,25 @@ const Header: React.FC = () => {
   const [leftHover, setLeftHover] = useState(false);
   const role = getUserRole();
   const { isAuthenticated } = useAuth();
+
+  const handleUserAccountClick = () => {
+    if (!isAuthenticated) {
+      navigate("/login");
+      return;
+    }
+    const token = localStorage.getItem("token");
+    console.log("Token:", token);
+    if (!token) {
+      console.error("No token found in localStorage");
+      return;
+    }
+    const userId = getUserId();
+    if (!userId) {
+      navigate("/login");
+      return;
+    }
+    navigate(`/users/${userId}`);
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -174,7 +194,7 @@ const Header: React.FC = () => {
             <CartIconWithBadge />
             {isAuthenticated ? (
               <ButtonSecond
-                onClick={() => navigate("/account")}
+                onClick={handleUserAccountClick}
                 children="account"
               />
             ) : (
