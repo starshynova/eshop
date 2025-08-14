@@ -52,39 +52,49 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
+def verify_google_id_token(id_token: str, expected_email: str) -> bool:
+    # TODO: Реальная валидация через JWKS/Google tokeninfo (см. подсказку выше)
+    return False
+
+def _is_local_account(stored_hash) -> bool:
+    return bool(stored_hash)   # если есть непустой пароль — локальный аккаунт
+
+def _validate_new_password(pwd: str):
+    if not isinstance(pwd, str) or len(pwd) < 8:
+        raise HTTPException(status_code=422, detail="Password must be at least 8 characters.")
+
 allowedFields = {
     "email",
-    "first_name", "last_name",
-    "address_line1", "address_line2",
-    "post_code", "city",
+    "first_name",
+    "last_name",
+    "address_line1",
+    "address_line2",
+    "post_code",
+    "city",
     "role"
 }
 
-def _validate_payload(data):
+def _validate_profile_payload(data: dict) -> dict:
     if not isinstance(data, dict):
         raise HTTPException(status_code=422, detail="Body must be a JSON object.")
-
     unknown = set(data.keys()) - allowedFields
     if unknown:
         raise HTTPException(status_code=422, detail=f"Unknown fields: {', '.join(sorted(unknown))}")
 
     updates = {}
 
-    # Email
     if "email" in data:
         email = (data.get("email") or "").strip()
         if "@" not in email or "." not in email.split("@")[-1]:
             raise HTTPException(status_code=422, detail="Invalid email.")
         updates["email"] = email
 
-    # Роль
     if "role" in data:
         role = str(data.get("role") or "").strip().lower()
         if role not in {"user", "admin"}:
             raise HTTPException(status_code=422, detail="Role must be 'user' or 'admin'.")
         updates["role"] = role
 
-    # Остальные строковые поля
     for key in ["first_name", "last_name", "address_line1", "address_line2", "post_code", "city"]:
         if key in data:
             val = data.get(key)
@@ -97,10 +107,10 @@ def _validate_payload(data):
 
     return updates
 
-def _validate_new_password(pwd: str):
-    if not isinstance(pwd, str) or len(pwd) < 8:
-        raise HTTPException(status_code=422, detail="Password must be at least 8 characters.")
-    # сюда можно добавить требования: цифра/буква/символ и т.п.
+# def _validate_new_password(pwd: str):
+#     if not isinstance(pwd, str) or len(pwd) < 8:
+#         raise HTTPException(status_code=422, detail="Password must be at least 8 characters.")
+#     # сюда можно добавить требования: цифра/буква/символ и т.п.
 
 
 
@@ -195,6 +205,7 @@ async def google_login(request: Request):
     redirect_uri = request.url_for('google_auth_callback')
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
+
 @router.get("/oauth/google/callback", name="google_auth_callback")
 async def google_auth_callback(request: Request):
     try:
@@ -287,37 +298,41 @@ def get_user_by_id(user_id: str):
                             detail="Failed to get user")
 
 
+@router.patch("/me")
+def update_me(data = Body(...), current_user = Depends(get_current_user)):
+    return update_user_profile(current_user["user_id"], data, current_user)
+
+
 @router.patch("/{user_id}")
-def update_user(user_id: str, data = Body(...), current_user = Depends(get_current_user)):
+def update_user_profile(user_id: str, data = Body(...), current_user = Depends(get_current_user)):
+    print("IN update_user_profile: user_id from URL =", user_id, "current_user['user_id'] =", current_user.get("user_id"))
     is_admin = current_user.get("role") == "admin"
     is_self = current_user.get("user_id") == user_id
     if not (is_admin or is_self):
         raise HTTPException(status_code=403, detail="You are not allowed to edit this user.")
 
-    updates = _validate_payload(data)
+    updates = _validate_profile_payload(data)
 
-    # Смена роли — только админ
+    # смена роли — только админ
     role_updated = False
     if "role" in updates:
         if not is_admin:
             raise HTTPException(status_code=403, detail="Only admins can change user roles.")
         role_updated = True
 
-    # Проверка уникальности email
+    # проверка уникальности email
     if "email" in updates:
         with get_db_cursor() as cur:
             cur.execute("SELECT 1 FROM users WHERE email = %s AND id <> %s", (updates["email"], user_id))
             if cur.fetchone():
                 raise HTTPException(status_code=400, detail="This email is already taken by another user.")
 
-    # Выполняем UPDATE
     try:
         set_parts = []
         values = []
         for col, val in updates.items():
             set_parts.append(f"{col} = %s")
             values.append(val)
-
         set_clause = ", ".join(set_parts)
         with get_db_cursor() as cur:
             cur.execute(f"UPDATE users SET {set_clause} WHERE id = %s", (*values, user_id))
@@ -325,7 +340,6 @@ def update_user(user_id: str, data = Body(...), current_user = Depends(get_curre
         new_token = None
         if role_updated:
             new_token = create_access_token_for_user(user_id=user_id, role=updates["role"])
-
     except HTTPException:
         raise
     except Exception:
@@ -337,44 +351,38 @@ def update_user(user_id: str, data = Body(...), current_user = Depends(get_curre
     return resp
 
 
-@router.patch("/me")
-def update_me(data = Body(...), current_user = Depends(get_current_user)):
-    return update_user(current_user["user_id"], data, current_user)
+# ====================== 2. Смена пароля ======================
 
 @router.patch("/me/password")
 def change_my_password(data = Body(...), current_user = Depends(get_current_user)):
-    # ожидаем: {"current_password": "...", "new_password": "..."}
     if not isinstance(data, dict):
         raise HTTPException(status_code=422, detail="Body must be a JSON object.")
 
-    current_password = data.get("current_password")
-    new_password = data.get("new_password")
-
-    if not current_password or not new_password:
-        raise HTTPException(status_code=422, detail="Both 'current_password' and 'new_password' are required.")
-
+    new_password = (data.get("new_password") or "")
     _validate_new_password(new_password)
 
     user_id = current_user["user_id"]
 
-    # 1) достаём хеш текущего пароля и роль (на всякий)
     with get_db_cursor() as cur:
-        cur.execute("SELECT password FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT email, password FROM users WHERE id = %s", (user_id,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="User not found.")
+        email, stored_hash = row[0], row[1]
 
-        hashed = row[0]
+    if _is_local_account(stored_hash):
+        current_password = data.get("current_password") or ""
+        if not current_password:
+            raise HTTPException(status_code=422, detail="'current_password' is required for local accounts.")
+        if not pwd_context.verify(current_password, stored_hash):
+            raise HTTPException(status_code=400, detail="Current password is incorrect.")
+        if pwd_context.verify(new_password, stored_hash):
+            raise HTTPException(status_code=400, detail="New password must be different from the current one.")
+    else:
+        google_id_token = data.get("google_id_token") or ""
+        if not google_id_token or not verify_google_id_token(google_id_token, expected_email=email):
+            raise HTTPException(status_code=401, detail="Reauthentication required: provide a valid 'google_id_token'.")
 
-    # 2) проверяем текущий пароль
-    if not pwd_context.verify(current_password, hashed):
-        raise HTTPException(status_code=400, detail="Current password is incorrect.")
-
-    # 3) не допускаем одинаковый новый пароль
-    if pwd_context.verify(new_password, hashed):
-        raise HTTPException(status_code=400, detail="New password must be different from the current one.")
-
-    # 4) сохраняем новый хеш
     try:
         new_hash = pwd_context.hash(new_password)
         with get_db_cursor() as cur:
@@ -384,23 +392,17 @@ def change_my_password(data = Body(...), current_user = Depends(get_current_user
 
     return {"message": "Password changed successfully"}
 
-
-@router.patch("/users/{user_id}/password")
-def admin_change_user_password(user_id: str, data = Body(...), current_user = Depends(get_current_user)):
-    # ожидаем: {"new_password": "..."} — только для админа
+@router.patch("/{user_id}/password")
+def admin_reset_password(user_id: str, data = Body(...), current_user = Depends(get_current_user)):
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admins can change other users' passwords.")
 
     if not isinstance(data, dict):
         raise HTTPException(status_code=422, detail="Body must be a JSON object.")
 
-    new_password = data.get("new_password")
-    if not new_password:
-        raise HTTPException(status_code=422, detail="'new_password' is required.")
-
+    new_password = (data.get("new_password") or "")
     _validate_new_password(new_password)
 
-    # убедимся, что пользователь существует
     with get_db_cursor() as cur:
         cur.execute("SELECT 1 FROM users WHERE id = %s", (user_id,))
         if not cur.fetchone():
@@ -418,23 +420,29 @@ def admin_change_user_password(user_id: str, data = Body(...), current_user = De
 
 @router.delete("/me")
 def delete_my_account(data = Body(None), current_user = Depends(get_current_user)):
-    # Рекомендуем подтверждение паролем: {"current_password": "..."}
-    if data is None or not isinstance(data, dict) or not data.get("current_password"):
-        raise HTTPException(status_code=422, detail="'current_password' is required to delete your account.")
+    if data is None or not isinstance(data, dict):
+        data = {}
 
     user_id = current_user["user_id"]
-    current_password = data["current_password"]
 
-    # проверяем, что пользователь существует и пароль верный
     with get_db_cursor() as cur:
-        cur.execute("SELECT password FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT email, password FROM users WHERE id = %s", (user_id,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="User not found.")
-        if not pwd_context.verify(current_password, row[0]):
-            raise HTTPException(status_code=400, detail="Current password is incorrect.")
+        email, stored_hash = row[0], row[1]
 
-    # удаляем
+    if _is_local_account(stored_hash):
+        current_password = data.get("current_password") or ""
+        if not current_password:
+            raise HTTPException(status_code=422, detail="'current_password' is required to delete your account.")
+        if not pwd_context.verify(current_password, stored_hash):
+            raise HTTPException(status_code=400, detail="Current password is incorrect.")
+    else:
+        google_id_token = data.get("google_id_token") or ""
+        if not google_id_token or not verify_google_id_token(google_id_token, expected_email=email):
+            raise HTTPException(status_code=401, detail="Reauthentication required: provide a valid 'google_id_token'.")
+
     try:
         with get_db_cursor() as cur:
             cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
@@ -443,20 +451,16 @@ def delete_my_account(data = Body(None), current_user = Depends(get_current_user
 
     return {"message": "Account deleted"}
 
-
-@router.delete("/users/{user_id}")
+@router.delete("/{user_id}")
 def admin_delete_user(user_id: str, current_user = Depends(get_current_user)):
     if current_user.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Only admins can delete users.")
 
-    # можно добавить защиту от удаления себя/последнего админа, если нужно
     try:
         with get_db_cursor() as cur:
-            # убедимся, что пользователь существует
             cur.execute("SELECT 1 FROM users WHERE id = %s", (user_id,))
             if not cur.fetchone():
                 raise HTTPException(status_code=404, detail="User not found.")
-
             cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
     except HTTPException:
         raise
