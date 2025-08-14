@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends, Body
 from pydantic import BaseModel, EmailStr, constr
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -14,6 +14,7 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 from core.auth import create_access_token_for_user
+from core.auth import get_current_user
 
 
 router = APIRouter(prefix="/users", tags=["users"])
@@ -50,6 +51,57 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+allowedFields = {
+    "email",
+    "first_name", "last_name",
+    "address_line1", "address_line2",
+    "post_code", "city",
+    "role"
+}
+
+def _validate_payload(data):
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=422, detail="Body must be a JSON object.")
+
+    unknown = set(data.keys()) - allowedFields
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"Unknown fields: {', '.join(sorted(unknown))}")
+
+    updates = {}
+
+    # Email
+    if "email" in data:
+        email = (data.get("email") or "").strip()
+        if "@" not in email or "." not in email.split("@")[-1]:
+            raise HTTPException(status_code=422, detail="Invalid email.")
+        updates["email"] = email
+
+    # Роль
+    if "role" in data:
+        role = str(data.get("role") or "").strip().lower()
+        if role not in {"user", "admin"}:
+            raise HTTPException(status_code=422, detail="Role must be 'user' or 'admin'.")
+        updates["role"] = role
+
+    # Остальные строковые поля
+    for key in ["first_name", "last_name", "address_line1", "address_line2", "post_code", "city"]:
+        if key in data:
+            val = data.get(key)
+            if val is not None and not isinstance(val, str):
+                raise HTTPException(status_code=422, detail=f"Field '{key}' must be a string or null.")
+            updates[key] = (val.strip() if isinstance(val, str) else val)
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No fields to update.")
+
+    return updates
+
+def _validate_new_password(pwd: str):
+    if not isinstance(pwd, str) or len(pwd) < 8:
+        raise HTTPException(status_code=422, detail="Password must be at least 8 characters.")
+    # сюда можно добавить требования: цифра/буква/символ и т.п.
+
 
 
 def serialize_user(row) -> dict:
@@ -213,7 +265,6 @@ def list_users():
 
 @router.get("/{user_id}")
 def get_user_by_id(user_id: str):
-    print("Received user_id:", user_id)
 
     try:
         with get_db_cursor() as cur:
@@ -235,3 +286,181 @@ def get_user_by_id(user_id: str):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Failed to get user")
 
+
+@router.patch("/{user_id}")
+def update_user(user_id: str, data = Body(...), current_user = Depends(get_current_user)):
+    is_admin = current_user.get("role") == "admin"
+    is_self = current_user.get("user_id") == user_id
+    if not (is_admin or is_self):
+        raise HTTPException(status_code=403, detail="You are not allowed to edit this user.")
+
+    updates = _validate_payload(data)
+
+    # Смена роли — только админ
+    role_updated = False
+    if "role" in updates:
+        if not is_admin:
+            raise HTTPException(status_code=403, detail="Only admins can change user roles.")
+        role_updated = True
+
+    # Проверка уникальности email
+    if "email" in updates:
+        with get_db_cursor() as cur:
+            cur.execute("SELECT 1 FROM users WHERE email = %s AND id <> %s", (updates["email"], user_id))
+            if cur.fetchone():
+                raise HTTPException(status_code=400, detail="This email is already taken by another user.")
+
+    # Выполняем UPDATE
+    try:
+        set_parts = []
+        values = []
+        for col, val in updates.items():
+            set_parts.append(f"{col} = %s")
+            values.append(val)
+
+        set_clause = ", ".join(set_parts)
+        with get_db_cursor() as cur:
+            cur.execute(f"UPDATE users SET {set_clause} WHERE id = %s", (*values, user_id))
+
+        new_token = None
+        if role_updated:
+            new_token = create_access_token_for_user(user_id=user_id, role=updates["role"])
+
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to update user")
+
+    resp = {"message": "User successfully updated"}
+    if role_updated and new_token:
+        resp.update({"token": new_token, "token_type": "bearer"})
+    return resp
+
+
+@router.patch("/me")
+def update_me(data = Body(...), current_user = Depends(get_current_user)):
+    return update_user(current_user["user_id"], data, current_user)
+
+@router.patch("/me/password")
+def change_my_password(data = Body(...), current_user = Depends(get_current_user)):
+    # ожидаем: {"current_password": "...", "new_password": "..."}
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=422, detail="Body must be a JSON object.")
+
+    current_password = data.get("current_password")
+    new_password = data.get("new_password")
+
+    if not current_password or not new_password:
+        raise HTTPException(status_code=422, detail="Both 'current_password' and 'new_password' are required.")
+
+    _validate_new_password(new_password)
+
+    user_id = current_user["user_id"]
+
+    # 1) достаём хеш текущего пароля и роль (на всякий)
+    with get_db_cursor() as cur:
+        cur.execute("SELECT password FROM users WHERE id = %s", (user_id,))
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="User not found.")
+
+        hashed = row[0]
+
+    # 2) проверяем текущий пароль
+    if not pwd_context.verify(current_password, hashed):
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+
+    # 3) не допускаем одинаковый новый пароль
+    if pwd_context.verify(new_password, hashed):
+        raise HTTPException(status_code=400, detail="New password must be different from the current one.")
+
+    # 4) сохраняем новый хеш
+    try:
+        new_hash = pwd_context.hash(new_password)
+        with get_db_cursor() as cur:
+            cur.execute("UPDATE users SET password = %s WHERE id = %s", (new_hash, user_id))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to change password")
+
+    return {"message": "Password changed successfully"}
+
+
+@router.patch("/users/{user_id}/password")
+def admin_change_user_password(user_id: str, data = Body(...), current_user = Depends(get_current_user)):
+    # ожидаем: {"new_password": "..."} — только для админа
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can change other users' passwords.")
+
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=422, detail="Body must be a JSON object.")
+
+    new_password = data.get("new_password")
+    if not new_password:
+        raise HTTPException(status_code=422, detail="'new_password' is required.")
+
+    _validate_new_password(new_password)
+
+    # убедимся, что пользователь существует
+    with get_db_cursor() as cur:
+        cur.execute("SELECT 1 FROM users WHERE id = %s", (user_id,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=404, detail="User not found.")
+
+    try:
+        new_hash = pwd_context.hash(new_password)
+        with get_db_cursor() as cur:
+            cur.execute("UPDATE users SET password = %s WHERE id = %s", (new_hash, user_id))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to change password")
+
+    return {"message": "Password reset successfully"}
+
+
+@router.delete("/me")
+def delete_my_account(data = Body(None), current_user = Depends(get_current_user)):
+    # Рекомендуем подтверждение паролем: {"current_password": "..."}
+    if data is None or not isinstance(data, dict) or not data.get("current_password"):
+        raise HTTPException(status_code=422, detail="'current_password' is required to delete your account.")
+
+    user_id = current_user["user_id"]
+    current_password = data["current_password"]
+
+    # проверяем, что пользователь существует и пароль верный
+    with get_db_cursor() as cur:
+        cur.execute("SELECT password FROM users WHERE id = %s", (user_id,))
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="User not found.")
+        if not pwd_context.verify(current_password, row[0]):
+            raise HTTPException(status_code=400, detail="Current password is incorrect.")
+
+    # удаляем
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to delete account")
+
+    return {"message": "Account deleted"}
+
+
+@router.delete("/users/{user_id}")
+def admin_delete_user(user_id: str, current_user = Depends(get_current_user)):
+    if current_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete users.")
+
+    # можно добавить защиту от удаления себя/последнего админа, если нужно
+    try:
+        with get_db_cursor() as cur:
+            # убедимся, что пользователь существует
+            cur.execute("SELECT 1 FROM users WHERE id = %s", (user_id,))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="User not found.")
+
+            cur.execute("DELETE FROM users WHERE id = %s", (user_id,))
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to delete user")
+
+    return {"message": "User deleted"}
