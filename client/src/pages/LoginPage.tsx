@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import Button from "../components/Button";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import Input from "../components/Input";
 import CustomDialog from "../components/CustomDialog";

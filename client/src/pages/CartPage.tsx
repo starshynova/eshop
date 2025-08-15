@@ -3,7 +3,7 @@ import Header from "../components/Header";
 import Loader from "../components/Loader";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { useAuth } from "../context/AuthContext";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import ButtonSecond from "../components/ButtonSecond";

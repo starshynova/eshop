@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import Header from "../components/Header";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import Loader from "../components/Loader";
 import Button from "../components/Button";
 
