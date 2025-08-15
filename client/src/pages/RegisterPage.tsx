@@ -3,7 +3,7 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import CustomDialog from "../components/CustomDialog";
 

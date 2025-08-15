@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import ProductCardSmall from "../components/ProductCardSmall";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import Header from "../components/Header";
 import Loader from "../components/Loader";
 

@@ -1,7 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { UserDetails } from "../types/UserDetails";
 import Loader from "./Loader";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import Input from "./Input";
 import ButtonOutline from "./ButtonOutline";
 import CustomDialog from "./CustomDialog";
@@ -19,6 +19,7 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     confirm_password: "",
   });
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -30,15 +31,12 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     city: "",
   });
 
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-
   const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!userId) return;
 
     const ac = new AbortController();
-
     const run = async () => {
       try {
         setLoading(true);
@@ -49,7 +47,6 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data: UserDetails = await response.json();
         setUserData(data);
-        console.log("User Data:", data);
       } catch (e: any) {
         if (e?.name !== "AbortError")
           setError(e?.message ?? "Error fetching user data");
@@ -57,7 +54,6 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         setLoading(false);
       }
     };
-
     run();
     return () => ac.abort();
   }, [userId]);
@@ -103,23 +99,69 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         setEditMode(false);
         setUserData((prev) => (prev ? { ...prev, ...form } : null));
       } catch (err: any) {
-        console.error("Error updating profile:", err);
+        setError(err.message || "Failed to update profile");
       }
     }
   };
 
-  const handleEditPassword = async () => {
-    if (!editPasswordMode) {
-      setEditPasswordMode(true);
+  const isGoogleAccount =
+    userData?.password === "" ||
+    userData?.password == null ||
+    userData?.is_google_account === true;
+
+  const handleSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
+    if (passwords.new_password !== passwords.confirm_password) {
+      setPasswordError("Пароли не совпадают");
       return;
     }
-    setPasswordError(null);
+    if (passwords.new_password.length < 8) {
+      setPasswordError("Минимум 8 символов");
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/users/me/set-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          new_password: passwords.new_password,
+          confirm_password: passwords.confirm_password,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.detail || "Failed to set password");
+      setIsPasswordDialogOpen(true);
+      setEditPasswordMode(false);
+      setPasswords({
+        current_password: "",
+        new_password: "",
+        confirm_password: "",
+      });
+      setPasswordError(null);
+    } catch (err: any) {
+      setPasswordError(err.message || "Ошибка установки пароля");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleEditPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError(null);
     if (passwords.new_password !== passwords.confirm_password) {
       setPasswordError("New password and confirmation do not match.");
       return;
     }
-
+    if (passwords.new_password.length < 8) {
+      setPasswordError("Минимум 8 символов");
+      return;
+    }
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/users/me/password`, {
@@ -134,9 +176,8 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         }),
       });
       const result = await response.json();
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(result.detail || "Failed to change password");
-      }
       setIsPasswordDialogOpen(true);
       setEditPasswordMode(false);
       setPasswords({
@@ -146,16 +187,14 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
       });
       setPasswordError(null);
     } catch (err: any) {
-      console.log("Error changing password:", err);
       setPasswordError(err.message || "Failed to change password");
     } finally {
       setLoading(false);
     }
   };
 
-
   if (loading) return <Loader />;
-  if (error) return <div className="text-red-600">Ошибка: {error}</div>;
+  if (error) return <div className="text-red-600">Error: {error}</div>;
   if (!userData) return null;
 
   return (
@@ -230,8 +269,9 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
           <ButtonOutline
             className="w-full mt-4 h-[48px]"
             onClick={handleEditProfile}
-            children={editMode ? "save changes" : "edit profile"}
-          />
+          >
+            {editMode ? "Save changes" : "Edit profile"}
+          </ButtonOutline>
         </div>
         <div className="flex flex-row gap-4 h-fit w-[49%] border-2 border-gray-300 p-8 rounded-sm">
           {!editPasswordMode ? (
@@ -247,57 +287,76 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
                 className="h-[48px] w-[40%]"
                 onClick={() => setEditPasswordMode(true)}
               >
-                Change password
+                {isGoogleAccount ? "Set password" : "Change password"}
               </ButtonOutline>
             </>
-          ) : (
-            <div
+          ) : isGoogleAccount ? (
+            <form
               className="flex flex-col gap-4 w-full"
-              onSubmit={async (e) => {
-                e.preventDefault();
-                setPasswordError(null);
-
-                if (passwords.new_password !== passwords.confirm_password) {
-                  setPasswordError(
-                    "New password and confirmation do not match.",
-                  );
-                  return;
+              onSubmit={handleSetPassword}
+            >
+              <div className="mb-5">
+                <Input
+                  label="New password"
+                  type="password"
+                  value={passwords.new_password}
+                  onChange={(e) =>
+                    setPasswords((p) => ({
+                      ...p,
+                      new_password: e.target.value,
+                    }))
+                  }
+                  disabled={loading}
+                />
+                <div className="text-sm text-black flex items-center gap-2 pt-0">
+                  <Check /> 8 characters minimum
+                </div>
+              </div>
+              <Input
+                label="Confirm new password"
+                type="password"
+                value={passwords.confirm_password}
+                onChange={(e) =>
+                  setPasswords((p) => ({
+                    ...p,
+                    confirm_password: e.target.value,
+                  }))
                 }
-                setLoading(true);
-                try {
-                  const token = localStorage.getItem("token");
-                  const response = await fetch(
-                    `${API_BASE_URL}/users/me/password`,
-                    {
-                      method: "PATCH",
-                      headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                      },
-                      body: JSON.stringify({
-                        current_password: passwords.current_password,
-                        new_password: passwords.new_password,
-                      }),
-                    },
-                  );
-                  const result = await response.json();
-                  if (!response.ok)
-                    throw new Error(
-                      result.detail || "Failed to change password",
-                    );
-                  alert("Password changed!");
-                  setEditPasswordMode(false);
-                  setPasswords({
-                    current_password: "",
-                    new_password: "",
-                    confirm_password: "",
-                  });
-                } catch (err: any) {
-                  alert("Error: " + err.message);
-                } finally {
-                  setLoading(false);
-                }
-              }}
+                disabled={loading}
+              />
+              {passwordError && (
+                <div className="text-red-500 text-xs ">{passwordError}</div>
+              )}
+              <div className="flex flex-row gap-2 mt-2">
+                <ButtonOutline
+                  type="submit"
+                  className="h-[48px] w-[50%]"
+                  disabled={loading}
+                >
+                  Set password
+                </ButtonOutline>
+                <ButtonOutline
+                  type="button"
+                  className="h-[48px] w-[50%]"
+                  onClick={() => {
+                    setEditPasswordMode(false);
+                    setPasswords({
+                      current_password: "",
+                      new_password: "",
+                      confirm_password: "",
+                    });
+                    setPasswordError(null);
+                  }}
+                  disabled={loading}
+                >
+                  Cancel
+                </ButtonOutline>
+              </div>
+            </form>
+          ) : (
+            <form
+              className="flex flex-col gap-4 w-full"
+              onSubmit={handleEditPassword}
             >
               <Input
                 label="Current password"
@@ -312,18 +371,21 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
                 disabled={loading}
               />
               <div className="mb-5">
-              <Input
-                label="New password"
-                type="password"
-                value={passwords.new_password}
-                onChange={(e) =>
-                  setPasswords((p) => ({ ...p, new_password: e.target.value }))
-                }
-                disabled={loading}
-              />
-              <div className="text-sm text-black flex items-center gap-2 pt-0">
-                 <Check /> 8 characters minimum
-              </div>
+                <Input
+                  label="New password"
+                  type="password"
+                  value={passwords.new_password}
+                  onChange={(e) =>
+                    setPasswords((p) => ({
+                      ...p,
+                      new_password: e.target.value,
+                    }))
+                  }
+                  disabled={loading}
+                />
+                <div className="text-sm text-black flex items-center gap-2 pt-0">
+                  <Check /> 8 characters minimum
+                </div>
               </div>
               <Input
                 label="Confirm password"
@@ -345,7 +407,6 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
                   type="submit"
                   className="h-[48px] w-[50%]"
                   disabled={loading}
-                  onClick={handleEditPassword}
                 >
                   Save
                 </ButtonOutline>
@@ -366,17 +427,21 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
                   Cancel
                 </ButtonOutline>
               </div>
-            </div>
+            </form>
           )}
         </div>
       </div>
       <ButtonOutline children="delete account" className="w-fit" />
       <CustomDialog
-  isOpen={isPasswordDialogOpen}
-  onClose={() => setIsPasswordDialogOpen(false)}
-  message="Password changed successfully!"
-  isVisibleButton={false} 
-/>
+        isOpen={isPasswordDialogOpen}
+        onClose={() => setIsPasswordDialogOpen(false)}
+        message={
+          isGoogleAccount
+            ? "Password set successfully!"
+            : "Password changed successfully!"
+        }
+        isVisibleButton={false}
+      />
     </div>
   );
 };

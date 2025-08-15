@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProductCardSmall from "../components/ProductCardSmall";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { useSearchParams } from "react-router-dom";

@@ -125,6 +125,7 @@ def serialize_user(row) -> dict:
         "address_line2": row[6] or "",
         "post_code": row[7] or "",
         "city": row[8] or "",
+        "is_google_account": not bool(row[9])
     }
 
 
@@ -280,7 +281,7 @@ def get_user_by_id(user_id: str):
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                SELECT id, role, email, first_name, last_name, address_line1, address_line2, post_code, city
+                SELECT id, role, email, first_name, last_name, address_line1, address_line2, post_code, city, password
                 FROM users
                 WHERE id = %s;
             """, (str(user_id),))
@@ -391,6 +392,70 @@ def change_my_password(data = Body(...), current_user = Depends(get_current_user
         raise HTTPException(status_code=500, detail="Failed to change password")
 
     return {"message": "Password changed successfully"}
+
+# @router.post("/oauth/google/token")
+# async def exchange_code_for_token(request: Request):
+#     try:
+#         body = await request.json()
+#         code = body.get("code")
+#         if not code:
+#             raise HTTPException(status_code=400, detail="Missing authorization code.")
+#
+#         token = await oauth.google.fetch_token(
+#             grant_type="authorization_code",
+#             code=code,
+#             redirect_uri="postmessage",  # для popup flow
+#         )
+#
+#         id_token = token.get("id_token")
+#         if not id_token:
+#             raise HTTPException(status_code=400, detail="No ID token received from Google.")
+#
+#         return {"google_id_token": id_token}
+#
+#     except Exception as e:
+#         import traceback
+#         print("OAuth token exchange error:", e)
+#         traceback.print_exc()
+#         raise HTTPException(status_code=500, detail="Failed to exchange code for token.")
+
+@router.post("/me/set-password")
+def set_password_for_google_user(
+    data = Body(...),
+    current_user = Depends(get_current_user)
+):
+    user_id = current_user["user_id"]
+    new_password = (data.get("new_password") or "").strip()
+    confirm_password = (data.get("confirm_password") or "").strip()
+
+    if not new_password or not confirm_password:
+        raise HTTPException(status_code=422, detail="Password fields required.")
+    if new_password != confirm_password:
+        raise HTTPException(status_code=400, detail="Passwords do not match.")
+    if len(new_password) < 8:
+        raise HTTPException(status_code=422, detail="Password too short.")
+
+    with get_db_cursor() as cur:
+        cur.execute("SELECT password FROM users WHERE id = %s", (user_id,))
+        row = cur.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="User not found.")
+        current_hash = row[0]
+
+    # Разрешаем только если пароля ещё не было
+    if current_hash:
+        raise HTTPException(status_code=400, detail="Password already set for this user.")
+
+    # Сохраняем новый пароль (bcrypt hash)
+    hash_new = pwd_context.hash(new_password)
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("UPDATE users SET password = %s WHERE id = %s", (hash_new, user_id))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to set password.")
+
+    return {"message": "Password set successfully."}
+
 
 @router.patch("/{user_id}/password")
 def admin_reset_password(user_id: str, data = Body(...), current_user = Depends(get_current_user)):

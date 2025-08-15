@@ -5,7 +5,7 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import { useAuth } from "./AuthContext";
 import Loader from "../components/Loader";
 

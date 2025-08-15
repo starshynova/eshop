@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import SearchInterface from "./SearchInterface";
 import { useNavigate } from "react-router-dom";
-import API_BASE_URL from "../config";
+import { API_BASE_URL } from "../config";
 import getUserRole from "../utils/getUserRole";
 import { useAuth } from "../context/AuthContext";
 import CartIconWithBadge from "./CartIconWithBadge";
