@@ -193,6 +193,33 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!window.confirm("Are you sure you want to delete your account?")) {
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          //  "Content-Type": "application/json",
+        },
+        //  body: JSON.stringify({ current_password: passwords.current_password })
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || "Failed to delete account");
+      }
+      alert("Account deleted successfully.");
+      window.location.href = "/login"; // Redirect to login page
+    } catch (err: any) {
+      setError(err.message || "Failed to delete account");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (loading) return <Loader />;
   if (error) return;
   <CustomDialog
@@ -442,7 +469,10 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
           )}
         </div>
       </div>
-      <ButtonOutline children="delete account" className="w-fit" />
+      <ButtonOutline 
+        children="delete account" 
+        className="w-fit" 
+        onClick={handleDeleteAccount}/>
       <CustomDialog
         isOpen={isPasswordDialogOpen}
         onClose={() => setIsPasswordDialogOpen(false)}

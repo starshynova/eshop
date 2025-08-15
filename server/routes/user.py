@@ -484,29 +484,14 @@ def admin_reset_password(user_id: str, data = Body(...), current_user = Depends(
 
 
 @router.delete("/me")
-def delete_my_account(data = Body(None), current_user = Depends(get_current_user)):
-    if data is None or not isinstance(data, dict):
-        data = {}
-
+def delete_my_account(current_user = Depends(get_current_user)):
     user_id = current_user["user_id"]
 
     with get_db_cursor() as cur:
-        cur.execute("SELECT email, password FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT email FROM users WHERE id = %s", (user_id,))
         row = cur.fetchone()
         if not row:
             raise HTTPException(status_code=404, detail="User not found.")
-        email, stored_hash = row[0], row[1]
-
-    if _is_local_account(stored_hash):
-        current_password = data.get("current_password") or ""
-        if not current_password:
-            raise HTTPException(status_code=422, detail="'current_password' is required to delete your account.")
-        if not pwd_context.verify(current_password, stored_hash):
-            raise HTTPException(status_code=400, detail="Current password is incorrect.")
-    else:
-        google_id_token = data.get("google_id_token") or ""
-        if not google_id_token or not verify_google_id_token(google_id_token, expected_email=email):
-            raise HTTPException(status_code=401, detail="Reauthentication required: provide a valid 'google_id_token'.")
 
     try:
         with get_db_cursor() as cur:
@@ -515,6 +500,7 @@ def delete_my_account(data = Body(None), current_user = Depends(get_current_user
         raise HTTPException(status_code=500, detail="Failed to delete account")
 
     return {"message": "Account deleted"}
+
 
 @router.delete("/{user_id}")
 def admin_delete_user(user_id: str, current_user = Depends(get_current_user)):
