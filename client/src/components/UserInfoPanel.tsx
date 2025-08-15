@@ -31,6 +31,8 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     city: "",
   });
 
+  const isGoogleAccount = !!userData?.is_google_account;
+
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -104,20 +106,15 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     }
   };
 
-  const isGoogleAccount =
-    userData?.password === "" ||
-    userData?.password == null ||
-    userData?.is_google_account === true;
-
   const handleSetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setPasswordError(null);
     if (passwords.new_password !== passwords.confirm_password) {
-      setPasswordError("Пароли не совпадают");
+      setPasswordError("Password and confirmation do not match");
       return;
     }
     if (passwords.new_password.length < 8) {
-      setPasswordError("Минимум 8 символов");
+      setPasswordError("Minimum 8 characters");
       return;
     }
     try {
@@ -138,6 +135,9 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         throw new Error(result.detail || "Failed to set password");
       setIsPasswordDialogOpen(true);
       setEditPasswordMode(false);
+      setUserData((prev) =>
+        prev ? { ...prev, is_google_account: false } : prev,
+      );
       setPasswords({
         current_password: "",
         new_password: "",
@@ -145,7 +145,7 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
       });
       setPasswordError(null);
     } catch (err: any) {
-      setPasswordError(err.message || "Ошибка установки пароля");
+      setPasswordError(err.message || "Password setup error");
     } finally {
       setLoading(false);
     }
@@ -194,7 +194,12 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   };
 
   if (loading) return <Loader />;
-  if (error) return <div className="text-red-600">Error: {error}</div>;
+  if (error) return;
+  <CustomDialog
+    isOpen={true}
+    onClose={() => setError(null)}
+    message={`Error: ${error}`}
+  />;
   if (!userData) return null;
 
   return (
@@ -266,30 +271,36 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
               onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
             />
           </div>
-          <ButtonOutline
-            className="w-full mt-4 h-[48px]"
-            onClick={handleEditProfile}
-          >
+          <ButtonOutline className="w-full mt-4" onClick={handleEditProfile}>
             {editMode ? "Save changes" : "Edit profile"}
           </ButtonOutline>
         </div>
         <div className="flex flex-row gap-4 h-fit w-[49%] border-2 border-gray-300 p-8 rounded-sm">
           {!editPasswordMode ? (
-            <>
-              <Input
-                label="Password"
-                type="password"
-                value="********"
-                className="w-[60%]"
-                disabled
-              />
+            isGoogleAccount ? (
               <ButtonOutline
-                className="h-[48px] w-[40%]"
+                className=" w-full"
                 onClick={() => setEditPasswordMode(true)}
               >
-                {isGoogleAccount ? "Set password" : "Change password"}
+                Set password
               </ButtonOutline>
-            </>
+            ) : (
+              <>
+                <Input
+                  label="Password"
+                  type="password"
+                  value="********"
+                  className="w-[60%]"
+                  disabled
+                />
+                <ButtonOutline
+                  className="w-[40%]"
+                  onClick={() => setEditPasswordMode(true)}
+                >
+                  Change password
+                </ButtonOutline>
+              </>
+            )
           ) : isGoogleAccount ? (
             <form
               className="flex flex-col gap-4 w-full"
@@ -330,14 +341,14 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
               <div className="flex flex-row gap-2 mt-2">
                 <ButtonOutline
                   type="submit"
-                  className="h-[48px] w-[50%]"
+                  className="w-[50%]"
                   disabled={loading}
                 >
                   Set password
                 </ButtonOutline>
                 <ButtonOutline
                   type="button"
-                  className="h-[48px] w-[50%]"
+                  className="w-[50%]"
                   onClick={() => {
                     setEditPasswordMode(false);
                     setPasswords({
@@ -405,14 +416,14 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
               <div className="flex flex-row gap-2 mt-2">
                 <ButtonOutline
                   type="submit"
-                  className="h-[48px] w-[50%]"
+                  className="w-[50%]"
                   disabled={loading}
                 >
                   Save
                 </ButtonOutline>
                 <ButtonOutline
                   type="button"
-                  className="h-[48px] w-[50%]"
+                  className="w-[50%]"
                   onClick={() => {
                     setEditPasswordMode(false);
                     setPasswords({

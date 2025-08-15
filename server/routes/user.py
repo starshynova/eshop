@@ -125,7 +125,7 @@ def serialize_user(row) -> dict:
         "address_line2": row[6] or "",
         "post_code": row[7] or "",
         "city": row[8] or "",
-        "is_google_account": not bool(row[9])
+        "is_google_account": (row[9] == "" or row[9] is None),
     }
 
 

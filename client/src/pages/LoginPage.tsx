@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import Button from "../components/Button";
+import ButtonOutline from "../components/ButtonOutline";
 import { API_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import Input from "../components/Input";
@@ -80,13 +81,13 @@ const LoginPage = () => {
                 onClick={handleLogin}
                 children="Log In"
               />
-              <Button
+              <ButtonOutline
                 className="w-full flex items-center justify-center gap-2"
                 onClick={handleGoogleLogin}
               >
                 <FcGoogle className="w-5 h-5" />
                 <span>Log In with Google</span>
-              </Button>
+              </ButtonOutline>
 
               <div className="flex flex-row gap-3 mt-7 w-full justify-center">
                 <p className="text-base text-gray-700">

@@ -85,6 +85,7 @@ const RegisterPage: React.FC = () => {
     }
 
     const userData = {
+      role: "user",
       email: credentials.email,
       password: credentials.password,
       first_name: step2.firstName,
@@ -128,7 +129,7 @@ const RegisterPage: React.FC = () => {
 
         <div className="w-[30%] max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-lg justify-center items-center">
           {step === Step.Credentials && (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <h2 className="text-3xl font-semibold">Signup</h2>
               <h3 className="text-xl font-semibold">Step 1 of 2</h3>
               <Input
@@ -181,7 +182,7 @@ const RegisterPage: React.FC = () => {
           )}
 
           {step === Step.Profile && (
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
               <h2 className="text-2xl font-semibold">Step 2 of 2</h2>
               <Input
                 type="text"
