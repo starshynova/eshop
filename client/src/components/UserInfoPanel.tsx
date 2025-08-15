@@ -6,6 +6,8 @@ import Input from "./Input";
 import ButtonOutline from "./ButtonOutline";
 import CustomDialog from "./CustomDialog";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   const [userData, setUserData] = useState<UserDetails | null>(null);
@@ -20,6 +22,8 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   });
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [SucesscDeleteAccountOpen, setSucesscDeleteAccountOpen] =
+    useState(false);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -31,9 +35,13 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     city: "",
   });
 
-  const isGoogleAccount = !!userData?.is_google_account;
+  const isGoogleAccount = userData?.is_google_account ?? false;
+
+  const { logout } = useAuth();
 
   const token = localStorage.getItem("token");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
@@ -203,22 +211,24 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         method: "DELETE",
         headers: {
           Authorization: `Bearer ${token}`,
-          //  "Content-Type": "application/json",
         },
-        //  body: JSON.stringify({ current_password: passwords.current_password })
       });
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.detail || "Failed to delete account");
       }
-      alert("Account deleted successfully.");
-      window.location.href = "/login"; // Redirect to login page
+      setSucesscDeleteAccountOpen(true);
+      logout();
+      setTimeout(() => {
+        setSucesscDeleteAccountOpen(false);
+        navigate("/");
+      }, 2000);
     } catch (err: any) {
       setError(err.message || "Failed to delete account");
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   if (loading) return <Loader />;
   if (error) return;
@@ -469,10 +479,11 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
           )}
         </div>
       </div>
-      <ButtonOutline 
-        children="delete account" 
-        className="w-fit" 
-        onClick={handleDeleteAccount}/>
+      <ButtonOutline
+        children="delete account"
+        className="w-fit"
+        onClick={handleDeleteAccount}
+      />
       <CustomDialog
         isOpen={isPasswordDialogOpen}
         onClose={() => setIsPasswordDialogOpen(false)}
@@ -481,6 +492,12 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
             ? "Password set successfully!"
             : "Password changed successfully!"
         }
+        isVisibleButton={false}
+      />
+      <CustomDialog
+        isOpen={SucesscDeleteAccountOpen}
+        onClose={() => setSucesscDeleteAccountOpen(false)}
+        message="You have successfully deleted your account."
         isVisibleButton={false}
       />
     </div>
