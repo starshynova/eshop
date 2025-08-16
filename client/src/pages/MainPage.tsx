@@ -71,7 +71,6 @@ const MainPage: React.FC = () => {
         isVisibleButton={false}
       />
     );
-    //  <div className="text-red-500 p-4">{error}</div>;
   }
 
   return (
