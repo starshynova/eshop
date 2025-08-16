@@ -79,7 +79,7 @@ const MainPage: React.FC = () => {
       <SearchQueryProvider>
         <Header />
         <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
-        <div className="flex flex-wrap gap-y-8 justify-between px-24 mt-8 absolute top-[140px]">
+        <div className="grid grid-cols-4 gap-y-8 justify-between px-24 mt-8 absolute top-[140px] pb-12">
           {products.map((product, idx) => (
             <ProductCardSmall
               key={product.id}
