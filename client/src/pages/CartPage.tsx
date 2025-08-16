@@ -22,14 +22,10 @@ const CartPage: React.FC = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editQuantity, setEditQuantity] = useState<number>(1);
 
-  const handleProductCardClick = (productId: string) => {
-    if (!productId) {
-      console.error("Product ID is undefined!");
-      return;
-    }
-    navigate(`/products/${productId}`);
-  };
+  
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -57,6 +53,58 @@ const CartPage: React.FC = () => {
 
     fetchCartItems();
   }, [isAuthenticated]);
+
+  const handleProductCardClick = (productId: string) => {
+    if (!productId) {
+      console.error("Product ID is undefined!");
+      return;
+    }
+    navigate(`/products/${productId}`);
+  };
+
+  const handleRemoveItem = async (itemId: string) => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Failed to remove item");
+      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+    } catch (err) {
+      console.error(err);
+      // Здесь можно добавить уведомление об ошибке
+    }
+  };
+
+  const handleEditClick = (item: CartItem) => {
+  setEditingId(item.id);
+  setEditQuantity(item.quantity);
+};
+
+const handleEditSave = async (itemId: string) => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ quantity: editQuantity }),
+    });
+    if (!res.ok) throw new Error("Failed to update quantity");
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === itemId ? { ...item, quantity: editQuantity } : item
+      )
+    );
+    setEditingId(null);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   if (!isAuthenticated) {
     return (
@@ -119,11 +167,56 @@ const CartPage: React.FC = () => {
                               Quantity: {item.quantity}
                             </p>
                           </div>
-                          <div className="flex flex-row">
+                          {/* <div className="flex flex-row">
                             <ButtonSecond children="Remove" />
                             <div className=" h-8 w-[2px] bg-black mx-4 "></div>
                             <ButtonSecond children="Edit" />
-                          </div>
+                          </div> */}
+                          <div className="flex flex-row">
+                            <ButtonSecond
+                              children="Remove"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveItem(item.id);
+                              }}
+                            />
+                            <div className=" h-8 w-[2px] bg-black mx-4 "></div>
+                            {editingId === item.id ? (
+                              <>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={editQuantity}
+                                  onChange={(e) => setEditQuantity(Number(e.target.value))}
+                                  className="w-16 border rounded px-2"
+                                  onClick={(e) => e.stopPropagation()}
+                                />
+                                <ButtonSecond
+                                  children="Save"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditSave(item.id);
+                                  }}
+                                />
+                                <ButtonSecond
+                                  children="Cancel"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingId(null);
+                                  }}
+                                />
+                              </>
+                            ) : (
+                              <ButtonSecond
+                                children="Edit"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditClick(item);
+                                }}
+                              />
+                            )}
+                          </div>                          
+
                         </div>
                       </div>
                       <div className="font-bold">
