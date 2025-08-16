@@ -72,13 +72,13 @@ const CartPage: React.FC = () => {
 
   return (
     <SearchQueryProvider>
-      <div className="w-full h-screen flex flex-col">
-        <Header />
+      <Header />
+      <div className="absolute top-[80px] w-full h-[calc(100vh-80px)] flex flex-col px-8">
         {loading && <Loader />}
 
         {cartItems.length === 0 ? (
           <div className="flex justify-center">
-            <div className="flex flex-col gap-16 mt-16 ml-16 w-fit">
+            <div className="flex flex-col gap-16 mt-16  w-fit">
               <h3 className="text-gray-800 text-3xl font-bold  uppercase">
                 your cart is empty
               </h3>
@@ -87,7 +87,7 @@ const CartPage: React.FC = () => {
           </div>
         ) : (
           <div className="flex flex-1 overflow-hidden">
-            <div className="w-[80%] flex flex-col px-16 overflow-y-auto pb-8">
+            <div className="w-[80%] flex flex-col pr-8 overflow-y-auto pb-8">
               <div className="border-b-4 border-gray-400 shrink-0">
                 <h2 className="text-2xl font-bold mt-8 mb-8 text-left uppercase">
                   your shopping cart

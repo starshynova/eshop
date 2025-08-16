@@ -52,7 +52,7 @@ const ProductDetails: React.FC = () => {
   return (
     <SearchQueryProvider>
       <Header />
-      <div className="flex flex-row w-full px-8 gap-x-12 my-12">
+      <div className="flex flex-row w-full px-8 gap-x-12 my-12 absolute top-[80px]">
         <img
           src={product.main_photo_url}
           alt={product.title}
