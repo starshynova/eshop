@@ -9,7 +9,7 @@ type ProductCardProps = {
   title: string;
   price: number;
   description: string;
-  idx: number; 
+  idx: number;
 };
 
 const ProductCardSmall: React.FC<ProductCardProps> = ({
