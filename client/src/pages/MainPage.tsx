@@ -77,21 +77,23 @@ const MainPage: React.FC = () => {
     <div>
       <SearchQueryProvider>
         <Header />
-        <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
-        <div className="grid grid-cols-4 gap-y-8 justify-between px-24 mt-8 absolute top-[140px] pb-12">
-          {products.map((product, idx) => (
-            <ProductCardSmall
-              key={product.id}
-              id={product.id}
-              image={product.main_photo_url}
-              title={product.title}
-              price={product.price}
-              description={
-                product.description || "No description available yet"
-              }
-              idx={idx}
-            />
-          ))}
+        <div className="absolute top-[80px] pb-12">
+          <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
+          <div className="grid grid-cols-4 gap-y-8 justify-between px-24 mt-8  ">
+            {products.map((product, idx) => (
+              <ProductCardSmall
+                key={product.id}
+                id={product.id}
+                image={product.main_photo_url}
+                title={product.title}
+                price={product.price}
+                description={
+                  product.description || "No description available yet"
+                }
+                idx={idx}
+              />
+            ))}
+          </div>
         </div>
       </SearchQueryProvider>
     </div>
