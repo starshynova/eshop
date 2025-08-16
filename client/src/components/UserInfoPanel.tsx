@@ -22,7 +22,9 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   });
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
-  const [SucesscDeleteAccountOpen, setSucesscDeleteAccountOpen] =
+  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] =
+    useState(false);
+  const [sucesscDeleteAccountOpen, setSucesscDeleteAccountOpen] =
     useState(false);
 
   const [form, setForm] = useState({
@@ -202,9 +204,6 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   };
 
   const handleDeleteAccount = async () => {
-    if (!window.confirm("Are you sure you want to delete your account?")) {
-      return;
-    }
     try {
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/users/me`, {
@@ -218,6 +217,7 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         throw new Error(data.detail || "Failed to delete account");
       }
       setSucesscDeleteAccountOpen(true);
+      setIsDeleteAccountDialogOpen(false);
       logout();
       setTimeout(() => {
         setSucesscDeleteAccountOpen(false);
@@ -482,7 +482,7 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
       <ButtonOutline
         children="delete account"
         className="w-fit"
-        onClick={handleDeleteAccount}
+        onClick={() => setIsDeleteAccountDialogOpen(true)}
       />
       <CustomDialog
         isOpen={isPasswordDialogOpen}
@@ -495,7 +495,16 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
         isVisibleButton={false}
       />
       <CustomDialog
-        isOpen={SucesscDeleteAccountOpen}
+        isOpen={isDeleteAccountDialogOpen}
+        onClose={() => setIsDeleteAccountDialogOpen(false)}
+        message="Are you sure you want to delete your account?"
+        buttonTitle="delete"
+        buttonOutlineTitle="cancel"
+        onClickButton={handleDeleteAccount}
+        isVisibleButton={true}
+      />
+      <CustomDialog
+        isOpen={sucesscDeleteAccountOpen}
         onClose={() => setSucesscDeleteAccountOpen(false)}
         message="You have successfully deleted your account."
         isVisibleButton={false}
