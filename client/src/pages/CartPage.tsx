@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import ButtonSecond from "../components/ButtonSecond";
 import CustomDialog from "../components/CustomDialog";
+import { useCart } from "../context/CartContext";
 
 type CartItem = {
   id: string;
@@ -21,11 +22,13 @@ const CartPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>("");
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQuantity, setEditQuantity] = useState<number>(1);
-
-  
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+  const { refresh } = useCart();
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -33,7 +36,6 @@ const CartPage: React.FC = () => {
     const fetchCartItems = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem("token");
         const res = await fetch(`${API_BASE_URL}/carts/items`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -44,8 +46,9 @@ const CartPage: React.FC = () => {
 
         const data = await res.json();
         setCartItems(data.items || []);
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Unknown error");
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -64,47 +67,58 @@ const CartPage: React.FC = () => {
 
   const handleRemoveItem = async (itemId: string) => {
     try {
-      const token = localStorage.getItem("token");
       const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to remove item");
       setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+      await refresh();
     } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
       console.error(err);
-      // Здесь можно добавить уведомление об ошибке
     }
   };
 
   const handleEditClick = (item: CartItem) => {
-  setEditingId(item.id);
-  setEditQuantity(item.quantity);
-};
+    setEditingId(item.id);
+    setEditQuantity(item.quantity);
+  };
 
-const handleEditSave = async (itemId: string) => {
-  try {
-    const token = localStorage.getItem("token");
-    const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ quantity: editQuantity }),
-    });
-    if (!res.ok) throw new Error("Failed to update quantity");
-    setCartItems((prev) =>
-      prev.map((item) =>
-        item.id === itemId ? { ...item, quantity: editQuantity } : item
-      )
+  const handleEditSave = async (itemId: string) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ quantity: editQuantity }),
+      });
+      if (!res.ok) throw new Error("Failed to update quantity");
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, quantity: editQuantity } : item,
+        ),
+      );
+      setEditingId(null);
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unknown error");
+      console.error(err);
+    }
+  };
+
+  {
+    error && (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => navigate("/cart")}
+        message={error}
+        isVisibleButton={false}
+      />
     );
-    setEditingId(null);
-  } catch (err) {
-    console.error(err);
   }
-};
-
 
   if (!isAuthenticated) {
     return (
@@ -127,7 +141,7 @@ const handleEditSave = async (itemId: string) => {
         {cartItems.length === 0 ? (
           <div className="flex justify-center">
             <div className="flex flex-col gap-16 mt-16  w-fit">
-              <h3 className="text-gray-800 text-3xl font-bold  uppercase">
+              <h3 className="text-black text-3xl font-bold  uppercase">
                 your cart is empty
               </h3>
               <Button children="start shopping" onClick={() => navigate("/")} />
@@ -167,47 +181,50 @@ const handleEditSave = async (itemId: string) => {
                               Quantity: {item.quantity}
                             </p>
                           </div>
-                          {/* <div className="flex flex-row">
-                            <ButtonSecond children="Remove" />
-                            <div className=" h-8 w-[2px] bg-black mx-4 "></div>
-                            <ButtonSecond children="Edit" />
-                          </div> */}
-                          <div className="flex flex-row">
+                          <div className="flex flex-row items-center">
                             <ButtonSecond
+                              className="text-sm"
                               children="Remove"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRemoveItem(item.id);
+                                setDeleteItemId(item.id);
                               }}
                             />
-                            <div className=" h-8 w-[2px] bg-black mx-4 "></div>
+                            <div className=" h-4 w-[1px] bg-black mx-4 "></div>
                             {editingId === item.id ? (
                               <>
                                 <input
                                   type="number"
                                   min={1}
                                   value={editQuantity}
-                                  onChange={(e) => setEditQuantity(Number(e.target.value))}
-                                  className="w-16 border rounded px-2"
+                                  onChange={(e) =>
+                                    setEditQuantity(Number(e.target.value))
+                                  }
+                                  className="w-16 border-black border-[1px] rounded-sm px-2"
                                   onClick={(e) => e.stopPropagation()}
                                 />
-                                <ButtonSecond
-                                  children="Save"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleEditSave(item.id);
-                                  }}
-                                />
-                                <ButtonSecond
-                                  children="Cancel"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setEditingId(null);
-                                  }}
-                                />
+                                <div className="flex gap-x-4 px-4">
+                                  <ButtonSecond
+                                    className="text-sm"
+                                    children="save"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditSave(item.id);
+                                    }}
+                                  />
+                                  <ButtonSecond
+                                    className="text-sm"
+                                    children="cancel"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setEditingId(null);
+                                    }}
+                                  />
+                                </div>
                               </>
                             ) : (
                               <ButtonSecond
+                                className="text-sm"
                                 children="Edit"
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -215,8 +232,7 @@ const handleEditSave = async (itemId: string) => {
                                 }}
                               />
                             )}
-                          </div>                          
-
+                          </div>
                         </div>
                       </div>
                       <div className="font-bold">
@@ -255,6 +271,18 @@ const handleEditSave = async (itemId: string) => {
             </div>
           </div>
         )}
+        <CustomDialog
+          isOpen={!!deleteItemId}
+          onClose={() => setDeleteItemId(null)}
+          message="Are you sure you want to delete this item from your cart?"
+          buttonTitle="Delete"
+          buttonOutlineTitle="Cancel"
+          onClickButton={() => {
+            if (deleteItemId) handleRemoveItem(deleteItemId);
+            setDeleteItemId(null);
+          }}
+          isVisibleButton={true}
+        />
       </div>
     </SearchQueryProvider>
   );
