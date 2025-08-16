@@ -67,16 +67,15 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
+    <div className="w-full flex flex-col items-center justify-between">
       <div className="w-full sticky top-0 z-50 bg-white shadow-md">
-        <div className="h-[80px] flex items-center justify-between px-20">
+        <div className="h-[80px] flex items-center justify-between px-24">
           <div
-            className="flex w-[60%] items-center justify-start px-10 gap-8"
+            className="flex w-[60%] items-center justify-start gap-8"
             onMouseEnter={() => setLeftHover(true)}
             onMouseLeave={() => setLeftHover(false)}
           >
             <ButtonSecond onClick={() => navigate("/")} children="Home" />
-
             <div
               onMouseEnter={() => setCatalogOpen(true)}
               onMouseLeave={() => {
@@ -183,7 +182,7 @@ const Header: React.FC = () => {
             />
           </div>
 
-          <div className="w-[30%] flex flex-row gap-8 items-center justify-end pr-4">
+          <div className="w-[30%] flex flex-row gap-8 items-center justify-end">
             {role === "admin" && (
               <ButtonSecond
                 onClick={() => console.log("Admin page")}
