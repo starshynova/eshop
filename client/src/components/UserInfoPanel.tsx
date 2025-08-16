@@ -6,6 +6,8 @@ import Input from "./Input";
 import ButtonOutline from "./ButtonOutline";
 import CustomDialog from "./CustomDialog";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   const [userData, setUserData] = useState<UserDetails | null>(null);
@@ -20,6 +22,10 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   });
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] =
+    useState(false);
+  const [sucesscDeleteAccountOpen, setSucesscDeleteAccountOpen] =
+    useState(false);
 
   const [form, setForm] = useState({
     first_name: "",
@@ -31,9 +37,13 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
     city: "",
   });
 
-  const isGoogleAccount = !!userData?.is_google_account;
+  const isGoogleAccount = userData?.is_google_account ?? false;
+
+  const { logout } = useAuth();
 
   const token = localStorage.getItem("token");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
@@ -188,6 +198,33 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
       setPasswordError(null);
     } catch (err: any) {
       setPasswordError(err.message || "Failed to change password");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/users/me`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || "Failed to delete account");
+      }
+      setSucesscDeleteAccountOpen(true);
+      setIsDeleteAccountDialogOpen(false);
+      logout();
+      setTimeout(() => {
+        setSucesscDeleteAccountOpen(false);
+        navigate("/");
+      }, 2000);
+    } catch (err: any) {
+      setError(err.message || "Failed to delete account");
     } finally {
       setLoading(false);
     }
@@ -442,7 +479,11 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
           )}
         </div>
       </div>
-      <ButtonOutline children="delete account" className="w-fit" />
+      <ButtonOutline
+        children="delete account"
+        className="w-fit"
+        onClick={() => setIsDeleteAccountDialogOpen(true)}
+      />
       <CustomDialog
         isOpen={isPasswordDialogOpen}
         onClose={() => setIsPasswordDialogOpen(false)}
@@ -451,6 +492,21 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
             ? "Password set successfully!"
             : "Password changed successfully!"
         }
+        isVisibleButton={false}
+      />
+      <CustomDialog
+        isOpen={isDeleteAccountDialogOpen}
+        onClose={() => setIsDeleteAccountDialogOpen(false)}
+        message="Are you sure you want to delete your account?"
+        buttonTitle="delete"
+        buttonOutlineTitle="cancel"
+        onClickButton={handleDeleteAccount}
+        isVisibleButton={true}
+      />
+      <CustomDialog
+        isOpen={sucesscDeleteAccountOpen}
+        onClose={() => setSucesscDeleteAccountOpen(false)}
+        message="You have successfully deleted your account."
         isVisibleButton={false}
       />
     </div>
