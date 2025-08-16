@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status , Path
 from pydantic import BaseModel, conint
 from db.context import get_db_cursor
 from core.auth import get_current_user_id
@@ -16,6 +16,9 @@ class CartItemOut(BaseModel):
     price: float
     quantity: int
     image: str | None = None
+
+class EditCartItemRequest(BaseModel):
+    quantity: conint(gt=0)
 
 @router.post("/add")
 def add_to_cart(
@@ -89,3 +92,37 @@ def get_cart_items(user_id: str = Depends(get_current_user_id)):
         # на проде логируй e
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Failed to fetch cart items")
+
+
+@router.delete("/items/{item_id}")
+def remove_cart_item(
+    item_id: str = Path(...),
+    user_id: str = Depends(get_current_user_id)
+):
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("""
+                DELETE FROM cart_item
+                WHERE user_id = %s AND item_id = %s
+            """, (user_id, item_id))
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/items/{item_id}")
+def edit_cart_item(
+    item_id: str = Path(...),
+    req: EditCartItemRequest = ...,
+    user_id: str = Depends(get_current_user_id)
+):
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("""
+                UPDATE cart_item
+                SET quantity = %s
+                WHERE user_id = %s AND item_id = %s
+            """, (req.quantity, user_id, item_id))
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
