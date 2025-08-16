@@ -79,8 +79,8 @@ const MainPage: React.FC = () => {
       <SearchQueryProvider>
         <Header />
         <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
-        <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-8 absolute top-[140px]">
-          {products.map((product) => (
+        <div className="flex flex-wrap gap-y-8 justify-between px-24 mt-8 absolute top-[140px]">
+          {products.map((product, idx) => (
             <ProductCardSmall
               key={product.id}
               id={product.id}
@@ -90,6 +90,7 @@ const MainPage: React.FC = () => {
               description={
                 product.description || "No description available yet"
               }
+              idx={idx}
             />
           ))}
         </div>
