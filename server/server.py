@@ -34,6 +34,7 @@ from routes.img_upload import router as img_upload_router
 from routes.user import router as user_router
 from routes.cart import router as cart_router
 from routes.payment import router as payment_router
+from routes.order import router as order_router
 
 app.include_router(item_router)
 app.include_router(init_qdrant_router)
@@ -42,6 +43,7 @@ app.include_router(img_upload_router)
 app.include_router(user_router)
 app.include_router(cart_router)
 app.include_router(payment_router)
+app.include_router(order_router)
 
 
 @app.get("/")

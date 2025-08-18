@@ -9,7 +9,7 @@ def get_db_cursor():
         conn = get_connection()
         cur = conn.cursor()
         yield cur
-        conn.commit()  # если нужно
+        conn.commit()
     except Exception:
         if conn:
             conn.rollback()
