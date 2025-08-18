@@ -12,6 +12,7 @@ interface CustomDialogProps {
   buttonOutlineTitle?: string;
   onClickButton?: () => void;
   isVisibleButton?: boolean;
+  isVisibleButtonOutline?: boolean;
 }
 
 const CustomDialog: React.FC<CustomDialogProps> = ({
@@ -22,12 +23,14 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   buttonOutlineTitle = "Cancel",
   onClickButton,
   isVisibleButton = true,
+  isVisibleButtonOutline = true,
 }) => {
   if (!isOpen) return null;
 
   return (
     <Dialog.Root
       open
+      closeOnInteractOutside={true}
       onOpenChange={(d) => {
         if (!d.open) onClose();
       }}
@@ -52,11 +55,13 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
                     {buttonTitle}
                   </Button>
                 </Dialog.CloseTrigger>
-                <Dialog.CloseTrigger asChild>
-                  <ButtonOutline className="w-[48%]" onClick={onClose}>
-                    {buttonOutlineTitle}
-                  </ButtonOutline>
-                </Dialog.CloseTrigger>
+                {isVisibleButtonOutline && (
+                  <Dialog.CloseTrigger asChild>
+                    <ButtonOutline className="w-[48%]" onClick={onClose}>
+                      {buttonOutlineTitle}
+                    </ButtonOutline>
+                  </Dialog.CloseTrigger>
+                )}
               </div>
             )}
           </Dialog.Content>
