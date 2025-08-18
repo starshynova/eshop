@@ -8,6 +8,7 @@ import Welcome from "./components/Welcome";
 import ProductDetails from "./pages/ProductDetails";
 import CartPage from "./pages/CartPage";
 import AccountPage from "./pages/AccountPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -20,6 +21,7 @@ const App: React.FC = () => (
       <Route path="/products/:id" element={<ProductDetails />} />
       <Route path="/cart" element={<CartPage />} />
       <Route path="/users/:userId" element={<AccountPage />} />
+      <Route path="payment/success" element={<PaymentSuccessPage />} />
     </Routes>
   </BrowserRouter>
 );

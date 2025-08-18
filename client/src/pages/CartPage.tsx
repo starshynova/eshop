@@ -3,12 +3,15 @@ import Header from "../components/Header";
 import Loader from "../components/Loader";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { useAuth } from "../context/AuthContext";
-import { API_BASE_URL } from "../config";
+import { API_BASE_URL, STRIPE_PUBLISHABLE_KEY } from "../config";
 import { useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import ButtonSecond from "../components/ButtonSecond";
 import CustomDialog from "../components/CustomDialog";
 import { useCart } from "../context/CartContext";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
+import StripeCheckoutForm from "../components/StripeCheckoutForm";
 
 type CartItem = {
   id: string;
@@ -29,6 +32,8 @@ const CartPage: React.FC = () => {
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { refresh } = useCart();
   const token = localStorage.getItem("token");
+  const stripePromise = loadStripe(`${STRIPE_PUBLISHABLE_KEY}`);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -108,6 +113,30 @@ const CartPage: React.FC = () => {
       console.error(err);
     }
   };
+
+  const handleCheckout = async () => {
+    const total = cartItems.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0,
+    );
+
+    const res = await fetch(`${API_BASE_URL}/payments/create-payment`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ amount: total }),
+    });
+
+    if (!res.ok) {
+      setError("Error during payment initiation");
+      return;
+    }
+    const data = await res.json();
+    setClientSecret(data.clientSecret);
+  };
+
+  {
+    loading && <Loader />;
+  }
 
   {
     error && (
@@ -263,11 +292,17 @@ const CartPage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              <Button
-                children="Checkout"
-                className="mt-8 w-full"
-                onClick={() => navigate("/checkout")}
-              />
+              {clientSecret ? (
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <StripeCheckoutForm />
+                </Elements>
+              ) : (
+                <Button
+                  children="Checkout"
+                  className="mt-8 w-full"
+                  onClick={handleCheckout}
+                />
+              )}
             </div>
           </div>
         )}
