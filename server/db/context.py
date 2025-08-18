@@ -19,3 +19,4 @@ def get_db_cursor():
             cur.close()
         if conn:
             conn.close()
+

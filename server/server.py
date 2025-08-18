@@ -20,7 +20,7 @@ secret_key_session_middleware=os.getenv("SECRET_KEY_SESSION_MIDDLEWARE")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,       # вместо ["*"]
-    allow_credentials=False,     # без куки и авторизации, если не нужно
+    allow_credentials=True,     # без куки и авторизации, если не нужно
     allow_methods=["*"],         # GET, POST, PUT и т. д.
     allow_headers=["*"],         # Content-Type и прочие
 )
@@ -52,4 +52,4 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="127.0.0.1", port=8080, reload=True)
+    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)

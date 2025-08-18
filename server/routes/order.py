@@ -1,75 +1,72 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
 from db.context import get_db_cursor
 from core.auth import get_current_user_id
+import uuid
 
 router = APIRouter(prefix="/orders", tags=["orders"])
 
-class OrderItemIn(BaseModel):
-    item_id: int
-    quantity: int
-
-class CheckoutSuccessRequest(BaseModel):
-    items: list[OrderItemIn]
-
 @router.post("/checkout-success")
-def checkout_success(
-    body: CheckoutSuccessRequest,
-    db = Depends(get_db_cursor),  # <--- здесь ты уже получаешь курсор!
-):
-    # user_id — должен быть вызов функции, а не сама функция!
-    user_id = get_current_user_id()
-
-    if not body.items:
-        raise HTTPException(400, "Order must have at least one item")
-
+def checkout_success(user_id: str = Depends(get_current_user_id)):
+    print("user id for orders:", user_id)
     try:
-        # 1. Создать заказ
-        db.execute(
-            "INSERT INTO orders (user_id, status) VALUES (%s, %s) RETURNING id;",
-            (user_id, "created")
-        )
-        order_id = db.fetchone()[0]
-
-        # 2. Добавить товары в order_item и уменьшить остатки
-        for item in body.items:
-            # Получить цену товара на момент покупки
-            db.execute(
-                "SELECT price FROM items WHERE id = %s;",
-                (item.item_id,)
+        with get_db_cursor() as cur:
+            # 1. Получить корзину пользователя из базы
+            cur.execute(
+                "SELECT item_id, quantity FROM cart_item WHERE user_id = %s;",
+                (user_id,)
             )
-            row = db.fetchone()
-            if not row:
-                raise HTTPException(400, f"Product with id={item.item_id} not found")
-            price_at_purchase = row[0]
+            cart = cur.fetchall()
+            if not cart:
+                raise HTTPException(400, "Ваша корзина пуста!")
 
-            # Вставить в order_item
-            db.execute(
-                """
-                INSERT INTO order_item (order_id, item_id, quantity, price_at_purchase)
-                VALUES (%s, %s, %s, %s);
-                """,
-                (order_id, item.item_id, item.quantity, price_at_purchase)
+            # 2. Создать заказ
+            order_id = str(uuid.uuid4())
+            cur.execute(
+                "INSERT INTO orders (id, user_id, status) VALUES (%s, %s, %s) RETURNING id;",
+                (order_id, user_id, "paid")
             )
-            # Уменьшить остаток товара
-            db.execute(
-                """
-                UPDATE items SET quantity = quantity - %s
-                WHERE id = %s AND quantity >= %s;
-                """,
-                (item.quantity, item.item_id, item.quantity)
+
+            for item_id, quantity in cart:
+                # Получить цену на момент покупки
+                cur.execute(
+                    "SELECT price FROM items WHERE id = %s;",
+                    (item_id,)
+                )
+                row = cur.fetchone()
+                if not row:
+                    raise HTTPException(400, f"Товар id={item_id} не найден")
+                price_at_purchase = row[0]
+
+                # Добавить товар в заказ
+                cur.execute(
+                    """
+                    INSERT INTO order_item (order_id, item_id, quantity, price_at_purchase)
+                    VALUES (%s, %s, %s, %s);
+                    """,
+                    (order_id, item_id, quantity, price_at_purchase)
+                )
+                # Уменьшить остаток товара
+                cur.execute(
+                    """
+                    UPDATE items SET quantity = quantity - %s
+                    WHERE id = %s AND quantity >= %s;
+                    """,
+                    (quantity, item_id, quantity)
+                )
+                if cur.rowcount == 0:
+                    raise HTTPException(400, f"Недостаточно товара id={item_id}")
+
+            # 3. Очистить корзину пользователя
+            cur.execute(
+                "DELETE FROM cart_item WHERE user_id = %s;",
+                (user_id,)
             )
-            if db.rowcount == 0:
-                raise HTTPException(400, f"Not enough product id={item.item_id}")
+            print("Order created, returning to client", order_id)
+            return {"order_id": order_id, "message": "Заказ успешно создан"}
 
-        # Очистить корзину пользователя (если есть таблица cart_items)
-        db.execute(
-            "DELETE FROM cart_items WHERE user_id = %s;",
-            (user_id,)
-        )
-
-        return {"order_id": order_id, "message": "Order successfully created"}
-
+    except HTTPException as e:
+        # HTTPException не заворачиваем заново, просто пробрасываем
+        raise
     except Exception as e:
-        # Не надо делать rollback или close: контекст-менеджер сделает это сам
-        raise HTTPException(400, f"Error when placing an order: {str(e)}")
+        # Все остальные ошибки заворачиваем в HTTPException
+        raise HTTPException(400, f"Ошибка при оформлении заказа: {str(e)}")
