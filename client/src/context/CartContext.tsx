@@ -23,13 +23,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const [count, setCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
+  const token = localStorage.getItem("token");
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated) {
       setCount(0);
       return;
     }
-    const token = localStorage.getItem("token");
+    
     if (!token) {
       setCount(0);
       return;

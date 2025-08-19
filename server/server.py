@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import os
@@ -20,7 +20,7 @@ secret_key_session_middleware=os.getenv("SECRET_KEY_SESSION_MIDDLEWARE")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,       # вместо ["*"]
-    allow_credentials=False,     # без куки и авторизации, если не нужно
+    allow_credentials=True,     # без куки и авторизации, если не нужно
     allow_methods=["*"],         # GET, POST, PUT и т. д.
     allow_headers=["*"],         # Content-Type и прочие
 )
@@ -34,6 +34,7 @@ from routes.img_upload import router as img_upload_router
 from routes.user import router as user_router
 from routes.cart import router as cart_router
 from routes.payment import router as payment_router
+from routes.order import router as order_router
 
 app.include_router(item_router)
 app.include_router(init_qdrant_router)
@@ -42,12 +43,20 @@ app.include_router(img_upload_router)
 app.include_router(user_router)
 app.include_router(cart_router)
 app.include_router(payment_router)
+app.include_router(order_router)
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"📡 Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    return response
 
 
 @app.get("/")
 def read_root():
+    print("✅ FastAPI server started")
     return {"message": "Server is running!"}
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="127.0.0.1", port=8080, reload=True)
+    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)
