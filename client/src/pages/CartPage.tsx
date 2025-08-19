@@ -122,7 +122,11 @@ const CartPage: React.FC = () => {
 
     const res = await fetch(`${API_BASE_URL}/payments/create-payment`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+
       body: JSON.stringify({ amount: total }),
     });
 
@@ -273,7 +277,7 @@ const CartPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="w-[20%] bg-[#ededed] px-8 py-8 flex flex-col justify-between">
+            <div className="w-[20%] bg-[#ededed] px-8 py-8 flex flex-col justify-between overflow-y-auto">
               <div>
                 <div className="border-b-4 border-black">
                   <h2 className="text-xl font-bold mb-8 text-left">

@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import os
@@ -45,9 +45,16 @@ app.include_router(cart_router)
 app.include_router(payment_router)
 app.include_router(order_router)
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    print(f"📡 Incoming request: {request.method} {request.url}")
+    response = await call_next(request)
+    return response
+
 
 @app.get("/")
 def read_root():
+    print("✅ FastAPI server started")
     return {"message": "Server is running!"}
 
 if __name__ == "__main__":
