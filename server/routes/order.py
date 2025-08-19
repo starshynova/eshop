@@ -2,8 +2,24 @@ from fastapi import APIRouter, Depends, HTTPException
 from db.context import get_db_cursor
 from core.auth import get_current_user_id
 import uuid
+from pydantic import BaseModel
+from typing import List, Optional
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+class OrderProduct(BaseModel):
+    id: str
+    title: str
+    main_photo_url: Optional[str]
+    price: float
+    quantity: int
+
+class OrderResponse(BaseModel):
+    id: str
+    created_at: str
+    status: str
+    items: List[OrderProduct]
+    total_price: float
 
 @router.post("/checkout-success")
 def checkout_success(user_id: str = Depends(get_current_user_id)):
@@ -70,3 +86,54 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
     except Exception as e:
         # Все остальные ошибки заворачиваем в HTTPException
         raise HTTPException(400, f"Ошибка при оформлении заказа: {str(e)}")
+
+
+@router.get("/my", response_model=List[OrderResponse])
+def get_my_orders(
+    user_id: str = Depends(get_current_user_id)
+):
+    with get_db_cursor() as cur:
+        cur.execute("""
+                SELECT id, created_at, status
+                FROM orders
+                WHERE user_id = %s
+                ORDER BY created_at DESC
+            """, (user_id,))
+        orders = cur.fetchall()
+        results = []
+
+        for order in orders:
+            order_id, created_at, status = order
+            cur.execute("""
+                    SELECT
+                        oi.item_id AS id,
+                        i.title,
+                        i.main_photo_url,
+                        oi.price_at_purchase AS price,
+                        oi.quantity
+                    FROM order_item oi
+                    JOIN items i ON oi.item_id = i.id
+                    WHERE oi.order_id = %s
+                """, (order_id,))
+            items = cur.fetchall()
+            item_list = []
+            total_price = 0
+
+            for item in items:
+                item_id, title, main_photo_url, price, quantity = item
+                total_price += float(price) * quantity
+                item_list.append(OrderProduct(
+                    id=str(item_id),
+                    title=title,
+                    main_photo_url=main_photo_url,
+                    price=float(price),
+                    quantity=quantity
+                ))
+            results.append(OrderResponse(
+                id=str(order_id),
+                created_at=str(created_at),
+                status=status,
+                items=item_list,
+                total_price=total_price
+            ))
+        return results
