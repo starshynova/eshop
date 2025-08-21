@@ -107,7 +107,7 @@ const AccountPage: React.FC = () => {
                 </Tabs.Trigger>
                 <Tabs.Trigger
                   value="orders"
-                  className="self-start h-8 bg-transparent text-[#000000] text-xl pb-5 justify-center  
+                  className="self-start h-8 bg-transparent text-[#000000] text-xl px-5 justify-center  
                   border-b-2 border-b-transparent hover:text-[#505050] transition-colors data-[selected]:border-b-[#000000]"
                 >
                   Orders
@@ -115,7 +115,7 @@ const AccountPage: React.FC = () => {
               </Tabs.List>
             </Tabs.Root>
           </div>
-          <div className="w-full flex flex-row justify-between p-4">
+          <div className="w-full flex flex-row justify-between p-8">
             {active === "profile" && <UserInfoPanel userId={userId ?? ""} />}
             {active === "orders" && <UserOrdersPanel />}
           </div>
