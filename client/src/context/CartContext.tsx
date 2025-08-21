@@ -30,7 +30,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
       setCount(0);
       return;
     }
-    
+
     if (!token) {
       setCount(0);
       return;
