@@ -185,7 +185,7 @@ const Header: React.FC = () => {
           <div className="w-[30%] flex flex-row gap-8 items-center justify-end">
             {role === "admin" && (
               <ButtonSecond
-                onClick={() => console.log("Admin page")}
+                onClick={() => navigate("/admin/dashboard")}
                 children="dashboard"
               />
             )}
