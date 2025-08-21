@@ -38,16 +38,12 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   });
 
   const isGoogleAccount = userData?.is_google_account ?? false;
-
   const { logout } = useAuth();
-
   const token = localStorage.getItem("token");
-
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!userId) return;
-
     const ac = new AbortController();
     const run = async () => {
       try {
@@ -169,7 +165,7 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
       return;
     }
     if (passwords.new_password.length < 8) {
-      setPasswordError("Минимум 8 символов");
+      setPasswordError("Minimum 8 characters");
       return;
     }
     try {
@@ -241,93 +237,25 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
 
   return (
     <div className="flex flex-col gap-12 w-full">
-      <div className="flex flex-row justify-between ">
-        <div className="flex flex-col gap-4 w-[49%] border-2 border-gray-300 p-8 rounded-sm">
-          <div className="flex flex-row gap-4">
-            <Input
-              label="First Name"
-              type="text"
-              value={form.first_name}
-              disabled={!editMode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, first_name: e.target.value }))
-              }
-            />
-            <Input
-              label="Last Name"
-              type="text"
-              value={form.last_name}
-              disabled={!editMode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, last_name: e.target.value }))
-              }
-            />
-          </div>
-          <Input
-            label="E-mail"
-            type="email"
-            value={form.email}
-            disabled={!editMode}
-            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-          />
-          <div className="flex flex-row gap-4">
-            <Input
-              label="Address Line 1"
-              type="text"
-              value={form.address_line1}
-              disabled={!editMode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, address_line1: e.target.value }))
-              }
-            />
-            <Input
-              label="Address Line 2"
-              type="text"
-              value={form.address_line2}
-              disabled={!editMode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, address_line2: e.target.value }))
-              }
-            />
-          </div>
-          <div className="flex flex-row gap-4">
-            <Input
-              label="Post Code"
-              type="text"
-              value={form.post_code}
-              disabled={!editMode}
-              onChange={(e) =>
-                setForm((f) => ({ ...f, post_code: e.target.value }))
-              }
-            />
-            <Input
-              label="City"
-              type="text"
-              value={form.city}
-              disabled={!editMode}
-              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
-            />
-          </div>
-          <ButtonOutline className="w-full mt-4" onClick={handleEditProfile}>
-            {editMode ? "Save changes" : "Edit profile"}
-          </ButtonOutline>
-        </div>
-        <div className="flex flex-row gap-4 h-fit w-[49%] border-2 border-gray-300 p-8 rounded-sm">
+      <div className="flex flex-row justify-between w-full">
+        <div className="flex flex-col gap-4 w-[49%] border-2 border-gray-300 p-8 rounded-sm h-fit bg-white">
+          <h2 className="text-2xl font-bold mb-4">Account details</h2>
+          <Input label="E-mail" type="email" value={form.email} />
           {!editPasswordMode ? (
             isGoogleAccount ? (
               <ButtonOutline
-                className=" w-full"
+                className="w-full"
                 onClick={() => setEditPasswordMode(true)}
               >
                 Set password
               </ButtonOutline>
             ) : (
-              <>
+              <div className="flex flex-row gap-4 w-full">
                 <Input
                   label="Password"
                   type="password"
                   value="********"
-                  className="w-[60%]"
+                  className="w-flex-1"
                   disabled
                 />
                 <ButtonOutline
@@ -336,7 +264,7 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
                 >
                   Change password
                 </ButtonOutline>
-              </>
+              </div>
             )
           ) : isGoogleAccount ? (
             <form
@@ -477,13 +405,80 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
               </div>
             </form>
           )}
+
+          <ButtonOutline
+            children="delete account"
+            className="w-fit mt-4"
+            onClick={() => setIsDeleteAccountDialogOpen(true)}
+          />
+        </div>
+
+        <div className="flex flex-col gap-4 w-[49%] border-2 border-gray-300 p-8 rounded-sm bg-white h-fit">
+          <h2 className="text-2xl font-bold mb-4">Delivery information</h2>
+          <div className="flex flex-row gap-4">
+            <Input
+              label="First Name"
+              type="text"
+              value={form.first_name}
+              disabled={!editMode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, first_name: e.target.value }))
+              }
+            />
+            <Input
+              label="Last Name"
+              type="text"
+              value={form.last_name}
+              disabled={!editMode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, last_name: e.target.value }))
+              }
+            />
+          </div>
+          <div className="flex flex-row gap-4">
+            <Input
+              label="Address Line 1"
+              type="text"
+              value={form.address_line1}
+              disabled={!editMode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, address_line1: e.target.value }))
+              }
+            />
+            <Input
+              label="Address Line 2"
+              type="text"
+              value={form.address_line2}
+              disabled={!editMode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, address_line2: e.target.value }))
+              }
+            />
+          </div>
+          <div className="flex flex-row gap-4">
+            <Input
+              label="Post Code"
+              type="text"
+              value={form.post_code}
+              disabled={!editMode}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, post_code: e.target.value }))
+              }
+            />
+            <Input
+              label="City"
+              type="text"
+              value={form.city}
+              disabled={!editMode}
+              onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))}
+            />
+          </div>
+          <ButtonOutline className="w-full mt-4" onClick={handleEditProfile}>
+            {editMode ? "Save changes" : "Edit delivery information"}
+          </ButtonOutline>
         </div>
       </div>
-      <ButtonOutline
-        children="delete account"
-        className="w-fit"
-        onClick={() => setIsDeleteAccountDialogOpen(true)}
-      />
+
       <CustomDialog
         isOpen={isPasswordDialogOpen}
         onClose={() => setIsPasswordDialogOpen(false)}
