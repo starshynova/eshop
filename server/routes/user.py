@@ -257,22 +257,22 @@ async def google_auth_callback(request: Request):
     return RedirectResponse(f"http://localhost:5173/welcome?token={access_token}")
 
 
-@router.get("/all_users")
+@router.get("/all-users")
 def list_users():
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                SELECT id, role, email, first_name, last_name, address_line1, address_line2, post_code, city
+                SELECT id, role, email, first_name, last_name, address_line1, address_line2, post_code, city, created_date
                 FROM users;
             """)
             rows = cur.fetchall()
-
         return [serialize_user(r) for r in rows]
-
     except Exception as e:
-        # логируем e
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail="Failed to get users")
+        print("Error in list_users:", e)  # Для отладки!
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to get users"
+        )
 
 
 @router.get("/{user_id}")
