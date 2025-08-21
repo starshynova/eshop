@@ -12,7 +12,7 @@ const PaymentSuccessPage: React.FC = () => {
       isVisibleButtonOutline={false}
       buttonTitle="go to the main page"
       onClickButton={() => navigate("/")}
-    />  
+    />
   );
 };
 export default PaymentSuccessPage;
