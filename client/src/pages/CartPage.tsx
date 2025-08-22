@@ -138,8 +138,8 @@ const CartPage: React.FC = () => {
     setClientSecret(data.clientSecret);
   };
 
-  {
-    loading && <Loader />;
+  if (loading) {
+    return <Loader />;
   }
 
   {
