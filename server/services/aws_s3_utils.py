@@ -1,6 +1,4 @@
 import boto3
-from botocore.exceptions import ClientError
-from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 from pathlib import Path
