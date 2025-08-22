@@ -270,7 +270,7 @@ const AdminUsersPanel: React.FC = () => {
                   setSelectedUser(null);
                   setEditMode(false);
                 }}
-                children="close"
+                children="back"
               />
             </div>
           </div>
@@ -399,7 +399,7 @@ const AdminUsersPanel: React.FC = () => {
                   setSelectedUser(null);
                   setEditMode(false);
                 }}
-                children="close"
+                children="close without changes"
               />
 
               <ButtonOutline

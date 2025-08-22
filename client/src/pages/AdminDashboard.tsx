@@ -4,6 +4,7 @@ import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { Tabs } from "@ark-ui/react/tabs";
 import CustomDialog from "../components/CustomDialog";
 import AdminUsersPanel from "../components/AdminUsersPanel";
+import AdminProductsPanel from "../components/AdminProductsPanel";
 
 type TabKey = "users" | "products" | "orderAnalytics";
 

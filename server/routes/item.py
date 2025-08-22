@@ -13,7 +13,7 @@ def get_products(
     try:
         with get_db_cursor() as cur:
             base_query = """
-                SELECT i.id, i.title, i.price, i.description, i.main_photo_url
+                SELECT i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity
                 FROM items i
             """
             joins = []
@@ -59,7 +59,8 @@ def get_products(
                 "title": row[1],
                 "price": float(row[2]),
                 "description": row[3],
-                "main_photo_url": row[4]
+                "main_photo_url": row[4],
+                "quantity": row[5]
             }
             for row in rows
         ]
@@ -67,6 +68,71 @@ def get_products(
         print(f"Error receiving products: {e}")
         return {"error": str(e)}
 
+
+@router.get("/all-products")
+def get_products(
+    category_name: str = None,
+    subcategory_name: str = None,
+):
+    try:
+        with get_db_cursor() as cur:
+            base_query = """
+                SELECT
+                    i.id,
+                    i.title,
+                    i.price,
+                    i.description,
+                    i.main_photo_url,
+                    i.quantity,
+                    c.id AS category_id,
+                    c.category_name,
+                    sc.id AS subcategory_id,
+                    sc.subcategory_name
+                FROM items i
+                LEFT JOIN item_category ic ON i.id = ic.item_id
+                LEFT JOIN category c ON ic.category_id = c.id
+                LEFT JOIN item_subcategory isc ON i.id = isc.item_id
+                LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
+            """
+
+            filters = []
+            values = []
+
+            if subcategory_name:
+                filters.append("sc.subcategory_name = %s")
+                values.append(subcategory_name)
+            elif category_name:
+                filters.append("c.category_name = %s")
+                values.append(category_name)
+
+            if filters:
+                base_query += " WHERE " + " AND ".join(filters)
+
+            cur.execute(base_query, tuple(values))
+            rows = cur.fetchall()
+
+        return [
+            {
+                "id": row[0],
+                "title": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "main_photo_url": row[4],
+                "quantity": row[5],
+                "category": {
+                    "id": row[6],
+                    "name": row[7]
+                } if row[6] else None,
+                "subcategory": {
+                    "id": row[8],
+                    "name": row[9]
+                } if row[8] else None,
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        print(f"Error receiving products: {e}")
+        return {"error": str(e)}
 
 
 @router.get("/search")
@@ -165,3 +231,5 @@ def get_product_by_id(item_id: str):
     except Exception as e:
         print(f"❌ Error getting product by id: {e}")
         return {"error": str(e)}
+
+
