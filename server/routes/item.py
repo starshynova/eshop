@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Body, HTTPException
 from db.context import get_db_cursor
 from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 
@@ -13,7 +13,7 @@ def get_products(
     try:
         with get_db_cursor() as cur:
             base_query = """
-                SELECT i.id, i.title, i.price, i.description, i.main_photo_url
+                SELECT i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity
                 FROM items i
             """
             joins = []
@@ -59,7 +59,8 @@ def get_products(
                 "title": row[1],
                 "price": float(row[2]),
                 "description": row[3],
-                "main_photo_url": row[4]
+                "main_photo_url": row[4],
+                "quantity": row[5]
             }
             for row in rows
         ]
@@ -67,6 +68,71 @@ def get_products(
         print(f"Error receiving products: {e}")
         return {"error": str(e)}
 
+
+@router.get("/all-products")
+def get_products(
+    category_name: str = None,
+    subcategory_name: str = None,
+):
+    try:
+        with get_db_cursor() as cur:
+            base_query = """
+                SELECT
+                    i.id,
+                    i.title,
+                    i.price,
+                    i.description,
+                    i.main_photo_url,
+                    i.quantity,
+                    c.id AS category_id,
+                    c.category_name,
+                    sc.id AS subcategory_id,
+                    sc.subcategory_name
+                FROM items i
+                LEFT JOIN item_category ic ON i.id = ic.item_id
+                LEFT JOIN category c ON ic.category_id = c.id
+                LEFT JOIN item_subcategory isc ON i.id = isc.item_id
+                LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
+            """
+
+            filters = []
+            values = []
+
+            if subcategory_name:
+                filters.append("sc.subcategory_name = %s")
+                values.append(subcategory_name)
+            elif category_name:
+                filters.append("c.category_name = %s")
+                values.append(category_name)
+
+            if filters:
+                base_query += " WHERE " + " AND ".join(filters)
+
+            cur.execute(base_query, tuple(values))
+            rows = cur.fetchall()
+
+        return [
+            {
+                "id": row[0],
+                "title": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "main_photo_url": row[4],
+                "quantity": row[5],
+                "category": {
+                    "id": row[6],
+                    "name": row[7]
+                } if row[6] else None,
+                "subcategory": {
+                    "id": row[8],
+                    "name": row[9]
+                } if row[8] else None,
+            }
+            for row in rows
+        ]
+    except Exception as e:
+        print(f"Error receiving products: {e}")
+        return {"error": str(e)}
 
 
 @router.get("/search")
@@ -165,3 +231,107 @@ def get_product_by_id(item_id: str):
     except Exception as e:
         print(f"❌ Error getting product by id: {e}")
         return {"error": str(e)}
+
+
+@router.patch("/{item_id}")
+def update_product_details(
+        item_id: str,
+        data: dict = Body(...)
+):
+    try:
+        with get_db_cursor() as cur:
+            # Проверим что продукт существует
+            cur.execute("SELECT id FROM items WHERE id = %s;", (item_id,))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail=f"Product with id {item_id} not found")
+
+            # Обновим основные поля
+            update_fields = []
+            values = []
+
+            allowed_fields = ["title", "description", "price", "quantity",  "main_photo_url"]
+            if "photo" in data:
+                data["main_photo_url"] = data["photo"]
+            for key in allowed_fields:
+                if key in data:
+                    update_fields.append(f"{key} = %s")
+                    values.append(data[key])
+
+            if update_fields:
+                cur.execute(
+                    f"""
+                        UPDATE items
+                        SET {", ".join(update_fields)}
+                        WHERE id = %s
+                        """,
+                    tuple(values + [item_id])
+                )
+
+            # Обновим category (item_category)
+            if "category_id" in data:
+                cur.execute("DELETE FROM item_category WHERE item_id = %s", (item_id,))
+                cur.execute("INSERT INTO item_category (item_id, category_id) VALUES (%s, %s)",
+                            (item_id, data["category_id"]))
+
+            # Обновим subcategory (item_subcategory)
+            if "subcategory_id" in data:
+                cur.execute("DELETE FROM item_subcategory WHERE item_id = %s", (item_id,))
+                cur.execute("INSERT INTO item_subcategory (item_id, subcategory_id) VALUES (%s, %s)",
+                            (item_id, data["subcategory_id"]))
+
+            # Получим обновлённый продукт с категориями
+            cur.execute("""
+                    SELECT
+                        i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity,
+                        c.id as category_id, c.category_name,
+                        sc.id as subcategory_id, sc.subcategory_name
+                    FROM items i
+                    LEFT JOIN item_category ic ON i.id = ic.item_id
+                    LEFT JOIN category c ON ic.category_id = c.id
+                    LEFT JOIN item_subcategory isc ON i.id = isc.item_id
+                    LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
+                    WHERE i.id = %s
+                """, (item_id,))
+            row = cur.fetchone()
+
+        if row:
+            return {
+                "id": row[0],
+                "title": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "main_photo_url": row[4],
+                "quantity": row[5],
+                "category": {
+                    "id": row[6],
+                    "name": row[7]
+                } if row[6] else None,
+                "subcategory": {
+                    "id": row[8],
+                    "name": row[9]
+                } if row[8] else None,
+            }
+        else:
+            raise HTTPException(status_code=404, detail=f"Product with id {item_id} not found")
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"❌ Error updating product: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.delete("/{item_id}")
+def delete_product(item_id: str):
+
+    try:
+        with get_db_cursor() as cur:
+            cur.execute("SELECT 1 FROM items WHERE id = %s", (item_id,))
+            if not cur.fetchone():
+                raise HTTPException(status_code=404, detail="Product not found.")
+            cur.execute("DELETE FROM items WHERE id = %s", (item_id,))
+        return {"detail": "Product deleted successfully."}
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Failed to delete user")
