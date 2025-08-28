@@ -3,7 +3,6 @@ from pydantic import BaseModel, EmailStr, constr
 import uuid
 from datetime import datetime, timezone, timedelta
 from passlib.context import CryptContext
-from jose import JWTError, jwt as jose_jwt
 
 from db.context import get_db_cursor
 from authlib.integrations.starlette_client import OAuth
@@ -11,8 +10,6 @@ from starlette.requests import Request
 from starlette.responses import RedirectResponse
 
 import os
-from dotenv import load_dotenv
-from pathlib import Path
 from core.auth import create_access_token_for_user
 from core.auth import get_current_user
 
