@@ -4,8 +4,10 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 app = FastAPI()
+app.add_middleware(ProxyHeadersMiddleware)
 
 origins = [
     "http://localhost:5173",
@@ -19,7 +21,7 @@ secret_key_session_middleware=os.getenv("SECRET_KEY_SESSION_MIDDLEWARE")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       # вместо ["*"]
+    allow_origins=["*"],       # вместо ["*"]
     allow_credentials=True,     # без куки и авторизации, если не нужно
     allow_methods=["*"],         # GET, POST, PUT и т. д.
     allow_headers=["*"],         # Content-Type и прочие
