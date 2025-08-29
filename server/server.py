@@ -4,10 +4,10 @@ from starlette.middleware.sessions import SessionMiddleware
 import os
 from dotenv import load_dotenv
 from pathlib import Path
-from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
+# from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
 app = FastAPI()
-app.add_middleware(ProxyHeadersMiddleware)
+# app.add_middleware(ProxyHeadersMiddleware)
 
 origins = [
     "http://localhost:5173",
