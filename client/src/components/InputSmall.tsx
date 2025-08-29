@@ -2,7 +2,6 @@ import React, { useId } from "react";
 import { Field } from "@ark-ui/react";
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  //   label: string;
   error?: boolean;
   errorText?: string;
   helperText?: string;
@@ -27,13 +26,6 @@ const InputSmall: React.FC<InputProps> = ({
       className={`relative w-full mb-5 ${containerClassName}`}
       invalid={error}
     >
-      {/* <Field.Label
-        htmlFor={inputId}
-        className="absolute -top-2 left-3 px-1 text-sm text-black bg-white"
-      >
-        {label}
-      </Field.Label> */}
-
       <Field.Input
         id={inputId}
         className={`w-full h-10 text-sm rounded-sm px-3 items-center pb-1 border-[1px] focus:outline-none

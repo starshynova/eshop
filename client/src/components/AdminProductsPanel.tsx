@@ -1,23 +1,13 @@
 import React, { useState, useEffect } from "react";
 import CustomDialog from "./CustomDialog";
-import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../config";
 import type { ProductDetails } from "../types/ProductDetails";
 import type { Category } from "../types/CategorySubcategory";
 import InputSmall from "./InputSmall";
+import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
 
-// Примерная структура ProductDetails, поправь если поля другие:
-// interface ProductDetails {
-//   id: string;
-//   title: string;
-//   description: string;
-//   price: number;
-//   availableQuantity: number;
-//   category: string;
-//   // добавь свои поля по необходимости
-// }
 
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
@@ -36,15 +26,6 @@ const AdminProductsPanel: React.FC = () => {
     category: "",
     subcategory: "",
   });
-  const [addForm, setAddForm] = useState({
-    title: "",
-    photo: "",
-    description: "",
-    price: "",
-    quantity: "",
-    category: "",
-    subcategory: "",
-  });
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [successDeleteDialogOpen, setSuccessDeleteDialogOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -52,6 +33,9 @@ const AdminProductsPanel: React.FC = () => {
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [addProductMode, setAddProductMode] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+
 
 
   const token = localStorage.getItem("token");
@@ -227,33 +211,69 @@ const AdminProductsPanel: React.FC = () => {
 //         }
 //     }
 
-const handleChangePhotoButton = async () => {
-  if (!file) {
-    setError("Выберите файл для загрузки");
-    return;
-  }
-  try {
-    const formData = new FormData();
-    formData.append("file", file);
+// const handleChangePhotoButton = async () => {
+//   if (!file) {
+//     setError("Select a file to upload");
+//     return;
+//   }
+//   try {
+//     const formData = new FormData();
+//     formData.append("file", file);
 
-    const response = await fetch(`${API_BASE_URL}/upload-image`, {
-      method: "POST",
-      body: formData,
-    });
+//     const response = await fetch(`${API_BASE_URL}/upload-image`, {
+//       method: "POST",
+//       body: formData,
+//     });
 
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.detail || "Failed to upload image");
+//     if (!response.ok) {
+//       const data = await response.json();
+//       throw new Error(data.detail || "Failed to upload image");
+//     }
+//     const data = await response.json();
+//     console.log("image data:", data);
+
+//     // Установить ссылку на фото в форму
+//     setForm(f => ({ ...f, main_photo_url: data.image_url }));
+//   } catch (err) {
+//     setError(err instanceof Error ? err.message : "An error occurred");
+//   }
+// };
+
+ const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) {
+      // setFile(null);
+      setUploadedFileName("");
+      return;
     }
-    const data = await response.json();
-    console.log("image data:", data);
+    const selectedFile = files[0];
+    // setFile(selectedFile);
+    setIsUploading(true);
 
-    // Установить ссылку на фото в форму
-    setForm(f => ({ ...f, main_photo_url: data.image_url }));
-  } catch (err) {
-    setError(err instanceof Error ? err.message : "An error occurred");
-  }
-};
+    try {
+      const formData = new FormData();
+      formData.append("file", selectedFile);
+
+      const response = await fetch(`${API_BASE_URL}/upload-image`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.detail || "Failed to upload image");
+      }
+      const data = await response.json();
+      setForm((f) => ({ ...f, main_photo_url: data.image_url }));
+      setUploadedFileName(selectedFile.name);
+      setError("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+      setUploadedFileName("");
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   
 
@@ -413,8 +433,8 @@ const handleChangePhotoButton = async () => {
             <table className="min-w-full border border-gray-300">
               <tbody>
                 <tr>
-                  <th className="text-left px-4 py-3 w-1/5">Title</th>
-                  <td>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Title</th>
+                  <td className="align-middle pt-3 px-4">
                     <InputSmall
                       type="text"
                       value={form.title}
@@ -425,28 +445,36 @@ const handleChangePhotoButton = async () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="text-left px-4 py-3 w-1/5">Photo</th>
-                  <td>
-                    <InputSmall
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Photo</th>
+                  <td className="align-middle pt-1 px-4">
+                    {/* <InputSmall
                       type="file"
-                    //   value={form.main_photo_url}
-                      onChange={e => {
-                        const files = e.target.files;
-                        if (files && files.length > 0) {
-                          setFile(files[0]);
-                        } else {
-                          setFile(null);
-                        }
-                      }}
+                      // type="text"
+                      // value={form.main_photo_url}
+                      onChange={handleFileChange}
+                    />
+                    <div className="text-xs mb-1 min-h-[1.5em]">
+                      {isUploading && "Uploading..."}
+                      {!isUploading && uploadedFileName && (
+                        <span>Uploaded: <b>{uploadedFileName}</b></span>
+                     )}
+                    </div> */}
+                    <InputFile
+                      accept="image/*"
+                      onChange={handleFileChange} 
+                      fileName={uploadedFileName}
+                      isUploading={isUploading}
+                      error={!!error}
+                      errorText={error ?? undefined}
                     />
                   </td>
-                  <td><ButtonOutline 
+                  {/* <td><ButtonOutline 
                     children="upload new photo"
-                    onClick={handleChangePhotoButton}/></td>
+                    onClick={handleChangePhotoButton}/></td> */}
                 </tr>
                 <tr>
-                  <th className="text-left px-4 py-3">Description</th>
-                  <td>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Description</th>
+                  <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="text"
                       value={form.description}
@@ -457,8 +485,8 @@ const handleChangePhotoButton = async () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="text-left px-4 py-3">Price</th>
-                  <td>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Price</th>
+                  <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="number"
                       value={form.price}
@@ -469,8 +497,8 @@ const handleChangePhotoButton = async () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="text-left px-4 py-3">Available Quantity</th>
-                  <td>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Available Quantity</th>
+                  <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="number"
                       value={form.quantity}
@@ -481,8 +509,8 @@ const handleChangePhotoButton = async () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="text-left px-4 py-3">Category</th>
-                  <td>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Category</th>
+                  <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="text"
                       value={form.category}
@@ -492,6 +520,20 @@ const handleChangePhotoButton = async () => {
                     />
                   </td>
                 </tr>
+               {/* {form.subcategory && ( */}
+                <tr>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">Subcategory</th>
+                  <td className="align-middle pt-1 px-4">
+                    <InputSmall
+                      type="text"
+                      value={form.subcategory}
+                      onChange={(e) =>
+                        setForm((f) => ({ ...f, subcategory: e.target.value }))
+                      }
+                    />
+                  </td>
+                </tr>
+                {/* )} */}
               </tbody>
             </table>
             <div className="flex flex-row gap-4 col-span-2">
