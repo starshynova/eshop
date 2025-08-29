@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Body, HTTPException
 from db.context import get_db_cursor
-from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
+# from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 
 router = APIRouter(prefix="/products", tags=["products"])
 
@@ -158,24 +158,24 @@ def search_products(
         print(f"Error receiving products in search: {e}")
         return {"error": str(e)}
 
-@router.post("/init-image-vectors")
-def init_image_vectors():
-    try:
-        with get_db_cursor() as cur:
-                cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
-                rows = cur.fetchall()
+# @router.post("/init-image-vectors")
+# def init_image_vectors():
+#     try:
+#         with get_db_cursor() as cur:
+#                 cur.execute("SELECT id, title, price, description, main_photo_url FROM items;")
+#                 rows = cur.fetchall()
 
-        products = [
-            {"id": row[0], "title": row[1], "price": float(row[2]), "description": row[3], "main_photo_url": row[4]}
-            for row in rows
-        ]
+#         products = [
+#             {"id": row[0], "title": row[1], "price": float(row[2]), "description": row[3], "main_photo_url": row[4]}
+#             for row in rows
+#         ]
 
-        init_image_collection()
-        add_products_with_image_vectors(products)
+#         init_image_collection()
+#         add_products_with_image_vectors(products)
 
-        return {"message": "Products added to Qdrant with image vectors!"}
-    except Exception as e:
-        return {"error": str(e)}
+#         return {"message": "Products added to Qdrant with image vectors!"}
+#     except Exception as e:
+#         return {"error": str(e)}
 
 
 @router.get("/categories")
