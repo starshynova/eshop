@@ -8,7 +8,6 @@ import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
 
-
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<ProductDetails | null>(
@@ -35,8 +34,6 @@ const AdminProductsPanel: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
-
-
 
   const token = localStorage.getItem("token");
   //   const navigate = useNavigate();
@@ -196,50 +193,50 @@ const AdminProductsPanel: React.FC = () => {
     }
   };
 
-//   const handleChangePhotoButton = async () => {
-   
-//         try {
-//         const response = await fetch(`${API_BASE_URL}/upload-image`);
-//          if (!response.ok) {
-//           const data = await response.json();
-//           throw new Error(data.detail || "Failed to update product");
-//         }
-//         const data = await response.json();
-//         console.log("image data:", data)
-//         } catch (err) {
-//             setError(err instanceof Error ? err.message : "An error occurred")
-//         }
-//     }
+  //   const handleChangePhotoButton = async () => {
 
-// const handleChangePhotoButton = async () => {
-//   if (!file) {
-//     setError("Select a file to upload");
-//     return;
-//   }
-//   try {
-//     const formData = new FormData();
-//     formData.append("file", file);
+  //         try {
+  //         const response = await fetch(`${API_BASE_URL}/upload-image`);
+  //          if (!response.ok) {
+  //           const data = await response.json();
+  //           throw new Error(data.detail || "Failed to update product");
+  //         }
+  //         const data = await response.json();
+  //         console.log("image data:", data)
+  //         } catch (err) {
+  //             setError(err instanceof Error ? err.message : "An error occurred")
+  //         }
+  //     }
 
-//     const response = await fetch(`${API_BASE_URL}/upload-image`, {
-//       method: "POST",
-//       body: formData,
-//     });
+  // const handleChangePhotoButton = async () => {
+  //   if (!file) {
+  //     setError("Select a file to upload");
+  //     return;
+  //   }
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("file", file);
 
-//     if (!response.ok) {
-//       const data = await response.json();
-//       throw new Error(data.detail || "Failed to upload image");
-//     }
-//     const data = await response.json();
-//     console.log("image data:", data);
+  //     const response = await fetch(`${API_BASE_URL}/upload-image`, {
+  //       method: "POST",
+  //       body: formData,
+  //     });
 
-//     // Установить ссылку на фото в форму
-//     setForm(f => ({ ...f, main_photo_url: data.image_url }));
-//   } catch (err) {
-//     setError(err instanceof Error ? err.message : "An error occurred");
-//   }
-// };
+  //     if (!response.ok) {
+  //       const data = await response.json();
+  //       throw new Error(data.detail || "Failed to upload image");
+  //     }
+  //     const data = await response.json();
+  //     console.log("image data:", data);
 
- const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //     // Установить ссылку на фото в форму
+  //     setForm(f => ({ ...f, main_photo_url: data.image_url }));
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : "An error occurred");
+  //   }
+  // };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
       // setFile(null);
@@ -275,24 +272,22 @@ const AdminProductsPanel: React.FC = () => {
     }
   };
 
-  
-
   if (loading) return <Loader />;
 
   return (
     <div className="p-4 w-full">
       {!addProductMode && !selectedProduct && products && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-            <div className="flex flex-row w-full justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold uppercase">products list</h2>
-          <ButtonOutline
-            className="mb-4"
-            children="Add new product"
-            onClick={() => {
-    setAddProductMode(true);
-  }}
+          <div className="flex flex-row w-full justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold uppercase">products list</h2>
+            <ButtonOutline
+              className="mb-4"
+              children="Add new product"
+              onClick={() => {
+                setAddProductMode(true);
+              }}
             />
-            </div>
+          </div>
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-300">
               <thead className="bg-gray-100">
@@ -370,8 +365,12 @@ const AdminProductsPanel: React.FC = () => {
                 <tr>
                   <th className="text-left px-4 py-3">Photo</th>
                   <td className="px-4 py-3">
-                    
-                    <img src={selectedProduct.main_photo_url} alt={selectedProduct.title} className="h-48" /></td>
+                    <img
+                      src={selectedProduct.main_photo_url}
+                      alt={selectedProduct.title}
+                      className="h-48"
+                    />
+                  </td>
                 </tr>
                 <tr>
                   <th className="text-left px-4 py-3">Description</th>
@@ -433,7 +432,9 @@ const AdminProductsPanel: React.FC = () => {
             <table className="min-w-full border border-gray-300">
               <tbody>
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Title</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Title
+                  </th>
                   <td className="align-middle pt-3 px-4">
                     <InputSmall
                       type="text"
@@ -445,7 +446,9 @@ const AdminProductsPanel: React.FC = () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Photo</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Photo
+                  </th>
                   <td className="align-middle pt-1 px-4">
                     {/* <InputSmall
                       type="file"
@@ -461,7 +464,7 @@ const AdminProductsPanel: React.FC = () => {
                     </div> */}
                     <InputFile
                       accept="image/*"
-                      onChange={handleFileChange} 
+                      onChange={handleFileChange}
                       fileName={uploadedFileName}
                       isUploading={isUploading}
                       error={!!error}
@@ -473,7 +476,9 @@ const AdminProductsPanel: React.FC = () => {
                     onClick={handleChangePhotoButton}/></td> */}
                 </tr>
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Description</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Description
+                  </th>
                   <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="text"
@@ -485,7 +490,9 @@ const AdminProductsPanel: React.FC = () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Price</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Price
+                  </th>
                   <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="number"
@@ -497,7 +504,9 @@ const AdminProductsPanel: React.FC = () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Available Quantity</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Available Quantity
+                  </th>
                   <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="number"
@@ -509,7 +518,9 @@ const AdminProductsPanel: React.FC = () => {
                   </td>
                 </tr>
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Category</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Category
+                  </th>
                   <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="text"
@@ -520,9 +531,11 @@ const AdminProductsPanel: React.FC = () => {
                     />
                   </td>
                 </tr>
-               {/* {form.subcategory && ( */}
+                {/* {form.subcategory && ( */}
                 <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">Subcategory</th>
+                  <th className="align-middle text-left px-4 py-3 w-1/5">
+                    Subcategory
+                  </th>
                   <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="text"
@@ -557,74 +570,71 @@ const AdminProductsPanel: React.FC = () => {
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
           <h2 className="text-2xl font-bold mb-4 uppercase">add product</h2>
           <table className="min-w-full border border-gray-300">
-              <tbody>
-                <tr>
-                  <th className="text-left px-4 py-3 w-1/5">Title</th>
-                  <td>
-                    <InputSmall
-                      type="text"
-                      value={form.title}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, title: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Description</th>
-                  <td>
-                    <InputSmall
-                      type="text"
-                      value={form.description}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, description: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Price</th>
-                  <td>
-                    <InputSmall
-                      type="number"
-                      value={form.price}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, price: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Available Quantity</th>
-                  <td>
-                    <InputSmall
-                      type="number"
-                      value={form.quantity}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, quantity: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Category</th>
-                  <td>
-                    <InputSmall
-                      type="text"
-                      value={form.category}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, category: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            </div>
-            )
-      
-
-      }
+            <tbody>
+              <tr>
+                <th className="text-left px-4 py-3 w-1/5">Title</th>
+                <td>
+                  <InputSmall
+                    type="text"
+                    value={form.title}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, title: e.target.value }))
+                    }
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Description</th>
+                <td>
+                  <InputSmall
+                    type="text"
+                    value={form.description}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, description: e.target.value }))
+                    }
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Price</th>
+                <td>
+                  <InputSmall
+                    type="number"
+                    value={form.price}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, price: e.target.value }))
+                    }
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Available Quantity</th>
+                <td>
+                  <InputSmall
+                    type="number"
+                    value={form.quantity}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, quantity: e.target.value }))
+                    }
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Category</th>
+                <td>
+                  <InputSmall
+                    type="text"
+                    value={form.category}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, category: e.target.value }))
+                    }
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
       {error && (
         <CustomDialog
           isOpen={true}
