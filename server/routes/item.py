@@ -13,7 +13,7 @@ def get_products(
     try:
         with get_db_cursor() as cur:
             base_query = """
-                SELECT i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity
+                SELECT i.id, i.title, i.price, i.description, i.main_photo_url, i.stock
                 FROM items i
             """
             joins = []
@@ -60,7 +60,7 @@ def get_products(
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5]
+                "stock": row[5]
             }
             for row in rows
         ]
@@ -83,7 +83,7 @@ def get_products(
                     i.price,
                     i.description,
                     i.main_photo_url,
-                    i.quantity,
+                    i.stock,
                     c.id AS category_id,
                     c.category_name,
                     sc.id AS subcategory_id,
@@ -118,7 +118,7 @@ def get_products(
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5],
+                "stock": row[5],
                 "category": {
                     "id": row[6],
                     "name": row[7]
@@ -211,7 +211,7 @@ def get_product_by_id(item_id: str):
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                SELECT id, title, price, description, main_photo_url, quantity
+                SELECT id, title, price, description, main_photo_url, stock
                 FROM items
                 WHERE id = %s;
             """, (item_id,))
@@ -224,7 +224,7 @@ def get_product_by_id(item_id: str):
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5]
+                "stock": row[5]
             }
         else:
             return {"error": f"Product with id {item_id} not found"}
@@ -249,7 +249,7 @@ def update_product_details(
             update_fields = []
             values = []
 
-            allowed_fields = ["title", "description", "price", "quantity",  "main_photo_url"]
+            allowed_fields = ["title", "description", "price", "stock",  "main_photo_url"]
             if "photo" in data:
                 data["main_photo_url"] = data["photo"]
             for key in allowed_fields:
@@ -282,7 +282,7 @@ def update_product_details(
             # Получим обновлённый продукт с категориями
             cur.execute("""
                     SELECT
-                        i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity,
+                        i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,
                         c.id as category_id, c.category_name,
                         sc.id as subcategory_id, sc.subcategory_name
                     FROM items i
@@ -301,7 +301,7 @@ def update_product_details(
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5],
+                "stock": row[5],
                 "category": {
                     "id": row[6],
                     "name": row[7]

@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS items (
     additional_photo_1_url TEXT,
     additional_photo_2_url TEXT,
     additional_photo_3_url TEXT,
-    quantity NUMERIC NOT NULL
+    stock NUMERIC NOT NULL
 );
 """)
 

@@ -8,17 +8,17 @@ router = APIRouter(prefix="/carts", tags=["carts"])
 
 class AddToCartRequest(BaseModel):
     item_id: str
-    quantity: conint(gt=0)
+    stock: conint(gt=0)
 
 class CartItemOut(BaseModel):
     id: str          # item_id
     title: str
     price: float
-    quantity: int
+    stock: int
     image: str | None = None
 
 class EditCartItemRequest(BaseModel):
-    quantity: conint(gt=0)
+    stock: conint(gt=0)
 
 @router.post("/add")
 def add_to_cart(
@@ -28,11 +28,11 @@ def add_to_cart(
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                    INSERT INTO cart_item (user_id, item_id, quantity)
+                    INSERT INTO cart_item (user_id, item_id, stock)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (user_id, item_id)
-                    DO UPDATE SET quantity = cart_item.quantity + EXCLUDED.quantity;
-                """, (user_id, req.item_id, req.quantity))
+                    DO UPDATE SET stock = cart_item.stock + EXCLUDED.stock;
+                """, (user_id, req.item_id, req.stock))
         return {"status": "ok"}
     except Exception as e:
         print("Add to cart error:", e)
@@ -42,7 +42,7 @@ def add_to_cart(
 def get_cart_count(user_id: str = Depends(get_current_user_id)):
     with get_db_cursor() as cur:
         cur.execute("""
-            SELECT COALESCE(SUM(quantity), 0)
+            SELECT COALESCE(SUM(stock), 0)
             FROM cart_item
             WHERE user_id = %s
         """, (user_id,))
@@ -54,7 +54,7 @@ def get_cart_count(user_id: str = Depends(get_current_user_id)):
 def get_cart_items(user_id: str = Depends(get_current_user_id)):
     """
     Возвращает список товаров в корзине текущего пользователя.
-    Формат: {"items": [ {id, title, price, quantity, image}, ... ]}
+    Формат: {"items": [ {id, title, price, stock, image}, ... ]}
     """
     try:
         with get_db_cursor() as cur:
@@ -65,7 +65,7 @@ def get_cart_items(user_id: str = Depends(get_current_user_id)):
                     ci.item_id               AS id,
                     i.title                  AS title,        -- или i.name
                     i.price                  AS price,
-                    ci.quantity              AS quantity,
+                    ci.stock              AS stock,
                     i.main_photo_url         AS image         -- или i.image
                 FROM cart_item ci
                 JOIN items i ON i.id = ci.item_id
@@ -77,12 +77,12 @@ def get_cart_items(user_id: str = Depends(get_current_user_id)):
 
         items: List[CartItemOut] = []
         for r in rows:
-            # r = (id, title, price, quantity, image)
+            # r = (id, title, price, stock, image)
             items.append(CartItemOut(
                 id=str(r[0]),
                 title=r[1],
                 price=float(r[2]),
-                quantity=int(r[3]),
+                stock=int(r[3]),
                 image=r[4]
             ))
 
@@ -120,9 +120,9 @@ def edit_cart_item(
         with get_db_cursor() as cur:
             cur.execute("""
                 UPDATE cart_item
-                SET quantity = %s
+                SET stock = %s
                 WHERE user_id = %s AND item_id = %s
-            """, (req.quantity, user_id, item_id))
+            """, (req.stock, user_id, item_id))
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
