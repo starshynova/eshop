@@ -13,24 +13,29 @@ import {
   Legend,
 } from "recharts";
 import type { AnalyticsData } from "../types/AnalyticsData";
+import type { ProductDetails } from "../types/ProductDetails";
 import { API_BASE_URL } from "../config";
 import Loader from "./Loader";
+import ButtonOutline from "./ButtonOutline";
+import ProductDetailsTable from "./ProductDetailTable";
 
 const COLORS = [
+  "#8e44ad",
+  "#fdcb6e",
+  "#2ecc71",
   "#1abc9c",
   "#3498db",
   "#f39c12",
   "#e74c3c",
-  "#8e44ad",
-  "#2ecc71",
   "#e67e22",
   "#e84393",
-  "#636e72",
-  "#fdcb6e",
 ];
 
 const AdminOrderAnalyticsPanel: React.FC = () => {
   const [data, setData] = useState<AnalyticsData | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetails | null>(null);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -48,11 +53,29 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
     fetchAnalytics();
   }, []);
 
+  useEffect(() => {
+  if (selectedProductId) {
+    const fetchProductDetails = async () => {
+    try {
+        const response = await fetch(`${API_BASE_URL}/products/${selectedProductId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch product details");
+        }
+        const productData = await response.json();
+        setSelectedProduct(productData);
+      } catch (error) {
+        console.error("Error fetching product details:", error);
+      }
+    };
+    fetchProductDetails();
+}
+}, [selectedProductId]);
+
   if (!data) return <Loader />;
 
+  if (!selectedProduct) {
   return (
     <div className="p-4 w-full">
-      {/* Карточки с метриками */}
       <div className="flex flex-wrap gap-6 mb-6">
         <div className="flex flex-col bg-white border-2 border-gray-300 rounded-sm p-6 min-w-[200px]">
           <span className="text-base text-gray-700 uppercase font-semibold">
@@ -92,7 +115,6 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Топ-10 товаров */}
       <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm mb-8 bg-white">
         <h2 className="text-2xl font-bold uppercase mb-4">
           Top 10 best-selling products
@@ -128,7 +150,7 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
               />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="sold" fill="#1abc9c" />
+              <Bar dataKey="sold" fill="#8e44ad"  cursor="pointer" onClick={(_, index) => setSelectedProductId(data.top_10_products[index].id)}/>
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -180,7 +202,7 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
       <div className="flex flex-wrap gap-6">
         <div className="flex-1 min-w-[280px] bg-white border-2 border-gray-300 p-6 rounded-sm">
           <h2 className="text-lg font-bold mb-3 uppercase">
-            Products with minimal stock (less than 5)
+            products with minimal stock (less than 5)
           </h2>
           <table className="min-w-full border border-gray-300">
             <thead>
@@ -190,10 +212,12 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {data.low_stock.map((p) => (
-                <tr key={p.id}>
-                  <td className="px-4 py-2">{p.title}</td>
-                  <td className="px-4 py-2">{p.stock}</td>
+              {data.low_stock.map((product) => (
+                <tr key={product.id}
+                onClick={() => setSelectedProductId(product.id)}
+                className="hover:bg-gray-200 cursor-pointer">
+                  <td className="px-4 py-2">{product.title}</td>
+                  <td className="px-4 py-2">{product.stock}</td>
                 </tr>
               ))}
             </tbody>
@@ -204,16 +228,55 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
             Products without sales
           </h2>
           <ul className="list-disc ml-6">
-            {data.unsold_products.map((p) => (
-              <li key={p.id} className="py-1">
-                {p.title}
+            {data.unsold_products.map((product) => (
+              <li key={product.id} className="py-1">
+                {product.title}
               </li>
             ))}
           </ul>
         </div>
       </div>
     </div>
-  );
+  ) 
+} 
+return (
+     <div className="p-4 w-full">
+      <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm bg-white">
+        <h2 className="text-2xl font-bold mb-4 uppercase">Product Details</h2>
+        <ProductDetailsTable
+      product={selectedProduct}
+      onClose={() => {
+        setSelectedProduct(null);
+        // setEditMode(false);
+      }}
+    >
+      <div className="flex flex-row gap-4 col-span-2">
+        {/* <ButtonOutline className="m-4" onClick={() => setIsDeleteDialogOpen(true)}>
+          delete product
+        </ButtonOutline>
+        <ButtonOutline className="m-4" onClick={() => setEditMode(true)}>
+          edit product
+        </ButtonOutline> */}
+        <ButtonOutline
+                className="m-4"
+                onClick={() => {
+                  setSelectedProduct(null);
+                //   setEditMode(false);
+                }}
+              >
+                back to analytics
+              </ButtonOutline>
+      </div>
+    </ProductDetailsTable>
+        {/* <ButtonOutline
+          className="mt-4"
+          onClick={() => setSelectedProduct(null)}
+        >
+          Back to Analytics
+        </ButtonOutline> */}
+      </div>
+    </div>
+)
 };
 
 export default AdminOrderAnalyticsPanel;

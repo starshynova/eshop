@@ -7,6 +7,7 @@ import InputSmall from "./InputSmall";
 import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
+import ProductDetailsTable from "./ProductDetailTable";
 
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
@@ -31,7 +32,7 @@ const AdminProductsPanel: React.FC = () => {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [addProductMode, setAddProductMode] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  // const [file, setFile] = useState<File | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
@@ -195,12 +196,10 @@ const AdminProductsPanel: React.FC = () => {
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
-      // setFile(null);
       setUploadedFileName("");
       return;
     }
     const selectedFile = files[0];
-    // setFile(selectedFile);
     setIsUploading(true);
 
     try {
@@ -306,8 +305,34 @@ const AdminProductsPanel: React.FC = () => {
       )}
       {!addProductMode && !editMode && selectedProduct && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-          <h2 className="text-2xl font-bold mb-4 uppercase">product details</h2>
-          <div className="overflow-x-auto">
+          {/* <h2 className="text-2xl font-bold mb-4 uppercase">product details</h2> */}
+         
+          <ProductDetailsTable
+      product={selectedProduct}
+      onClose={() => {
+        setSelectedProduct(null);
+        setEditMode(false);
+      }}
+    >
+      <div className="flex flex-row gap-4 col-span-2">
+        <ButtonOutline className="m-4" onClick={() => setIsDeleteDialogOpen(true)}>
+          delete product
+        </ButtonOutline>
+        <ButtonOutline className="m-4" onClick={() => setEditMode(true)}>
+          edit product
+        </ButtonOutline>
+        <ButtonOutline
+                className="m-4"
+                onClick={() => {
+                  setSelectedProduct(null);
+                  setEditMode(false);
+                }}
+              >
+                back
+              </ButtonOutline>
+      </div>
+    </ProductDetailsTable>
+          {/* <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-300">
               <tbody>
                 <tr>
@@ -378,7 +403,7 @@ const AdminProductsPanel: React.FC = () => {
                 back
               </ButtonOutline>
             </div>
-          </div>
+          </div> */}
         </div>
       )}
       {!addProductMode && editMode && selectedProduct && (
