@@ -210,9 +210,7 @@ const CartPage: React.FC = () => {
                             <p className="text-gray-600">
                               Price: €{item.price.toFixed(2)}
                             </p>
-                            <p className="text-gray-600">
-                              Stock: {item.stock}
-                            </p>
+                            <p className="text-gray-600">Stock: {item.stock}</p>
                           </div>
                           <div className="flex flex-row items-center">
                             <ButtonSecond

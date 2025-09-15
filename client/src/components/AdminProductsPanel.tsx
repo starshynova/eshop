@@ -36,7 +36,6 @@ const AdminProductsPanel: React.FC = () => {
   const [isUploading, setIsUploading] = useState(false);
 
   const token = localStorage.getItem("token");
-  //   const navigate = useNavigate();
 
   if (!token) {
     setError("No token found in localStorage");
@@ -192,49 +191,6 @@ const AdminProductsPanel: React.FC = () => {
       setLoading(false);
     }
   };
-
-  //   const handleChangePhotoButton = async () => {
-
-  //         try {
-  //         const response = await fetch(`${API_BASE_URL}/upload-image`);
-  //          if (!response.ok) {
-  //           const data = await response.json();
-  //           throw new Error(data.detail || "Failed to update product");
-  //         }
-  //         const data = await response.json();
-  //         console.log("image data:", data)
-  //         } catch (err) {
-  //             setError(err instanceof Error ? err.message : "An error occurred")
-  //         }
-  //     }
-
-  // const handleChangePhotoButton = async () => {
-  //   if (!file) {
-  //     setError("Select a file to upload");
-  //     return;
-  //   }
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("file", file);
-
-  //     const response = await fetch(`${API_BASE_URL}/upload-image`, {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-
-  //     if (!response.ok) {
-  //       const data = await response.json();
-  //       throw new Error(data.detail || "Failed to upload image");
-  //     }
-  //     const data = await response.json();
-  //     console.log("image data:", data);
-
-  //     // Установить ссылку на фото в форму
-  //     setForm(f => ({ ...f, main_photo_url: data.image_url }));
-  //   } catch (err) {
-  //     setError(err instanceof Error ? err.message : "An error occurred");
-  //   }
-  // };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -450,18 +406,6 @@ const AdminProductsPanel: React.FC = () => {
                     Photo
                   </th>
                   <td className="align-middle pt-1 px-4">
-                    {/* <InputSmall
-                      type="file"
-                      // type="text"
-                      // value={form.main_photo_url}
-                      onChange={handleFileChange}
-                    />
-                    <div className="text-xs mb-1 min-h-[1.5em]">
-                      {isUploading && "Uploading..."}
-                      {!isUploading && uploadedFileName && (
-                        <span>Uploaded: <b>{uploadedFileName}</b></span>
-                     )}
-                    </div> */}
                     <InputFile
                       accept="image/*"
                       onChange={handleFileChange}
@@ -471,9 +415,6 @@ const AdminProductsPanel: React.FC = () => {
                       errorText={error ?? undefined}
                     />
                   </td>
-                  {/* <td><ButtonOutline 
-                    children="upload new photo"
-                    onClick={handleChangePhotoButton}/></td> */}
                 </tr>
                 <tr>
                   <th className="align-middle text-left px-4 py-3 w-1/5">
@@ -546,7 +487,6 @@ const AdminProductsPanel: React.FC = () => {
                     />
                   </td>
                 </tr>
-                {/* )} */}
               </tbody>
             </table>
             <div className="flex flex-row gap-4 col-span-2">
