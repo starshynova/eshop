@@ -21,7 +21,7 @@ const AdminProductsPanel: React.FC = () => {
     main_photo_url: "",
     description: "",
     price: "",
-    quantity: "",
+    stock: "",
     category: "",
     subcategory: "",
   });
@@ -87,7 +87,7 @@ const AdminProductsPanel: React.FC = () => {
         main_photo_url: selectedProduct.main_photo_url || "",
         description: selectedProduct.description || "",
         price: selectedProduct.price?.toString() || "",
-        quantity: selectedProduct.quantity?.toString() || "",
+        stock: selectedProduct.stock?.toString() || "",
         category:
           typeof selectedProduct.category === "string"
             ? selectedProduct.category
@@ -120,7 +120,7 @@ const AdminProductsPanel: React.FC = () => {
             body: JSON.stringify({
               ...form,
               price: Number(form.price),
-              quantity: Number(form.quantity),
+              stock: Number(form.stock),
             }),
           },
         );
@@ -135,7 +135,7 @@ const AdminProductsPanel: React.FC = () => {
                 ...prev,
                 ...form,
                 price: Number(form.price),
-                quantity: Number(form.quantity),
+                stock: Number(form.stock),
               }
             : null,
         );
@@ -147,7 +147,7 @@ const AdminProductsPanel: React.FC = () => {
                       ...p,
                       ...form,
                       price: Number(form.price),
-                      quantity: Number(form.quantity),
+                      stock: Number(form.stock),
                     }
                   : p,
               )
@@ -381,8 +381,8 @@ const AdminProductsPanel: React.FC = () => {
                   <td className="px-4 py-3">{selectedProduct.price}</td>
                 </tr>
                 <tr>
-                  <th className="text-left px-4 py-3">Available Quantity</th>
-                  <td className="px-4 py-3">{selectedProduct.quantity}</td>
+                  <th className="text-left px-4 py-3">Available Stock</th>
+                  <td className="px-4 py-3">{selectedProduct.stock}</td>
                 </tr>
                 <tr>
                   <th className="text-left px-4 py-3">Category</th>
@@ -505,14 +505,14 @@ const AdminProductsPanel: React.FC = () => {
                 </tr>
                 <tr>
                   <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Available Quantity
+                    Available Stock
                   </th>
                   <td className="align-middle pt-1 px-4">
                     <InputSmall
                       type="number"
-                      value={form.quantity}
+                      value={form.stock}
                       onChange={(e) =>
-                        setForm((f) => ({ ...f, quantity: e.target.value }))
+                        setForm((f) => ({ ...f, stock: e.target.value }))
                       }
                     />
                   </td>
@@ -608,13 +608,13 @@ const AdminProductsPanel: React.FC = () => {
                 </td>
               </tr>
               <tr>
-                <th className="text-left px-4 py-3">Available Quantity</th>
+                <th className="text-left px-4 py-3">Available Stock</th>
                 <td>
                   <InputSmall
                     type="number"
-                    value={form.quantity}
+                    value={form.stock}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, quantity: e.target.value }))
+                      setForm((f) => ({ ...f, stock: e.target.value }))
                     }
                   />
                 </td>

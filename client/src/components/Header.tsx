@@ -85,7 +85,7 @@ const Header: React.FC = () => {
             >
               <Menu.Root open={catalogOpen}>
                 <Menu.Trigger
-                  className="self-start h-8 bg-transparent text-[#000000] text-lg px-1 uppercase
+                  className="self-start h-8 bg-transparent text-[#000000] text-lg px-1 uppercase focus:outline-none
                  border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
                 >
                   Catalog
@@ -107,12 +107,12 @@ const Header: React.FC = () => {
                           >
                             <ButtonSecond
                               children={category.category_name}
+                              className="py-2 h-auto"
                               onClick={() =>
                                 navigate(
                                   `/?category_name=${category.category_name}`,
                                 )
                               }
-                              className="text-[16px]"
                             />
                           </Menu.Item>
                         );
@@ -133,10 +133,16 @@ const Header: React.FC = () => {
                             open={openCategoryId === category.id}
                           >
                             <Menu.TriggerItem
-                              className="flex items-center justify-between px-3 py-2 bg-transparent text-[#000000] text-[16px]
+                              className="flex items-center justify-between px-1 pb-2 bg-transparent text-[#000000] text-lg focus:outline-none
                              uppercase border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
+                              onClick={() =>
+                                navigate(
+                                  `/?category_name=${category.category_name}`,
+                                )
+                              }
                             >
                               {category.category_name}
+
                               {openCategoryId === category.id ? (
                                 <ChevronDownIcon size={16} />
                               ) : (
@@ -155,7 +161,7 @@ const Header: React.FC = () => {
                                         `/?subcategory_name=${subcat.subcategory_name}`,
                                       )
                                     }
-                                    className="flex items-center justify-between px-3 py-2.5 bg-transparent text-[#000000] text-sm uppercase
+                                    className="flex items-center justify-between px-4 py-2 bg-transparent text-[#000000] text-sm uppercase focus:outline-none
                                    border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
                                   >
                                     {subcat.subcategory_name}

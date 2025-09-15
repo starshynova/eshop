@@ -37,6 +37,7 @@ from routes.user import router as user_router
 from routes.cart import router as cart_router
 from routes.payment import router as payment_router
 from routes.order import router as order_router
+from routes.analytics import router as analytics_router
 
 app.include_router(item_router)
 # app.include_router(init_qdrant_router)
@@ -46,6 +47,7 @@ app.include_router(user_router)
 app.include_router(cart_router)
 app.include_router(payment_router)
 app.include_router(order_router)
+app.include_router(analytics_router)
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):

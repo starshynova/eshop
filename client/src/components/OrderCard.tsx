@@ -6,7 +6,7 @@
 //   id: string;
 //   title: string;
 //   price: number;
-//   quantity: number;
+//   stock: number;
 //   main_photo_url: string;
 // };
 
@@ -66,10 +66,10 @@
 //                 <div className="flex-1">
 //                   <div className="font-semibold">{item.title}</div>
 //                   <div className="text-gray-500">
-//                     {item.quantity} x {item.price} ₽
+//                     {item.stock} x {item.price} ₽
 //                   </div>
 //                 </div>
-//                 <div className="font-bold">{item.price * item.quantity} ₽</div>
+//                 <div className="font-bold">{item.price * item.stock} ₽</div>
 //               </div>
 //             ))}
 //           </div>

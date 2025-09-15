@@ -17,7 +17,7 @@ type CartItem = {
   id: string;
   title: string;
   price: number;
-  quantity: number;
+  stock: number;
   image: string;
 };
 
@@ -28,7 +28,7 @@ const CartPage: React.FC = () => {
   const [error, setError] = useState<string | null>("");
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editQuantity, setEditQuantity] = useState<number>(1);
+  const [editStock, setEditStock] = useState<number>(1);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { refresh } = useCart();
   const token = localStorage.getItem("token");
@@ -87,7 +87,7 @@ const CartPage: React.FC = () => {
 
   const handleEditClick = (item: CartItem) => {
     setEditingId(item.id);
-    setEditQuantity(item.quantity);
+    setEditStock(item.stock);
   };
 
   const handleEditSave = async (itemId: string) => {
@@ -98,12 +98,12 @@ const CartPage: React.FC = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ quantity: editQuantity }),
+        body: JSON.stringify({ stock: editStock }),
       });
-      if (!res.ok) throw new Error("Failed to update quantity");
+      if (!res.ok) throw new Error("Failed to update stock");
       setCartItems((prev) =>
         prev.map((item) =>
-          item.id === itemId ? { ...item, quantity: editQuantity } : item,
+          item.id === itemId ? { ...item, stock: editStock } : item,
         ),
       );
       setEditingId(null);
@@ -116,7 +116,7 @@ const CartPage: React.FC = () => {
 
   const handleCheckout = async () => {
     const total = cartItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+      (sum, item) => sum + item.price * item.stock,
       0,
     );
 
@@ -211,7 +211,7 @@ const CartPage: React.FC = () => {
                               Price: €{item.price.toFixed(2)}
                             </p>
                             <p className="text-gray-600">
-                              Quantity: {item.quantity}
+                              Stock: {item.stock}
                             </p>
                           </div>
                           <div className="flex flex-row items-center">
@@ -229,9 +229,9 @@ const CartPage: React.FC = () => {
                                 <input
                                   type="number"
                                   min={1}
-                                  value={editQuantity}
+                                  value={editStock}
                                   onChange={(e) =>
-                                    setEditQuantity(Number(e.target.value))
+                                    setEditStock(Number(e.target.value))
                                   }
                                   className="w-16 border-black border-[1px] rounded-sm px-2"
                                   onClick={(e) => e.stopPropagation()}
@@ -269,7 +269,7 @@ const CartPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="font-bold">
-                        €{(item.price * item.quantity).toFixed(2)}
+                        €{(item.price * item.stock).toFixed(2)}
                       </div>
                     </li>
                   ))}
@@ -288,7 +288,7 @@ const CartPage: React.FC = () => {
                   <span className="text-lg font-bold text-gray-700">
                     {cartItems
                       .reduce(
-                        (total, item) => total + item.price * item.quantity,
+                        (total, item) => total + item.price * item.stock,
                         0,
                       )
                       .toFixed(2)}{" "}
