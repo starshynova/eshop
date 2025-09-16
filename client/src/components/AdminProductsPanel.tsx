@@ -7,7 +7,7 @@ import InputSmall from "./InputSmall";
 import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
-import ProductDetailsTable from "./ProductDetailTable";
+import ProductDetailsTable from "./ProductDetailsTable";
 
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
@@ -67,9 +67,9 @@ const AdminProductsPanel: React.FC = () => {
     const fetchCategories = async () => {
       try {
         setCategoriesLoading(true);
-        const res = await fetch(`${API_BASE_URL}/products/categories`);
-        if (!res.ok) throw new Error("Failed to fetch categories");
-        const data = await res.json();
+        const response = await fetch(`${API_BASE_URL}/products/categories`);
+        if (!response.ok) throw new Error("Failed to fetch categories");
+        const data = await response.json();
         setCategories(data);
       } catch (err: any) {
         setCategoriesError(err.message || "Unknown error");
@@ -303,17 +303,10 @@ const AdminProductsPanel: React.FC = () => {
           </div>
         </div>
       )}
-      {!addProductMode && !editMode && selectedProduct && (
+      {/* {!addProductMode && !editMode && selectedProduct && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-          {/* <h2 className="text-2xl font-bold mb-4 uppercase">product details</h2> */}
          
-          <ProductDetailsTable
-      product={selectedProduct}
-      onClose={() => {
-        setSelectedProduct(null);
-        setEditMode(false);
-      }}
-    >
+           <ProductDetailsTable product={selectedProduct}>
       <div className="flex flex-row gap-4 col-span-2">
         <ButtonOutline className="m-4" onClick={() => setIsDeleteDialogOpen(true)}>
           delete product
@@ -332,205 +325,35 @@ const AdminProductsPanel: React.FC = () => {
               </ButtonOutline>
       </div>
     </ProductDetailsTable>
-          {/* <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300">
-              <tbody>
-                <tr>
-                  <th className="text-left px-4 py-3 w-1/5">ID</th>
-                  <td className="px-4 py-3">{selectedProduct.id}</td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Title</th>
-                  <td className="px-4 py-3">{selectedProduct.title}</td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Photo</th>
-                  <td className="px-4 py-3">
-                    <img
-                      src={selectedProduct.main_photo_url}
-                      alt={selectedProduct.title}
-                      className="h-48"
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Description</th>
-                  <td className="px-4 py-3">{selectedProduct.description}</td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Price</th>
-                  <td className="px-4 py-3">{selectedProduct.price}</td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Available Stock</th>
-                  <td className="px-4 py-3">{selectedProduct.stock}</td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Category</th>
-                  <td className="px-4 py-3">
-                    {typeof selectedProduct.category === "string"
-                      ? selectedProduct.category
-                      : selectedProduct.category?.name || ""}
-                  </td>
-                </tr>
-                <tr>
-                  <th className="text-left px-4 py-3">Subcategory</th>
-                  <td className="px-4 py-3">
-                    {typeof selectedProduct.subcategory === "string"
-                      ? selectedProduct.subcategory
-                      : selectedProduct.subcategory?.name || ""}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="flex flex-row gap-4 col-span-2">
-              <ButtonOutline
-                className="m-4"
-                onClick={() => setIsDeleteDialogOpen(true)}
-              >
-                delete product
-              </ButtonOutline>
-              <ButtonOutline className="m-4" onClick={() => setEditMode(true)}>
-                edit product
-              </ButtonOutline>
-              <ButtonOutline
-                className="m-4"
-                onClick={() => {
-                  setSelectedProduct(null);
-                  setEditMode(false);
-                }}
-              >
-                back
-              </ButtonOutline>
-            </div>
-          </div> */}
         </div>
-      )}
-      {!addProductMode && editMode && selectedProduct && (
+      )} */}
+
+      {!addProductMode && selectedProduct && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-          <h2 className="text-2xl font-bold mb-4 uppercase">edit product</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-300">
-              <tbody>
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Title
-                  </th>
-                  <td className="align-middle pt-3 px-4">
-                    <InputSmall
-                      type="text"
-                      value={form.title}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, title: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Photo
-                  </th>
-                  <td className="align-middle pt-1 px-4">
-                    <InputFile
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      fileName={uploadedFileName}
-                      isUploading={isUploading}
-                      error={!!error}
-                      errorText={error ?? undefined}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Description
-                  </th>
-                  <td className="align-middle pt-1 px-4">
-                    <InputSmall
-                      type="text"
-                      value={form.description}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, description: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Price
-                  </th>
-                  <td className="align-middle pt-1 px-4">
-                    <InputSmall
-                      type="number"
-                      value={form.price}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, price: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Available Stock
-                  </th>
-                  <td className="align-middle pt-1 px-4">
-                    <InputSmall
-                      type="number"
-                      value={form.stock}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, stock: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Category
-                  </th>
-                  <td className="align-middle pt-1 px-4">
-                    <InputSmall
-                      type="text"
-                      value={form.category}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, category: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-                {/* {form.subcategory && ( */}
-                <tr>
-                  <th className="align-middle text-left px-4 py-3 w-1/5">
-                    Subcategory
-                  </th>
-                  <td className="align-middle pt-1 px-4">
-                    <InputSmall
-                      type="text"
-                      value={form.subcategory}
-                      onChange={(e) =>
-                        setForm((f) => ({ ...f, subcategory: e.target.value }))
-                      }
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div className="flex flex-row gap-4 col-span-2">
-              <ButtonOutline
-                className="m-4"
-                onClick={() => {
-                  setSelectedProduct(null);
-                  setEditMode(false);
-                }}
-              >
-                close without changes
-              </ButtonOutline>
-              <ButtonOutline className="m-4" onClick={handleEditProduct}>
-                save changes
-              </ButtonOutline>
-            </div>
-          </div>
+          <ProductDetailsTable
+            product={selectedProduct}
+            token={token}
+            onUpdate={(updatedProduct) => {
+              setSelectedProduct(updatedProduct);
+              setProducts((prev) =>
+                prev
+                  ? prev.map((p) =>
+                      p.id === updatedProduct.id ? updatedProduct : p,
+                    )
+                  : null,
+              );
+            }}
+            onDelete={(deletedId) => {
+              setProducts((prev) =>
+                prev ? prev.filter((p) => p.id !== deletedId) : null,
+              );
+              setSelectedProduct(null);
+            }}
+            onClose={() => setSelectedProduct(null)}
+          />
         </div>
       )}
+
       {addProductMode && !selectedProduct && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
           <h2 className="text-2xl font-bold mb-4 uppercase">add product</h2>
@@ -600,7 +423,7 @@ const AdminProductsPanel: React.FC = () => {
           </table>
         </div>
       )}
-      {error && (
+      {/* {error && (
         <CustomDialog
           isOpen={true}
           onClose={() => setError(null)}
@@ -622,7 +445,7 @@ const AdminProductsPanel: React.FC = () => {
         onClose={() => setSuccessDeleteDialogOpen(false)}
         message={`You have successfully deleted product "${selectedProduct ? selectedProduct.title : ""}"`}
         isVisibleButton={false}
-      />
+      /> */}
     </div>
   );
 };

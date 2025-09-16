@@ -8,5 +8,3 @@ export type ProductDetails = {
   category?: { id: number; name: string } | string;
   subcategory?: { id: number; name: string } | string;
 };
-
-

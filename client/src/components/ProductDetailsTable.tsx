@@ -1,10 +1,10 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import InputSmall from "./InputSmall";
 import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import CustomDialog from "./CustomDialog";
 import type { ProductDetails } from "../types/ProductDetails";
-
+import { API_BASE_URL } from "../config";
 
 interface ProductDetailsTableProps {
   product: ProductDetails;
@@ -44,12 +44,12 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
+  const [successDeleteDialogOpen, setSuccessDeleteDialogOpen] = useState(false);
 
-  // Функция для сохранения изменений (API PATCH)
   const handleSave = async () => {
     if (!token || !onUpdate) return;
     try {
-      const res = await fetch(`/api/products/${product.id}`, {
+      const res = await fetch(`${API_BASE_URL}/products/${product.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -77,11 +77,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
   };
 
-  // Функция для удаления (API DELETE)
   const handleDelete = async () => {
     if (!token || !onDelete) return;
     try {
-      const res = await fetch(`/api/products/${product.id}`, {
+      const res = await fetch(`${API_BASE_URL}/products/${product.id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -97,7 +96,6 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
   };
 
-  // Обработка загрузки фото (если надо)
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
@@ -111,7 +109,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
       const formData = new FormData();
       formData.append("file", selectedFile);
 
-      const response = await fetch("/api/upload-image", {
+      const response = await fetch(`${API_BASE_URL}/upload-image`, {
         method: "POST",
         body: formData,
       });
@@ -132,70 +130,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
   };
 
-//   return (
-//     <div className="overflow-x-auto w-full">
-//       <table className="min-w-full border border-gray-300">
-//         <tbody>
-//           <tr>
-//             <th className="text-left px-4 py-3 w-1/5">ID</th>
-//             <td className="px-4 py-3">{product.id}</td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Title</th>
-//             <td className="px-4 py-3">{product.title}</td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Photo</th>
-//             <td className="px-4 py-3">
-//               <img
-//                 src={product.main_photo_url}
-//                 alt={product.title}
-//                 className="h-48"
-//               />
-//             </td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Description</th>
-//             <td className="px-4 py-3">{product.description}</td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Price</th>
-//             <td className="px-4 py-3">{product.price}</td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Available Stock</th>
-//             <td className="px-4 py-3">{product.stock}</td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Category</th>
-//             <td className="px-4 py-3">
-//               {typeof product.category === "string"
-//                 ? product.category
-//                 : product.category?.name || ""}
-//             </td>
-//           </tr>
-//           <tr>
-//             <th className="text-left px-4 py-3">Subcategory</th>
-//             <td className="px-4 py-3">
-//               {typeof product.subcategory === "string"
-//                 ? product.subcategory
-//                 : product.subcategory?.name || ""}
-//             </td>
-//           </tr>
-//         </tbody>
-//       </table>
-//       {children}
-//       {/* {onClose && (
-//         <button
-//           className="mt-4 px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-//           onClick={onClose}
-//         >
-//           Close
-//         </button>
-//       )} */}
-//     </div>
-//   );
- return (
+  return (
     <div className="w-full border border-gray-300 rounded-sm p-6 bg-white">
       <h2 className="text-2xl font-bold mb-4 uppercase">Product details</h2>
       <div className="overflow-x-auto">
@@ -300,9 +235,11 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                       setForm((f) => ({ ...f, category: e.target.value }))
                     }
                   />
-                ) : typeof product.category === "string"
-                  ? product.category
-                  : product.category?.name || ""}
+                ) : typeof product.category === "string" ? (
+                  product.category
+                ) : (
+                  product.category?.name || ""
+                )}
               </td>
             </tr>
             <tr>
@@ -316,9 +253,11 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                       setForm((f) => ({ ...f, subcategory: e.target.value }))
                     }
                   />
-                ) : typeof product.subcategory === "string"
-                  ? product.subcategory
-                  : product.subcategory?.name || ""}
+                ) : typeof product.subcategory === "string" ? (
+                  product.subcategory
+                ) : (
+                  product.subcategory?.name || ""
+                )}
               </td>
             </tr>
           </tbody>
@@ -334,9 +273,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
           <ButtonOutline onClick={() => setIsDeleteDialogOpen(true)}>
             Delete product
           </ButtonOutline>
-          {onClose && (
-            <ButtonOutline onClick={onClose}>Back</ButtonOutline>
-          )}
+          {onClose && <ButtonOutline onClick={onClose}>Back</ButtonOutline>}
         </div>
       )}
       {editMode && (
@@ -344,9 +281,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
           <ButtonOutline onClick={() => setEditMode(false)}>
             Cancel
           </ButtonOutline>
-          <ButtonOutline onClick={handleSave}>
-            Save changes
-          </ButtonOutline>
+          <ButtonOutline onClick={handleSave}>Save changes</ButtonOutline>
         </div>
       )}
       {error && (
@@ -366,10 +301,14 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
         onClickButton={handleDelete}
         isVisibleButton={true}
       />
+      <CustomDialog
+        isOpen={successDeleteDialogOpen}
+        onClose={() => setSuccessDeleteDialogOpen(false)}
+        message={`You have successfully deleted product "${product ? product.title : ""}"`}
+        isVisibleButton={false}
+      />
     </div>
   );
 };
 
 export default ProductDetailsTable;
-
-
