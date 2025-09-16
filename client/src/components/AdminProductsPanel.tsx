@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
-import CustomDialog from "./CustomDialog";
 import { API_BASE_URL } from "../config";
 import type { ProductDetails } from "../types/ProductDetails";
 import type { Category } from "../types/CategorySubcategory";
 import InputSmall from "./InputSmall";
-import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
 import ProductDetailsTable from "./ProductDetailsTable";
+import Button from "./Button";
 
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<ProductDetails | null>(
     null,
   );
-  const [editMode, setEditMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -26,15 +24,10 @@ const AdminProductsPanel: React.FC = () => {
     category: "",
     subcategory: "",
   });
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [successDeleteDialogOpen, setSuccessDeleteDialogOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [addProductMode, setAddProductMode] = useState(false);
-  // const [file, setFile] = useState<File | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState("");
-  const [isUploading, setIsUploading] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -100,132 +93,19 @@ const AdminProductsPanel: React.FC = () => {
     }
   }, [selectedProduct]);
 
-  const handleEditProduct = async () => {
-    if (!editMode) {
-      setEditMode(true);
-    } else {
-      try {
-        if (!selectedProduct) {
-          setError("No product selected for editing.");
-          return;
-        }
-        const response = await fetch(
-          `${API_BASE_URL}/products/${selectedProduct.id}`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-            body: JSON.stringify({
-              ...form,
-              price: Number(form.price),
-              stock: Number(form.stock),
-            }),
-          },
-        );
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.detail || "Failed to update product");
-        }
-        setEditMode(false);
-        setSelectedProduct((prev) =>
-          prev
-            ? {
-                ...prev,
-                ...form,
-                price: Number(form.price),
-                stock: Number(form.stock),
-              }
-            : null,
-        );
-        setProducts((prev) =>
-          prev
-            ? prev.map((p) =>
-                p.id === selectedProduct.id
-                  ? {
-                      ...p,
-                      ...form,
-                      price: Number(form.price),
-                      stock: Number(form.stock),
-                    }
-                  : p,
-              )
-            : null,
-        );
-      } catch (err: any) {
-        setError(err.message || "Failed to update product");
-      }
-    }
-  };
-
-  const handleDeleteProduct = async () => {
-    try {
-      if (!selectedProduct) {
-        setError("No product selected for deleting.");
-        return;
-      }
-      setLoading(true);
-      const response = await fetch(
-        `${API_BASE_URL}/products/${selectedProduct.id}`,
-        {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || "Failed to delete product");
-      }
-      setSuccessDeleteDialogOpen(true);
-      setIsDeleteDialogOpen(false);
-      setProducts((prev) =>
-        prev ? prev.filter((p) => p.id !== selectedProduct.id) : null,
-      );
-      setSelectedProduct(null);
-      setTimeout(() => {
-        setSuccessDeleteDialogOpen(false);
-      }, 2000);
-    } catch (err: any) {
-      setError(err.message || "Failed to delete product");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) {
-      setUploadedFileName("");
+  const handleAddProduct = async () => {
+    if (
+      !form.title ||
+      !form.description ||
+      !form.price ||
+      !form.stock ||
+      !form.category
+    ) {
+      setError("Please fill in all required fields.");
       return;
     }
-    const selectedFile = files[0];
-    setIsUploading(true);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-
-      const response = await fetch(`${API_BASE_URL}/upload-image`, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || "Failed to upload image");
-      }
-      const data = await response.json();
-      setForm((f) => ({ ...f, main_photo_url: data.image_url }));
-      setUploadedFileName(selectedFile.name);
-      setError("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setUploadedFileName("");
-    } finally {
-      setIsUploading(false);
-    }
   };
+
 
   if (loading) return <Loader />;
 
@@ -303,52 +183,12 @@ const AdminProductsPanel: React.FC = () => {
           </div>
         </div>
       )}
-      {/* {!addProductMode && !editMode && selectedProduct && (
-        <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-         
-           <ProductDetailsTable product={selectedProduct}>
-      <div className="flex flex-row gap-4 col-span-2">
-        <ButtonOutline className="m-4" onClick={() => setIsDeleteDialogOpen(true)}>
-          delete product
-        </ButtonOutline>
-        <ButtonOutline className="m-4" onClick={() => setEditMode(true)}>
-          edit product
-        </ButtonOutline>
-        <ButtonOutline
-                className="m-4"
-                onClick={() => {
-                  setSelectedProduct(null);
-                  setEditMode(false);
-                }}
-              >
-                back
-              </ButtonOutline>
-      </div>
-    </ProductDetailsTable>
-        </div>
-      )} */}
 
       {!addProductMode && selectedProduct && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
           <ProductDetailsTable
-            product={selectedProduct}
+            productId={selectedProduct.id}
             token={token}
-            onUpdate={(updatedProduct) => {
-              setSelectedProduct(updatedProduct);
-              setProducts((prev) =>
-                prev
-                  ? prev.map((p) =>
-                      p.id === updatedProduct.id ? updatedProduct : p,
-                    )
-                  : null,
-              );
-            }}
-            onDelete={(deletedId) => {
-              setProducts((prev) =>
-                prev ? prev.filter((p) => p.id !== deletedId) : null,
-              );
-              setSelectedProduct(null);
-            }}
             onClose={() => setSelectedProduct(null)}
           />
         </div>
@@ -421,31 +261,9 @@ const AdminProductsPanel: React.FC = () => {
               </tr>
             </tbody>
           </table>
+          <Button children="Add product" onClick={() => {}} />
         </div>
       )}
-      {/* {error && (
-        <CustomDialog
-          isOpen={true}
-          onClose={() => setError(null)}
-          message={error}
-          isVisibleButton={false}
-        />
-      )}
-      <CustomDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        message={`Are you sure you want to delete product "${selectedProduct ? selectedProduct.title : ""}"?`}
-        buttonTitle="delete"
-        buttonOutlineTitle="cancel"
-        onClickButton={handleDeleteProduct}
-        isVisibleButton={true}
-      />
-      <CustomDialog
-        isOpen={successDeleteDialogOpen}
-        onClose={() => setSuccessDeleteDialogOpen(false)}
-        message={`You have successfully deleted product "${selectedProduct ? selectedProduct.title : ""}"`}
-        isVisibleButton={false}
-      /> */}
     </div>
   );
 };

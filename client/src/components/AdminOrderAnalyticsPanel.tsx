@@ -16,7 +16,6 @@ import type { AnalyticsData } from "../types/AnalyticsData";
 import type { ProductDetails } from "../types/ProductDetails";
 import { API_BASE_URL } from "../config";
 import Loader from "./Loader";
-import ButtonOutline from "./ButtonOutline";
 import ProductDetailsTable from "./ProductDetailsTable";
 
 const COLORS = [
@@ -39,22 +38,25 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(
     null,
   );
+  const [refreshKey, setRefreshKey] = useState(0);
+  const token = localStorage.getItem("token");
+
+  const fetchAnalytics = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/analytics/orders`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch analytics data");
+      }
+      const analyticsData = await response.json();
+      setData(analyticsData);
+    } catch (error) {
+      console.error("Error fetching analytics data:", error);
+    }
+  };
 
   useEffect(() => {
-    const fetchAnalytics = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/analytics/orders`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch analytics data");
-        }
-        const analyticsData = await response.json();
-        setData(analyticsData);
-      } catch (error) {
-        console.error("Error fetching analytics data:", error);
-      }
-    };
     fetchAnalytics();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (selectedProductId) {
@@ -224,46 +226,14 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
       <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm bg-white">
         <h2 className="text-2xl font-bold mb-4 uppercase">Product Details</h2>
         <ProductDetailsTable
-          product={selectedProduct}
+          productId={selectedProductId}
+          token={token}
           onClose={() => {
             setSelectedProduct(null);
+            setRefreshKey((k) => k + 1);
           }}
-        >
-          <div className="flex flex-row gap-4 col-span-2">
-            <ButtonOutline
-              className="m-4"
-              onClick={() => {
-                setSelectedProduct(null);
-              }}
-            >
-              back to analytics
-            </ButtonOutline>
-          </div>
-        </ProductDetailsTable>
-      </div>
-      {/* {error && (
-        <CustomDialog
-          isOpen={true}
-          onClose={() => setError(null)}
-          message={error}
-          isVisibleButton={false}
         />
-      )}
-      <CustomDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => setIsDeleteDialogOpen(false)}
-        message={`Are you sure you want to delete product "${selectedProduct ? selectedProduct.title : ""}"?`}
-        buttonTitle="delete"
-        buttonOutlineTitle="cancel"
-        onClickButton={handleDeleteProduct}
-        isVisibleButton={true}
-      />
-      <CustomDialog
-        isOpen={successDeleteDialogOpen}
-        onClose={() => setSuccessDeleteDialogOpen(false)}
-        message={`You have successfully deleted product "${selectedProduct ? selectedProduct.title : ""}"`}
-        isVisibleButton={false}
-      /> */}
+      </div>
     </div>
   );
 };

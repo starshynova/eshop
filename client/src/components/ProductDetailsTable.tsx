@@ -1,55 +1,104 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InputSmall from "./InputSmall";
 import InputFile from "./InputFile";
 import ButtonOutline from "./ButtonOutline";
 import CustomDialog from "./CustomDialog";
-import type { ProductDetails } from "../types/ProductDetails";
 import { API_BASE_URL } from "../config";
+import Loader from "./Loader";
 
 interface ProductDetailsTableProps {
-  product: ProductDetails;
-  children?: React.ReactNode;
+  productId: string | null;
   token?: string;
-  onUpdate?: (updated: ProductDetails) => void;
-  onDelete?: (id: string) => void;
   onClose?: () => void;
 }
 
 const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
-  product,
+  productId,
   token,
-  onUpdate,
-  onDelete,
   onClose,
-  children,
 }) => {
-  if (!product) return null;
+  const [product, setProduct] = useState<any>(null);
   const [editMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({
-    title: product.title,
-    main_photo_url: product.main_photo_url,
-    description: product.description,
-    price: String(product.price),
-    stock: String(product.stock),
-    category:
-      typeof product.category === "string"
-        ? product.category
-        : product.category?.name || "",
-    subcategory:
-      typeof product.subcategory === "string"
-        ? product.subcategory
-        : product.subcategory?.name || "",
-  });
+  const [form, setForm] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
-  const [successDeleteDialogOpen, setSuccessDeleteDialogOpen] = useState(false);
+  // const [successDeleteDialogOpen, setSuccessDeleteDialogOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const handleSave = async () => {
-    if (!token || !onUpdate) return;
+  useEffect(() => {
+    if (!productId) return;
+    const fetchProduct = async () => {
+      setLoading(true);
+      setProduct(null);
+      setForm(null);
+      //     try {
+      //       const res = await fetch(`${API_BASE_URL}/products/${productId}`);
+      //       if (!res.ok) throw new Error("Failed to load product");
+      //       const data = await res.json();
+      //       setProduct(data);
+      //       setForm({
+      //         title: data.title,
+      //         main_photo_url: data.main_photo_url,
+      //         description: data.description,
+      //         price: String(data.price),
+      //         stock: String(data.stock),
+      //         category:
+      //           typeof data.category === "string"
+      //             ? data.category
+      //             : data.category?.name || "",
+      //         subcategory:
+      //           typeof data.subcategory === "string"
+      //             ? data.subcategory
+      //             : data.subcategory?.name || "",
+      //       });
+      //     } catch (err) {
+      //       setError("Failed to load product");
+      //     } finally {
+      //       setLoading(false);
+      //     }
+      //   };
+      //   fetchProduct();
+      // }, [productId]);
+      try {
+        const res = await fetch(`${API_BASE_URL}/products/${productId}`);
+        if (!res.ok) throw new Error("Failed to load product");
+        const data = await res.json();
+        setProduct(data);
+      } catch (err) {
+        setError("Failed to load product");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProduct();
+  }, [productId]);
+
+  useEffect(() => {
+    if (!product) return;
+    setForm({
+      title: product.title,
+      main_photo_url: product.main_photo_url,
+      description: product.description,
+      price: String(product.price),
+      stock: String(product.stock),
+      category:
+        typeof product.category === "string"
+          ? product.category
+          : product.category?.name || "",
+      subcategory:
+        typeof product.subcategory === "string"
+          ? product.subcategory
+          : product.subcategory?.name || "",
+    });
+  }, [product, editMode]);
+
+  const handleEditProduct = async () => {
+    if (!token || !form) return;
+    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/products/${product.id}`, {
+      const res = await fetch(`${API_BASE_URL}/products/${productId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -65,22 +114,36 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
         const data = await res.json();
         throw new Error(data.detail || "Failed to update product");
       }
+      const updated = await res.json();
+      setProduct(updated);
       setEditMode(false);
-      onUpdate({
-        ...product,
-        ...form,
-        price: Number(form.price),
-        stock: Number(form.stock),
+      setForm({
+        title: updated.title,
+        main_photo_url: updated.main_photo_url,
+        description: updated.description,
+        price: String(updated.price),
+        stock: String(updated.stock),
+        category:
+          typeof updated.category === "string"
+            ? updated.category
+            : updated.category?.name || "",
+        subcategory:
+          typeof updated.subcategory === "string"
+            ? updated.subcategory
+            : updated.subcategory?.name || "",
       });
     } catch (err: any) {
       setError(err.message || "Failed to update product");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!token || !onDelete) return;
+    if (!token) return;
+    setLoading(true);
     try {
-      const res = await fetch(`${API_BASE_URL}/products/${product.id}`, {
+      const res = await fetch(`${API_BASE_URL}/products/${productId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -89,10 +152,11 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
         throw new Error(data.detail || "Failed to delete product");
       }
       setIsDeleteDialogOpen(false);
-      onDelete(product.id);
       if (onClose) onClose();
     } catch (err: any) {
       setError(err.message || "Failed to delete product");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -104,22 +168,19 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
     const selectedFile = files[0];
     setIsUploading(true);
-
     try {
       const formData = new FormData();
       formData.append("file", selectedFile);
-
       const response = await fetch(`${API_BASE_URL}/upload-image`, {
         method: "POST",
         body: formData,
       });
-
       if (!response.ok) {
         const data = await response.json();
         throw new Error(data.detail || "Failed to upload image");
       }
       const data = await response.json();
-      setForm((f) => ({ ...f, main_photo_url: data.image_url }));
+      setForm((f: any) => ({ ...f, main_photo_url: data.image_url }));
       setUploadedFileName(selectedFile.name);
       setError("");
     } catch (err) {
@@ -129,6 +190,9 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
       setIsUploading(false);
     }
   };
+
+  if (loading) return <Loader />;
+  if (!product || !form) return null;
 
   return (
     <div className="w-full border border-gray-300 rounded-sm p-6 bg-white">
@@ -148,7 +212,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                     type="text"
                     value={form.title}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, title: e.target.value }))
+                      setForm((f: any) => ({
+                        ...f,
+                        title: e.target.value,
+                      }))
                     }
                   />
                 ) : (
@@ -184,7 +251,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                     type="text"
                     value={form.description}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, description: e.target.value }))
+                      setForm((f: any) => ({
+                        ...f,
+                        description: e.target.value,
+                      }))
                     }
                   />
                 ) : (
@@ -200,7 +270,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                     type="number"
                     value={form.price}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, price: e.target.value }))
+                      setForm((f: any) => ({
+                        ...f,
+                        price: e.target.value,
+                      }))
                     }
                   />
                 ) : (
@@ -216,7 +289,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                     type="number"
                     value={form.stock}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, stock: e.target.value }))
+                      setForm((f: any) => ({
+                        ...f,
+                        stock: e.target.value,
+                      }))
                     }
                   />
                 ) : (
@@ -232,7 +308,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                     type="text"
                     value={form.category}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, category: e.target.value }))
+                      setForm((f: any) => ({
+                        ...f,
+                        category: e.target.value,
+                      }))
                     }
                   />
                 ) : typeof product.category === "string" ? (
@@ -250,7 +329,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                     type="text"
                     value={form.subcategory}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, subcategory: e.target.value }))
+                      setForm((f: any) => ({
+                        ...f,
+                        subcategory: e.target.value,
+                      }))
                     }
                   />
                 ) : typeof product.subcategory === "string" ? (
@@ -263,8 +345,6 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
           </tbody>
         </table>
       </div>
-
-      {/* КНОПКИ */}
       {!editMode && (
         <div className="flex gap-4 mt-4">
           <ButtonOutline onClick={() => setEditMode(true)}>
@@ -281,7 +361,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
           <ButtonOutline onClick={() => setEditMode(false)}>
             Cancel
           </ButtonOutline>
-          <ButtonOutline onClick={handleSave}>Save changes</ButtonOutline>
+          <ButtonOutline onClick={handleEditProduct}>Save changes</ButtonOutline>
         </div>
       )}
       {error && (
@@ -300,12 +380,6 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
         buttonOutlineTitle="Cancel"
         onClickButton={handleDelete}
         isVisibleButton={true}
-      />
-      <CustomDialog
-        isOpen={successDeleteDialogOpen}
-        onClose={() => setSuccessDeleteDialogOpen(false)}
-        message={`You have successfully deleted product "${product ? product.title : ""}"`}
-        isVisibleButton={false}
       />
     </div>
   );
