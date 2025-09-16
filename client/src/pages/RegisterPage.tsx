@@ -238,14 +238,14 @@ const RegisterPage: React.FC = () => {
                 }
                 className="w-full px-3 py-2 border rounded"
               />
-              <div className="flex justify-between">
+              <div className="flex w-full flex-row gap-4">
                 <Button
-                  className="w-[45%]"
+                  className="flex-1"
                   onClick={() => setStep(Step.Credentials)}
                   children="Back"
                 />
                 <Button
-                  className="w-[45%]"
+                  className="flex-1"
                   onClick={handleRegister}
                   children="Register"
                 />

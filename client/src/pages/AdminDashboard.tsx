@@ -5,6 +5,7 @@ import { Tabs } from "@ark-ui/react/tabs";
 import CustomDialog from "../components/CustomDialog";
 import AdminUsersPanel from "../components/AdminUsersPanel";
 import AdminProductsPanel from "../components/AdminProductsPanel";
+import AdminOrderAnalyticsPanel from "../components/AdminOrderAnalyticsPanel";
 
 type TabKey = "users" | "products" | "orderAnalytics";
 

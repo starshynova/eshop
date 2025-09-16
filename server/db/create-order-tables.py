@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS orders (
 CREATE TABLE IF NOT EXISTS order_item (
     order_id UUID NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     item_id UUID NOT NULL REFERENCES items(id) ON DELETE CASCADE,
-    quantity INTEGER NOT NULL CHECK (quantity > 0),
+    stock INTEGER NOT NULL CHECK (stock > 0),
     price_at_purchase NUMERIC NOT NULL,
     PRIMARY KEY (order_id, item_id)
 );

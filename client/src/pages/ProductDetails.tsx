@@ -15,7 +15,7 @@ type ProductProps = {
   price: number;
   description: string;
   main_photo_url: string;
-  quantity: number;
+  stock: number;
 };
 
 const ProductDetails: React.FC = () => {
@@ -64,7 +64,7 @@ const ProductDetails: React.FC = () => {
           </h1>
           <div className="mt-4 text-black text-xl">€{product.price}</div>
           <p className="text-sm text-gray-400 mt-4">
-            Available Quantity: {product.quantity}
+            Available Stock: {product.stock}
           </p>
           <div className="border-t-[1px] border-gray-400 w-full mt-8" />
           <Button

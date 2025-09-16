@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query, Body, HTTPException
 from db.context import get_db_cursor
+from uuid import uuid4
 # from services.qdrant_utils import init_image_collection, add_products_with_image_vectors
 
 router = APIRouter(prefix="/products", tags=["products"])
@@ -13,7 +14,7 @@ def get_products(
     try:
         with get_db_cursor() as cur:
             base_query = """
-                SELECT i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity
+                SELECT i.id, i.title, i.price, i.description, i.main_photo_url, i.stock
                 FROM items i
             """
             joins = []
@@ -60,7 +61,7 @@ def get_products(
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5]
+                "stock": row[5]
             }
             for row in rows
         ]
@@ -83,7 +84,7 @@ def get_products(
                     i.price,
                     i.description,
                     i.main_photo_url,
-                    i.quantity,
+                    i.stock,
                     c.id AS category_id,
                     c.category_name,
                     sc.id AS subcategory_id,
@@ -118,7 +119,7 @@ def get_products(
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5],
+                "stock": row[5],
                 "category": {
                     "id": row[6],
                     "name": row[7]
@@ -206,14 +207,47 @@ def get_categories():
         print(f"Error getting categories: {e}")
         return {"error": str(e)}
 
+# @router.get("/{item_id}")
+# def get_product_by_id(item_id: str):
+#     try:
+#         with get_db_cursor() as cur:
+#             cur.execute("""
+#                 SELECT id, title, price, description, main_photo_url, stock
+#                 FROM items
+#                 WHERE id = %s;
+#             """, (item_id,))
+#             row = cur.fetchone()
+#
+#         if row:
+#             return {
+#                 "id": row[0],
+#                 "title": row[1],
+#                 "price": float(row[2]),
+#                 "description": row[3],
+#                 "main_photo_url": row[4],
+#                 "stock": row[5]
+#             }
+#         else:
+#             return {"error": f"Product with id {item_id} not found"}
+#     except Exception as e:
+#         print(f"❌ Error getting product by id: {e}")
+#         return {"error": str(e)}
+
 @router.get("/{item_id}")
 def get_product_by_id(item_id: str):
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                SELECT id, title, price, description, main_photo_url, quantity
-                FROM items
-                WHERE id = %s;
+                SELECT
+                    i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,
+                    c.id as category_id, c.category_name,
+                    sc.id as subcategory_id, sc.subcategory_name
+                FROM items i
+                LEFT JOIN item_category ic ON i.id = ic.item_id
+                LEFT JOIN category c ON ic.category_id = c.id
+                LEFT JOIN item_subcategory isc ON i.id = isc.item_id
+                LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
+                WHERE i.id = %s
             """, (item_id,))
             row = cur.fetchone()
 
@@ -224,7 +258,15 @@ def get_product_by_id(item_id: str):
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5]
+                "stock": row[5],
+                "category": {
+                    "id": row[6],
+                    "name": row[7]
+                } if row[6] else None,
+                "subcategory": {
+                    "id": row[8],
+                    "name": row[9]
+                } if row[8] else None,
             }
         else:
             return {"error": f"Product with id {item_id} not found"}
@@ -249,7 +291,7 @@ def update_product_details(
             update_fields = []
             values = []
 
-            allowed_fields = ["title", "description", "price", "quantity",  "main_photo_url"]
+            allowed_fields = ["title", "description", "price", "stock",  "main_photo_url"]
             if "photo" in data:
                 data["main_photo_url"] = data["photo"]
             for key in allowed_fields:
@@ -282,7 +324,7 @@ def update_product_details(
             # Получим обновлённый продукт с категориями
             cur.execute("""
                     SELECT
-                        i.id, i.title, i.price, i.description, i.main_photo_url, i.quantity,
+                        i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,
                         c.id as category_id, c.category_name,
                         sc.id as subcategory_id, sc.subcategory_name
                     FROM items i
@@ -301,7 +343,7 @@ def update_product_details(
                 "price": float(row[2]),
                 "description": row[3],
                 "main_photo_url": row[4],
-                "quantity": row[5],
+                "stock": row[5],
                 "category": {
                     "id": row[6],
                     "name": row[7]
@@ -335,3 +377,82 @@ def delete_product(item_id: str):
         raise
     except Exception:
         raise HTTPException(status_code=500, detail="Failed to delete user")
+
+@router.post("/")
+def create_product(data: dict = Body(...)):
+    try:
+        # Проверяем обязательные поля
+        required_fields = ["title", "price", "description", "stock"]
+        for field in required_fields:
+            if field not in data:
+                raise HTTPException(status_code=422, detail=f"Field '{field}' is required")
+
+        # Подготовка данных
+        product_id = str(uuid4())
+        title = data["title"]
+        price = data["price"]
+        description = data["description"]
+        stock = data["stock"]
+        main_photo_url = data.get("main_photo_url") or data.get("photo") or None
+
+        # Сохраняем товар
+        with get_db_cursor() as cur:
+            cur.execute("""
+                INSERT INTO items (id, title, price, description, main_photo_url, stock)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (product_id, title, price, description, main_photo_url, stock))
+
+            # Категория (item_category)
+            if "category_id" in data:
+                cur.execute(
+                    "INSERT INTO item_category (item_id, category_id) VALUES (%s, %s)",
+                    (product_id, data["category_id"])
+                )
+
+            # Подкатегория (item_subcategory)
+            if "subcategory_id" in data:
+                cur.execute(
+                    "INSERT INTO item_subcategory (item_id, subcategory_id) VALUES (%s, %s)",
+                    (product_id, data["subcategory_id"])
+                )
+
+            # Получим полный объект для возврата
+            cur.execute("""
+                SELECT
+                    i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,
+                    c.id as category_id, c.category_name,
+                    sc.id as subcategory_id, sc.subcategory_name
+                FROM items i
+                LEFT JOIN item_category ic ON i.id = ic.item_id
+                LEFT JOIN category c ON ic.category_id = c.id
+                LEFT JOIN item_subcategory isc ON i.id = isc.item_id
+                LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
+                WHERE i.id = %s
+            """, (product_id,))
+            row = cur.fetchone()
+
+        if row:
+            return {
+                "id": row[0],
+                "title": row[1],
+                "price": float(row[2]),
+                "description": row[3],
+                "main_photo_url": row[4],
+                "stock": row[5],
+                "category": {
+                    "id": row[6],
+                    "name": row[7]
+                } if row[6] else None,
+                "subcategory": {
+                    "id": row[8],
+                    "name": row[9]
+                } if row[8] else None,
+            }
+        else:
+            raise HTTPException(status_code=500, detail="Failed to create product")
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        print(f"❌ Error creating product: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

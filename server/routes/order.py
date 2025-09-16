@@ -12,7 +12,7 @@ class OrderProduct(BaseModel):
     title: str
     main_photo_url: Optional[str]
     price: float
-    quantity: int
+    stock: int
 
 class OrderResponse(BaseModel):
     id: str
@@ -28,7 +28,7 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
         with get_db_cursor() as cur:
             # 1. Получить корзину пользователя из базы
             cur.execute(
-                "SELECT item_id, quantity FROM cart_item WHERE user_id = %s;",
+                "SELECT item_id, stock FROM cart_item WHERE user_id = %s;",
                 (user_id,)
             )
             cart = cur.fetchall()
@@ -42,7 +42,7 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
                 (order_id, user_id, "paid")
             )
 
-            for item_id, quantity in cart:
+            for item_id, stock in cart:
                 # Получить цену на момент покупки
                 cur.execute(
                     "SELECT price FROM items WHERE id = %s;",
@@ -56,18 +56,18 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
                 # Добавить товар в заказ
                 cur.execute(
                     """
-                    INSERT INTO order_item (order_id, item_id, quantity, price_at_purchase)
+                    INSERT INTO order_item (order_id, item_id, stock, price_at_purchase)
                     VALUES (%s, %s, %s, %s);
                     """,
-                    (order_id, item_id, quantity, price_at_purchase)
+                    (order_id, item_id, stock, price_at_purchase)
                 )
                 # Уменьшить остаток товара
                 cur.execute(
                     """
-                    UPDATE items SET quantity = quantity - %s
-                    WHERE id = %s AND quantity >= %s;
+                    UPDATE items SET stock = stock - %s
+                    WHERE id = %s AND stock >= %s;
                     """,
-                    (quantity, item_id, quantity)
+                    (stock, item_id, stock)
                 )
                 if cur.rowcount == 0:
                     raise HTTPException(400, f"Недостаточно товара id={item_id}")
@@ -110,7 +110,7 @@ def get_my_orders(
                         i.title,
                         i.main_photo_url,
                         oi.price_at_purchase AS price,
-                        oi.quantity
+                        oi.stock
                     FROM order_item oi
                     JOIN items i ON oi.item_id = i.id
                     WHERE oi.order_id = %s
@@ -120,14 +120,14 @@ def get_my_orders(
             total_price = 0
 
             for item in items:
-                item_id, title, main_photo_url, price, quantity = item
-                total_price += float(price) * quantity
+                item_id, title, main_photo_url, price, stock = item
+                total_price += float(price) * stock
                 item_list.append(OrderProduct(
                     id=str(item_id),
                     title=title,
                     main_photo_url=main_photo_url,
                     price=float(price),
-                    quantity=quantity
+                    stock=stock
                 ))
             results.append(OrderResponse(
                 id=str(order_id),

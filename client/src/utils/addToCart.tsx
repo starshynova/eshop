@@ -1,8 +1,8 @@
 // import API_BASE_URL from "../config";
 
-// const addToCart = async (productId: string, quantity: number) => {
-//   if (!productId || quantity <= 0) {
-//     console.error("Invalid product ID or quantity");
+// const addToCart = async (productId: string, stock: number) => {
+//   if (!productId || stock <= 0) {
+//     console.error("Invalid product ID or stock");
 //     return;
 //   }
 
@@ -23,7 +23,7 @@
 //       },
 //       body: JSON.stringify({
 //         item_id: productId,
-//         quantity: quantity,
+//         stock: stock,
 //       }),
 //     });
 //     const data = await response.json();

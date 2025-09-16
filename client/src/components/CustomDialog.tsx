@@ -44,25 +44,25 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             </Dialog.Description>
 
             {isVisibleButton && (
-              <div className="flex w-full flex-row justify-between">
-                <Dialog.CloseTrigger asChild>
-                  <Button
-                    className="w-[48%]"
-                    onClick={() => {
-                      onClickButton?.();
-                    }}
-                  >
-                    {buttonTitle}
-                  </Button>
-                </Dialog.CloseTrigger>
-                {isVisibleButtonOutline && (
-                  <Dialog.CloseTrigger asChild>
-                    <ButtonOutline className="w-[48%]" onClick={onClose}>
-                      {buttonOutlineTitle}
-                    </ButtonOutline>
-                  </Dialog.CloseTrigger>
-                )}
-              </div>
+              <div className="flex w-full flex-row gap-4">
+  <Dialog.CloseTrigger asChild>
+    <Button
+      className="flex-1"
+      onClick={() => {
+        onClickButton?.();
+      }}
+    >
+      {buttonTitle}
+    </Button>
+  </Dialog.CloseTrigger>
+  {isVisibleButtonOutline && (
+    <Dialog.CloseTrigger asChild>
+      <ButtonOutline className="flex-1" onClick={onClose}>
+        {buttonOutlineTitle}
+      </ButtonOutline>
+    </Dialog.CloseTrigger>
+  )}
+</div>
             )}
           </Dialog.Content>
         </Dialog.Positioner>

@@ -1,13 +1,13 @@
 import React, { useId, useRef } from "react";
 import { Field } from "@ark-ui/react";
-import { UploadCloud } from "lucide-react"; 
+import { UploadCloud } from "lucide-react";
 
 interface InputFileProps extends React.InputHTMLAttributes<HTMLInputElement> {
   error?: boolean;
   errorText?: string;
   helperText?: string;
   containerClassName?: string;
-  fileName?: string; 
+  fileName?: string;
   isUploading?: boolean;
 }
 
@@ -58,7 +58,11 @@ const InputFile: React.FC<InputFileProps> = ({
       </button>
       {/* Имя файла */}
       <div className="mt-1 text-xs min-h-[1.5em]">
-        {fileName && <span>Selected: <b>{fileName}</b></span>}
+        {fileName && (
+          <span>
+            Selected: <b>{fileName}</b>
+          </span>
+        )}
       </div>
 
       {/* Helper/Error */}

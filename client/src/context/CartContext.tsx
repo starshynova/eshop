@@ -13,7 +13,7 @@ type CartContextType = {
   count: number;
   loading: boolean;
   refresh: () => Promise<void>; // перезагрузить count с бэка
-  addAndRefresh: (productId: string, quantity?: number) => Promise<void>; // добавить и обновить count
+  addAndRefresh: (productId: string, stock?: number) => Promise<void>; // добавить и обновить count
   setCount: (n: number) => void; // опционально, иногда удобно мгновенно обновить
 };
 
@@ -58,7 +58,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [refresh]);
 
   const addAndRefresh = useCallback(
-    async (productId: string, quantity: number = 1) => {
+    async (productId: string, stock: number = 1) => {
       const token = localStorage.getItem("token");
       if (!token) return;
 
@@ -70,7 +70,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ item_id: productId, quantity }),
+          body: JSON.stringify({ item_id: productId, stock }),
         });
 
         if (res.ok) {
