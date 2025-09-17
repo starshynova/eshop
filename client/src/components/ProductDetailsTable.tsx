@@ -5,6 +5,7 @@ import ButtonOutline from "./ButtonOutline";
 import CustomDialog from "./CustomDialog";
 import { API_BASE_URL } from "../config";
 import Loader from "./Loader";
+import uploadFile from "../utils/uploadFile";
 
 interface ProductDetailsTableProps {
   productId: string | null;
@@ -24,7 +25,6 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState("");
-  // const [successDeleteDialogOpen, setSuccessDeleteDialogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -160,6 +160,37 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
   };
 
+  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const files = e.target.files;
+  //   if (!files || files.length === 0) {
+  //     setUploadedFileName("");
+  //     return;
+  //   }
+  //   const selectedFile = files[0];
+  //   setIsUploading(true);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("file", selectedFile);
+  //     const response = await fetch(`${API_BASE_URL}/upload-image`, {
+  //       method: "POST",
+  //       body: formData,
+  //     });
+  //     if (!response.ok) {
+  //       const data = await response.json();
+  //       throw new Error(data.detail || "Failed to upload image");
+  //     }
+  //     const data = await response.json();
+  //     setForm((f: any) => ({ ...f, main_photo_url: data.image_url }));
+  //     setUploadedFileName(selectedFile.name);
+  //     setError("");
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : "An error occurred");
+  //     setUploadedFileName("");
+  //   } finally {
+  //     setIsUploading(false);
+  //   }
+  // };
+
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
@@ -168,27 +199,16 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
     const selectedFile = files[0];
     setIsUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      const response = await fetch(`${API_BASE_URL}/upload-image`, {
-        method: "POST",
-        body: formData,
-      });
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || "Failed to upload image");
-      }
-      const data = await response.json();
-      setForm((f: any) => ({ ...f, main_photo_url: data.image_url }));
+    const result = await uploadFile(selectedFile);
+    if (result.error) {
+      setError(result.error);
+      setUploadedFileName("");
+    } else {
+      setForm((f: any) => ({ ...f, main_photo_url: result.imageUrl }));
       setUploadedFileName(selectedFile.name);
       setError("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setUploadedFileName("");
-    } finally {
-      setIsUploading(false);
     }
+    setIsUploading(false);
   };
 
   if (loading) return <Loader />;
@@ -361,7 +381,9 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
           <ButtonOutline onClick={() => setEditMode(false)}>
             Cancel
           </ButtonOutline>
-          <ButtonOutline onClick={handleEditProduct}>Save changes</ButtonOutline>
+          <ButtonOutline onClick={handleEditProduct}>
+            Save changes
+          </ButtonOutline>
         </div>
       )}
       {error && (

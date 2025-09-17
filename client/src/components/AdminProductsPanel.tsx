@@ -7,6 +7,7 @@ import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
 import ProductDetailsTable from "./ProductDetailsTable";
 import Button from "./Button";
+import AddProductTable from "./AddProductTable";
 
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
@@ -92,20 +93,6 @@ const AdminProductsPanel: React.FC = () => {
       });
     }
   }, [selectedProduct]);
-
-  const handleAddProduct = async () => {
-    if (
-      !form.title ||
-      !form.description ||
-      !form.price ||
-      !form.stock ||
-      !form.category
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-  };
-
 
   if (loading) return <Loader />;
 
@@ -195,73 +182,8 @@ const AdminProductsPanel: React.FC = () => {
       )}
 
       {addProductMode && !selectedProduct && (
-        <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-          <h2 className="text-2xl font-bold mb-4 uppercase">add product</h2>
-          <table className="min-w-full border border-gray-300">
-            <tbody>
-              <tr>
-                <th className="text-left px-4 py-3 w-1/5">Title</th>
-                <td>
-                  <InputSmall
-                    type="text"
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, title: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Description</th>
-                <td>
-                  <InputSmall
-                    type="text"
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, description: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Price</th>
-                <td>
-                  <InputSmall
-                    type="number"
-                    value={form.price}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, price: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Available Stock</th>
-                <td>
-                  <InputSmall
-                    type="number"
-                    value={form.stock}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, stock: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Category</th>
-                <td>
-                  <InputSmall
-                    type="text"
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, category: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <Button children="Add product" onClick={() => {}} />
+        <div>
+          <AddProductTable />
         </div>
       )}
     </div>
