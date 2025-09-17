@@ -378,45 +378,66 @@ def delete_product(item_id: str):
     except Exception:
         raise HTTPException(status_code=500, detail="Failed to delete user")
 
+
 @router.post("/")
 def create_product(data: dict = Body(...)):
     try:
-        # Проверяем обязательные поля
-        required_fields = ["title", "price", "description", "stock"]
+        required_fields = ["title", "price", "description", "stock", "category_name"]
         for field in required_fields:
             if field not in data:
                 raise HTTPException(status_code=422, detail=f"Field '{field}' is required")
 
-        # Подготовка данных
-        product_id = str(uuid4())
+        item_id = str(uuid4())
         title = data["title"]
         price = data["price"]
         description = data["description"]
         stock = data["stock"]
         main_photo_url = data.get("main_photo_url") or data.get("photo") or None
+        category_name = data["category_name"]
+        subcategory_name = data.get("subcategory_name")
 
-        # Сохраняем товар
         with get_db_cursor() as cur:
+            cur.execute("SELECT id FROM category WHERE category_name = %s", (category_name,))
+            cat_row = cur.fetchone()
+            if cat_row:
+                category_id = cat_row[0]
+            else:
+                category_id = str(uuid4())
+                cur.execute(
+                    "INSERT INTO category (id, category_name) VALUES (%s, %s)",
+                    (category_id, category_name)
+                )
+
+            subcategory_id = None
+            if subcategory_name:
+                cur.execute("SELECT id FROM subcategory WHERE subcategory_name = %s", (subcategory_name,))
+                subcat_row = cur.fetchone()
+                if subcat_row:
+                    subcategory_id = subcat_row[0]
+                else:
+                    subcategory_id = str(uuid4())
+                    cur.execute(
+                        "INSERT INTO subcategory (id, subcategory_name) VALUES (%s, %s)",
+                        (subcategory_id, subcategory_name)
+                    )
+
             cur.execute("""
                 INSERT INTO items (id, title, price, description, main_photo_url, stock)
                 VALUES (%s, %s, %s, %s, %s, %s)
-            """, (product_id, title, price, description, main_photo_url, stock))
+            """, (item_id, title, price, description, main_photo_url, stock))
 
-            # Категория (item_category)
-            if "category_id" in data:
-                cur.execute(
-                    "INSERT INTO item_category (item_id, category_id) VALUES (%s, %s)",
-                    (product_id, data["category_id"])
-                )
+            cur.execute(
+                "INSERT INTO item_category (item_id, category_id) VALUES (%s, %s)",
+                (item_id, category_id)
+            )
 
-            # Подкатегория (item_subcategory)
-            if "subcategory_id" in data:
+            if subcategory_id:
                 cur.execute(
                     "INSERT INTO item_subcategory (item_id, subcategory_id) VALUES (%s, %s)",
-                    (product_id, data["subcategory_id"])
+                    (item_id, subcategory_id)
                 )
 
-            # Получим полный объект для возврата
+            # --- Let's get the complete object to return ---
             cur.execute("""
                 SELECT
                     i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,
@@ -428,7 +449,7 @@ def create_product(data: dict = Body(...)):
                 LEFT JOIN item_subcategory isc ON i.id = isc.item_id
                 LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
                 WHERE i.id = %s
-            """, (product_id,))
+            """, (item_id,))
             row = cur.fetchone()
 
         if row:
@@ -454,5 +475,5 @@ def create_product(data: dict = Body(...)):
     except HTTPException as he:
         raise he
     except Exception as e:
-        print(f"❌ Error creating product: {e}")
+        print(f"Error creating product: {e}")
         raise HTTPException(status_code=500, detail=str(e))

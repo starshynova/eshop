@@ -45,24 +45,24 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
 
             {isVisibleButton && (
               <div className="flex w-full flex-row gap-4">
-  <Dialog.CloseTrigger asChild>
-    <Button
-      className="flex-1"
-      onClick={() => {
-        onClickButton?.();
-      }}
-    >
-      {buttonTitle}
-    </Button>
-  </Dialog.CloseTrigger>
-  {isVisibleButtonOutline && (
-    <Dialog.CloseTrigger asChild>
-      <ButtonOutline className="flex-1" onClick={onClose}>
-        {buttonOutlineTitle}
-      </ButtonOutline>
-    </Dialog.CloseTrigger>
-  )}
-</div>
+                <Dialog.CloseTrigger asChild>
+                  <Button
+                    className="flex-1"
+                    onClick={() => {
+                      onClickButton?.();
+                    }}
+                  >
+                    {buttonTitle}
+                  </Button>
+                </Dialog.CloseTrigger>
+                {isVisibleButtonOutline && (
+                  <Dialog.CloseTrigger asChild>
+                    <ButtonOutline className="flex-1" onClick={onClose}>
+                      {buttonOutlineTitle}
+                    </ButtonOutline>
+                  </Dialog.CloseTrigger>
+                )}
+              </div>
             )}
           </Dialog.Content>
         </Dialog.Positioner>

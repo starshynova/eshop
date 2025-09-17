@@ -227,12 +227,16 @@ const UserInfoPanel: React.FC<{ userId: string }> = ({ userId }) => {
   };
 
   if (loading) return <Loader />;
-  if (error) return;
-  <CustomDialog
-    isOpen={true}
-    onClose={() => setError(null)}
-    message={`Error: ${error}`}
-  />;
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
   if (!userData) return null;
 
   return (

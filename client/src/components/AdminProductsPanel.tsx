@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import type { ProductDetails } from "../types/ProductDetails";
-import type { Category } from "../types/CategorySubcategory";
-import InputSmall from "./InputSmall";
 import ButtonOutline from "./ButtonOutline";
 import Loader from "./Loader";
 import ProductDetailsTable from "./ProductDetailsTable";
-import Button from "./Button";
+import AddProductTable from "./AddProductTable";
+import CustomDialog from "./CustomDialog";
 
 const AdminProductsPanel: React.FC = () => {
   const [products, setProducts] = useState<ProductDetails[] | null>(null);
@@ -15,18 +14,6 @@ const AdminProductsPanel: React.FC = () => {
   );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    title: "",
-    main_photo_url: "",
-    description: "",
-    price: "",
-    stock: "",
-    category: "",
-    subcategory: "",
-  });
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const [addProductMode, setAddProductMode] = useState(false);
 
   const token = localStorage.getItem("token");
@@ -56,64 +43,24 @@ const AdminProductsPanel: React.FC = () => {
     fetchProducts();
   }, [token]);
 
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const response = await fetch(`${API_BASE_URL}/products/categories`);
-        if (!response.ok) throw new Error("Failed to fetch categories");
-        const data = await response.json();
-        setCategories(data);
-      } catch (err: any) {
-        setCategoriesError(err.message || "Unknown error");
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    if (selectedProduct) {
-      setForm({
-        title: selectedProduct.title || "",
-        main_photo_url: selectedProduct.main_photo_url || "",
-        description: selectedProduct.description || "",
-        price: selectedProduct.price?.toString() || "",
-        stock: selectedProduct.stock?.toString() || "",
-        category:
-          typeof selectedProduct.category === "string"
-            ? selectedProduct.category
-            : selectedProduct.category?.name || "",
-        subcategory:
-          typeof selectedProduct.subcategory === "string"
-            ? selectedProduct.subcategory
-            : selectedProduct.subcategory?.name || "",
-      });
-    }
-  }, [selectedProduct]);
-
-  const handleAddProduct = async () => {
-    if (
-      !form.title ||
-      !form.description ||
-      !form.price ||
-      !form.stock ||
-      !form.category
-    ) {
-      setError("Please fill in all required fields.");
-      return;
-    }
-  };
-
 
   if (loading) return <Loader />;
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
 
   return (
     <div className="p-4 w-full">
       {!addProductMode && !selectedProduct && products && (
         <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-          <div className="flex flex-row w-full justify-between items-center mb-4">
+          <div className="flex flex-row w-full justify-between items-start mb-4">
             <h2 className="text-2xl font-bold uppercase">products list</h2>
             <ButtonOutline
               className="mb-4"
@@ -195,73 +142,8 @@ const AdminProductsPanel: React.FC = () => {
       )}
 
       {addProductMode && !selectedProduct && (
-        <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm">
-          <h2 className="text-2xl font-bold mb-4 uppercase">add product</h2>
-          <table className="min-w-full border border-gray-300">
-            <tbody>
-              <tr>
-                <th className="text-left px-4 py-3 w-1/5">Title</th>
-                <td>
-                  <InputSmall
-                    type="text"
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, title: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Description</th>
-                <td>
-                  <InputSmall
-                    type="text"
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, description: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Price</th>
-                <td>
-                  <InputSmall
-                    type="number"
-                    value={form.price}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, price: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Available Stock</th>
-                <td>
-                  <InputSmall
-                    type="number"
-                    value={form.stock}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, stock: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-              <tr>
-                <th className="text-left px-4 py-3">Category</th>
-                <td>
-                  <InputSmall
-                    type="text"
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, category: e.target.value }))
-                    }
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <Button children="Add product" onClick={() => {}} />
+        <div>
+          <AddProductTable onClose={() => setAddProductMode(false)} />
         </div>
       )}
     </div>

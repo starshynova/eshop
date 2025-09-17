@@ -45,6 +45,7 @@ const StripeCheckoutForm: React.FC = () => {
     <form onSubmit={handleSubmit}>
       <PaymentElement className="mb-8" />
       <Button
+        className="w-full"
         disabled={loading}
         type="submit"
         children={loading ? "Processing..." : "Pay"}
