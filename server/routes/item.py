@@ -397,7 +397,6 @@ def create_product(data: dict = Body(...)):
         subcategory_name = data.get("subcategory_name")
 
         with get_db_cursor() as cur:
-            # --- Категория ---
             cur.execute("SELECT id FROM category WHERE category_name = %s", (category_name,))
             cat_row = cur.fetchone()
             if cat_row:
@@ -409,7 +408,6 @@ def create_product(data: dict = Body(...)):
                     (category_id, category_name)
                 )
 
-            # --- Подкатегория ---
             subcategory_id = None
             if subcategory_name:
                 cur.execute("SELECT id FROM subcategory WHERE subcategory_name = %s", (subcategory_name,))
@@ -423,26 +421,23 @@ def create_product(data: dict = Body(...)):
                         (subcategory_id, subcategory_name)
                     )
 
-            # --- Товар ---
             cur.execute("""
                 INSERT INTO items (id, title, price, description, main_photo_url, stock)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """, (item_id, title, price, description, main_photo_url, stock))
 
-            # --- Связь с категорией ---
             cur.execute(
                 "INSERT INTO item_category (item_id, category_id) VALUES (%s, %s)",
                 (item_id, category_id)
             )
 
-            # --- Связь с подкатегорией (если есть) ---
             if subcategory_id:
                 cur.execute(
                     "INSERT INTO item_subcategory (item_id, subcategory_id) VALUES (%s, %s)",
                     (item_id, subcategory_id)
                 )
 
-            # --- Получим полный объект для возврата ---
+            # --- Let's get the complete object to return ---
             cur.execute("""
                 SELECT
                     i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,

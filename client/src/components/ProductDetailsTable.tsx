@@ -33,34 +33,6 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
       setLoading(true);
       setProduct(null);
       setForm(null);
-      //     try {
-      //       const res = await fetch(`${API_BASE_URL}/products/${productId}`);
-      //       if (!res.ok) throw new Error("Failed to load product");
-      //       const data = await res.json();
-      //       setProduct(data);
-      //       setForm({
-      //         title: data.title,
-      //         main_photo_url: data.main_photo_url,
-      //         description: data.description,
-      //         price: String(data.price),
-      //         stock: String(data.stock),
-      //         category:
-      //           typeof data.category === "string"
-      //             ? data.category
-      //             : data.category?.name || "",
-      //         subcategory:
-      //           typeof data.subcategory === "string"
-      //             ? data.subcategory
-      //             : data.subcategory?.name || "",
-      //       });
-      //     } catch (err) {
-      //       setError("Failed to load product");
-      //     } finally {
-      //       setLoading(false);
-      //     }
-      //   };
-      //   fetchProduct();
-      // }, [productId]);
       try {
         const res = await fetch(`${API_BASE_URL}/products/${productId}`);
         if (!res.ok) throw new Error("Failed to load product");
@@ -160,37 +132,6 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
     }
   };
 
-  // const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const files = e.target.files;
-  //   if (!files || files.length === 0) {
-  //     setUploadedFileName("");
-  //     return;
-  //   }
-  //   const selectedFile = files[0];
-  //   setIsUploading(true);
-  //   try {
-  //     const formData = new FormData();
-  //     formData.append("file", selectedFile);
-  //     const response = await fetch(`${API_BASE_URL}/upload-image`, {
-  //       method: "POST",
-  //       body: formData,
-  //     });
-  //     if (!response.ok) {
-  //       const data = await response.json();
-  //       throw new Error(data.detail || "Failed to upload image");
-  //     }
-  //     const data = await response.json();
-  //     setForm((f: any) => ({ ...f, main_photo_url: data.image_url }));
-  //     setUploadedFileName(selectedFile.name);
-  //     setError("");
-  //   } catch (err) {
-  //     setError(err instanceof Error ? err.message : "An error occurred");
-  //     setUploadedFileName("");
-  //   } finally {
-  //     setIsUploading(false);
-  //   }
-  // };
-
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) {
@@ -212,13 +153,24 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
   };
 
   if (loading) return <Loader />;
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
   if (!product || !form) return null;
 
   return (
-    <div className="w-full border border-gray-300 rounded-sm p-6 bg-white">
-      <h2 className="text-2xl font-bold mb-4 uppercase">Product details</h2>
-      <div className="overflow-x-auto">
+    <div>
+      <h2 className="text-2xl font-bold mb-8 uppercase">Product details</h2>
+      <div className="overflow-x-auto ">
         <table className="min-w-full border border-gray-300">
+          <div className="p-4">
           <tbody>
             <tr>
               <th className="text-left px-4 py-3 w-1/5">ID</th>
@@ -363,10 +315,11 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
               </td>
             </tr>
           </tbody>
+          </div>
         </table>
       </div>
       {!editMode && (
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-8">
           <ButtonOutline onClick={() => setEditMode(true)}>
             Edit product
           </ButtonOutline>
@@ -377,7 +330,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
         </div>
       )}
       {editMode && (
-        <div className="flex gap-4 mt-4">
+        <div className="flex gap-4 mt-8">
           <ButtonOutline onClick={() => setEditMode(false)}>
             Cancel
           </ButtonOutline>

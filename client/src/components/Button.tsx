@@ -7,7 +7,7 @@ const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement>> = ({
 }) => {
   return (
     <button
-      className={`uppercase w-full bg-[#000000] text-[#ffffff] text-lg  px-4 py-2  rounded-sm hover:bg-[#d0ff00] hover:text-[#000000] transition-colors h-12 ${className}`}
+      className={`uppercase  bg-[#000000] text-[#ffffff] text-lg  px-8 py-2  rounded-sm hover:bg-[#d0ff00] hover:text-[#000000] transition-colors h-12 ${className}`}
       {...props}
     >
       {children}

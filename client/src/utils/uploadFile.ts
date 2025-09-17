@@ -7,7 +7,6 @@ export interface UploadFileResult {
 
 const uploadFile = async (
   file: File,
-  //   API_BASE_URL: string
 ): Promise<UploadFileResult> => {
   try {
     const formData = new FormData();
