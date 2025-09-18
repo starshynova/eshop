@@ -43,7 +43,6 @@ const AdminProductsPanel: React.FC = () => {
     fetchProducts();
   }, [token]);
 
-
   if (loading) return <Loader />;
   if (error) {
     return (

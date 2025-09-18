@@ -176,19 +176,19 @@ const AdminUsersPanel: React.FC = () => {
                     onClick={() => setSelectedUser(user)}
                     className="hover:bg-gray-200 cursor-pointer"
                   >
-                    <td className="w-[27%] min-w-[200px] px-4 py-3 text-left text-sm text-black">
+                    <td className=" min-w-[200px] px-4 py-3 text-left text-sm text-black">
                       {user.id}
                     </td>
-                    <td className="w-[27%] min-w-[200px] px-4 py-3 text-left text-sm text-black">
+                    <td className="min-w-[200px] px-4 py-3 text-left text-sm text-black">
                       {user.email}
                     </td>
-                    <td className="w-[17%] min-w-[200px] px-4 py-3 text-left text-sm text-black">
+                    <td className="min-w-[200px] px-4 py-3 text-left text-sm text-black">
                       {user.first_name || "N/A"}
                     </td>
-                    <td className="w-[21%] min-w-[200px] px-4 py-3 text-left text-sm text-black">
+                    <td className="min-w-[200px] px-4 py-3 text-left text-sm text-black">
                       {user.last_name || "N/A"}
                     </td>
-                    <td className="w-[8%] min-w-[80px] px-4 py-3 text-left text-sm text-blue-900">
+                    <td className="min-w-[80px] px-4 py-3 text-left text-sm text-blue-900">
                       View more
                     </td>
                   </tr>

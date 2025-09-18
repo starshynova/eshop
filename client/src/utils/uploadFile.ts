@@ -5,9 +5,7 @@ export interface UploadFileResult {
   error: string | null;
 }
 
-const uploadFile = async (
-  file: File,
-): Promise<UploadFileResult> => {
+const uploadFile = async (file: File): Promise<UploadFileResult> => {
   try {
     const formData = new FormData();
     formData.append("file", file);

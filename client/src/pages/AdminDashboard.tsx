@@ -22,7 +22,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <SearchQueryProvider>
       <Header />
-      <div className="flex flex-col w-full px-8 gap-x-12 my-12 absolute top-[80px]">
+      <div className="flex flex-col w-full px-8 gap-x-12 my-12 absolute top-[100px]">
         <h1 className="text-3xl font-bold mb-4 text-center uppercase">
           Admin Dashboard
         </h1>

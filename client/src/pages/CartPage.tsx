@@ -168,7 +168,7 @@ const CartPage: React.FC = () => {
   return (
     <SearchQueryProvider>
       <Header />
-      <div className="absolute top-[80px] w-full h-[calc(100vh-80px)] flex flex-col px-8">
+      <div className="absolute top-[100px] w-full h-[calc(100vh-80px)] flex flex-col px-8">
         {loading && <Loader />}
 
         {cartItems.length === 0 ? (
