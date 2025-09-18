@@ -1,20 +1,19 @@
 import React, { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 
-// 1) Тип для нашего контекста: строка + setter
 interface SearchQueryContextType {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
 }
 
-// 2) Создаём контекст, по умолчанию undefined для отлова ошибок
+// create a context, undefined by default, for error handling
 const SearchQueryContext = createContext<SearchQueryContextType | undefined>(
   undefined,
 );
 
 type SearchQueryProviderProps = { children: ReactNode };
 
-// 3) Провайдер, который будем оборачивать приложение или определённые разделы
+// provider that will wrap the application or specific parts of it
 export const SearchQueryProvider = ({ children }: SearchQueryProviderProps) => {
   const [query, setQuery] = useState<string>("");
 
@@ -25,7 +24,7 @@ export const SearchQueryProvider = ({ children }: SearchQueryProviderProps) => {
   );
 };
 
-// 4) Кастомный хук для удобного доступа к контексту
+// custom hook for convenient access to context
 export function useSearchQuery(): SearchQueryContextType {
   const context = useContext(SearchQueryContext);
   if (!context) {

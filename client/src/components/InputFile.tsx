@@ -36,7 +36,6 @@ const InputFile: React.FC<InputFileProps> = ({
       className={`relative w-full mb-5 ${containerClassName}`}
       invalid={error}
     >
-      {/* Скрытый input */}
       <input
         ref={fileInputRef}
         type="file"
@@ -56,7 +55,6 @@ const InputFile: React.FC<InputFileProps> = ({
         <UploadCloud className="w-4 h-4" />
         {isUploading ? "Uploading..." : "Select file"}
       </button>
-      {/* Имя файла */}
       <div className="mt-1 text-xs min-h-[1.5em]">
         {fileName && (
           <span>
@@ -65,7 +63,6 @@ const InputFile: React.FC<InputFileProps> = ({
         )}
       </div>
 
-      {/* Helper/Error */}
       {!error && helperText && (
         <Field.HelperText className="mt-1 text-xs text-gray-500">
           {helperText}

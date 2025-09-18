@@ -287,7 +287,6 @@ def update_product_details(
             if not cur.fetchone():
                 raise HTTPException(status_code=404, detail=f"Product with id {item_id} not found")
 
-            # Обновим основные поля
             update_fields = []
             values = []
 
@@ -309,19 +308,16 @@ def update_product_details(
                     tuple(values + [item_id])
                 )
 
-            # Обновим category (item_category)
             if "category_id" in data:
                 cur.execute("DELETE FROM item_category WHERE item_id = %s", (item_id,))
                 cur.execute("INSERT INTO item_category (item_id, category_id) VALUES (%s, %s)",
                             (item_id, data["category_id"]))
 
-            # Обновим subcategory (item_subcategory)
             if "subcategory_id" in data:
                 cur.execute("DELETE FROM item_subcategory WHERE item_id = %s", (item_id,))
                 cur.execute("INSERT INTO item_subcategory (item_id, subcategory_id) VALUES (%s, %s)",
                             (item_id, data["subcategory_id"]))
 
-            # Получим обновлённый продукт с категориями
             cur.execute("""
                     SELECT
                         i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,

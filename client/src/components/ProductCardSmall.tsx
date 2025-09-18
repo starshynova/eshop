@@ -8,7 +8,6 @@ type ProductCardProps = {
   image: string;
   title: string;
   price: number;
-  description: string;
   idx: number;
 };
 
@@ -17,7 +16,6 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
   image,
   title,
   price,
-  description,
   idx,
 }) => {
   const navigate = useNavigate();

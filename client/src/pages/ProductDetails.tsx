@@ -8,6 +8,8 @@ import Button from "../components/Button";
 import { Accordion } from "@ark-ui/react";
 import { Plus, Minus } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import CustomDialog from "../components/CustomDialog";
+import { useNavigate } from "react-router-dom";
 
 type ProductProps = {
   id: string;
@@ -16,16 +18,23 @@ type ProductProps = {
   description: string;
   main_photo_url: string;
   stock: number;
+  category?: { name: string };
+  subcategory?: { name: string };
 };
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<ProductProps | null>(null);
   const { addAndRefresh } = useCart();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) return;
     const fetchProductDetails = async () => {
+      setError(null);
+      setIsLoading(true);
       try {
         const response = await fetch(`${API_BASE_URL}/products/${id}`);
         if (!response.ok) {
@@ -33,8 +42,11 @@ const ProductDetails: React.FC = () => {
         }
         const data = await response.json();
         setProduct(data);
-      } catch (error) {
-        console.error("Error fetching product details:", error);
+      } catch (error: any) {
+        setError(error.message || "Error fetching product details");
+        setProduct(null);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchProductDetails();
@@ -45,9 +57,19 @@ const ProductDetails: React.FC = () => {
     await addAndRefresh(id, 1);
   };
 
-  if (!product) {
-    return <Loader />;
+  if (isLoading) return <Loader />;
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
   }
+
+  if (!product) return null;
 
   return (
     <SearchQueryProvider>
@@ -56,16 +78,51 @@ const ProductDetails: React.FC = () => {
         <img
           src={product.main_photo_url}
           alt={product.title}
-          className="w-[45%] object-cover aspect-[3/5]"
+          className="w-[45%] object-cover aspect-[1/1]"
         />
         <div className="flex flex-col w-[55%]">
-          <h1 className="text-4xl font-bold text-black uppercase">
+          <h2 className="text-lg text-gray-800 text-left flex gap-2 items-center">
+            <button
+              className="capitalize"
+              onClick={() => navigate("/")}
+              type="button"
+            >
+              home /
+            </button>
+            {product.category?.name && (
+              <button
+                className=" capitalize"
+                onClick={() =>
+                  navigate(
+                    `/?category_name=${encodeURIComponent(product.category!.name)}`,
+                  )
+                }
+                type="button"
+              >
+                {product.category.name}
+              </button>
+            )}
+            {product.subcategory?.name && (
+              <>
+                <span>/</span>
+                <button
+                  className="capitalize"
+                  onClick={() =>
+                    navigate(
+                      `/?subcategory_name=${encodeURIComponent(product.subcategory!.name)}`,
+                    )
+                  }
+                  type="button"
+                >
+                  {product.subcategory.name}
+                </button>
+              </>
+            )}
+          </h2>
+          <h1 className="text-4xl font-bold text-black uppercase mt-4">
             {product.title}
           </h1>
           <div className="mt-4 text-black text-xl">€{product.price}</div>
-          <p className="text-sm text-gray-400 mt-4">
-            Available Stock: {product.stock}
-          </p>
           <div className="border-t-[1px] border-gray-400 w-full mt-8" />
           <Button
             className="mt-8"
