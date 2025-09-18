@@ -15,7 +15,6 @@ interface Product {
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
-  //   const q = searchParams.get('q') || '';
   const term = searchParams.get("term") || "";
   const mode = searchParams.get("mode") ?? "regular";
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,12 +31,12 @@ const SearchPage = () => {
 
         const response = await fetch(url.toString());
         if (!response.ok) {
-          throw new Error(`Ошибка загрузки: ${response.status}`);
+          throw new Error(`Failed to load: ${response.status}`);
         }
         const data = await response.json();
         setProducts(data);
       } catch (error) {
-        console.error("Ошибка при загрузке продуктов:", error);
+        console.error("Error loading products:", error);
       } finally {
         setLoading(false);
       }
@@ -50,33 +49,31 @@ const SearchPage = () => {
       <Header />
 
       {loading ? (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-white bg-opacity-75">
           <Loader />
-        </div>
       ) : !term ? (
         <p className="p-8 text-center">
-          Введите запрос в поисковую строку выше.
+          Enter your query in the search bar above
         </p>
       ) : products.length > 0 ? (
         <div className="w-full flex flex-col items-center justify-center mt-8">
           <h1 className="mb-4 text-2xl">
-            Результаты поиска: «{term}» ({mode})
+            Search results: «{term}» ({mode})
           </h1>
-          <div className="flex flex-wrap gap-y-8 justify-around px-8 mt-4 w-full">
-            {products.map((product) => (
+          <div className="grid grid-cols-4 gap-y-8 gap-x-8 px-8 mt-8">
+            {products.map((product, idx) => (
               <ProductCardSmall
                 key={product.id}
                 id={product.id.toString()}
                 image={product.main_photo_url}
                 title={product.title}
                 price={product.price}
-                description={product.description || "Описание пока отсутствует"}
+                idx={idx}
               />
             ))}
           </div>
         </div>
       ) : (
-        <p className="p-8 text-center">Ничего не найдено.</p>
+        <p className="p-8 text-center text-2xl uppercase">Nothing found</p>
       )}
     </>
   );
