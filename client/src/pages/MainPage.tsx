@@ -77,9 +77,15 @@ const MainPage: React.FC = () => {
     <div>
       <SearchQueryProvider>
         <Header />
-        <div className="absolute top-[80px] pb-12">
-          <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
-          <div className="grid grid-cols-4 gap-y-8 justify-between px-24 mt-8  ">
+        <div className="absolute top-[100px] pb-12">
+          <div className="flex justify-between items-center px-8">
+            <h1 className="text-3xl font-bold text-left uppercase mt-8">
+              {subcategory || category || "All Products"}
+            </h1>
+
+            <SortMenu sort={sort as any} handleSortChange={handleSortChange} />
+          </div>
+          <div className="grid grid-cols-4 gap-y-8 justify-between px-8 mt-8  ">
             {products.map((product, idx) => (
               <ProductCardSmall
                 key={product.id}

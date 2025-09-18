@@ -57,7 +57,7 @@ const LoginPage = () => {
     <>
       <SearchQueryProvider>
         <Header />
-        <div className="w-full h-full absolutetop-[80px]">
+        <div className="w-full h-full absolute top-[100px]">
           <div className="w-[30%] max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-lg justify-center items-center">
             <div className="space-y-4">
               <h2 className="text-3xl font-semibold">Login</h2>

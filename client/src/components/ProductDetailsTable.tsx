@@ -171,150 +171,150 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
       <div className="overflow-x-auto ">
         <table className="min-w-full border border-gray-300">
           <div className="p-4">
-          <tbody>
-            <tr>
-              <th className="text-left px-4 py-3 w-1/5">ID</th>
-              <td className="px-4 py-3">{product.id}</td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Title</th>
-              <td className="px-4 py-3">
-                {editMode ? (
-                  <InputSmall
-                    type="text"
-                    value={form.title}
-                    onChange={(e) =>
-                      setForm((f: any) => ({
-                        ...f,
-                        title: e.target.value,
-                      }))
-                    }
+            <tbody>
+              <tr>
+                <th className="text-left px-4 py-3 w-1/5">ID</th>
+                <td className="px-4 py-3">{product.id}</td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Title</th>
+                <td className="px-4 py-3">
+                  {editMode ? (
+                    <InputSmall
+                      type="text"
+                      value={form.title}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          title: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : (
+                    product.title
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Photo</th>
+                <td className="px-4 py-3">
+                  <img
+                    src={form.main_photo_url}
+                    alt={product.title}
+                    className="h-48"
                   />
-                ) : (
-                  product.title
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Photo</th>
-              <td className="px-4 py-3">
-                <img
-                  src={form.main_photo_url}
-                  alt={product.title}
-                  className="h-48"
-                />
-                {editMode && (
-                  <InputFile
-                    accept="image/*"
-                    onChange={handleFileChange}
-                    fileName={uploadedFileName}
-                    isUploading={isUploading}
-                    error={!!error}
-                    errorText={error ?? undefined}
-                  />
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Description</th>
-              <td className="px-4 py-3">
-                {editMode ? (
-                  <InputSmall
-                    type="text"
-                    value={form.description}
-                    onChange={(e) =>
-                      setForm((f: any) => ({
-                        ...f,
-                        description: e.target.value,
-                      }))
-                    }
-                  />
-                ) : (
-                  product.description
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Price</th>
-              <td className="px-4 py-3">
-                {editMode ? (
-                  <InputSmall
-                    type="number"
-                    value={form.price}
-                    onChange={(e) =>
-                      setForm((f: any) => ({
-                        ...f,
-                        price: e.target.value,
-                      }))
-                    }
-                  />
-                ) : (
-                  product.price
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Stock</th>
-              <td className="px-4 py-3">
-                {editMode ? (
-                  <InputSmall
-                    type="number"
-                    value={form.stock}
-                    onChange={(e) =>
-                      setForm((f: any) => ({
-                        ...f,
-                        stock: e.target.value,
-                      }))
-                    }
-                  />
-                ) : (
-                  product.stock
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Category</th>
-              <td className="px-4 py-3">
-                {editMode ? (
-                  <InputSmall
-                    type="text"
-                    value={form.category}
-                    onChange={(e) =>
-                      setForm((f: any) => ({
-                        ...f,
-                        category: e.target.value,
-                      }))
-                    }
-                  />
-                ) : typeof product.category === "string" ? (
-                  product.category
-                ) : (
-                  product.category?.name || ""
-                )}
-              </td>
-            </tr>
-            <tr>
-              <th className="text-left px-4 py-3">Subcategory</th>
-              <td className="px-4 py-3">
-                {editMode ? (
-                  <InputSmall
-                    type="text"
-                    value={form.subcategory}
-                    onChange={(e) =>
-                      setForm((f: any) => ({
-                        ...f,
-                        subcategory: e.target.value,
-                      }))
-                    }
-                  />
-                ) : typeof product.subcategory === "string" ? (
-                  product.subcategory
-                ) : (
-                  product.subcategory?.name || ""
-                )}
-              </td>
-            </tr>
-          </tbody>
+                  {editMode && (
+                    <InputFile
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      fileName={uploadedFileName}
+                      isUploading={isUploading}
+                      error={!!error}
+                      errorText={error ?? undefined}
+                    />
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Description</th>
+                <td className="px-4 py-3">
+                  {editMode ? (
+                    <InputSmall
+                      type="text"
+                      value={form.description}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          description: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : (
+                    product.description
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Price</th>
+                <td className="px-4 py-3">
+                  {editMode ? (
+                    <InputSmall
+                      type="number"
+                      value={form.price}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          price: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : (
+                    product.price
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Stock</th>
+                <td className="px-4 py-3">
+                  {editMode ? (
+                    <InputSmall
+                      type="number"
+                      value={form.stock}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          stock: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : (
+                    product.stock
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Category</th>
+                <td className="px-4 py-3">
+                  {editMode ? (
+                    <InputSmall
+                      type="text"
+                      value={form.category}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          category: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : typeof product.category === "string" ? (
+                    product.category
+                  ) : (
+                    product.category?.name || ""
+                  )}
+                </td>
+              </tr>
+              <tr>
+                <th className="text-left px-4 py-3">Subcategory</th>
+                <td className="px-4 py-3">
+                  {editMode ? (
+                    <InputSmall
+                      type="text"
+                      value={form.subcategory}
+                      onChange={(e) =>
+                        setForm((f: any) => ({
+                          ...f,
+                          subcategory: e.target.value,
+                        }))
+                      }
+                    />
+                  ) : typeof product.subcategory === "string" ? (
+                    product.subcategory
+                  ) : (
+                    product.subcategory?.name || ""
+                  )}
+                </td>
+              </tr>
+            </tbody>
           </div>
         </table>
       </div>

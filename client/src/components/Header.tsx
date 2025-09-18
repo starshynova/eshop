@@ -67,9 +67,9 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <div className="w-full flex flex-col items-center justify-between px-8">
+    <div className="w-full flex flex-col items-center justify-between px-8 mt-[20px]">
       <div className="w-full sticky top-0 z-50 bg-white shadow-md">
-        <div className="h-[80px] flex items-center justify-between px-24">
+        <div className="h-[80px] flex items-center justify-between px-8">
           <div
             className="flex w-[60%] items-center justify-start gap-8"
             onMouseEnter={() => setLeftHover(true)}

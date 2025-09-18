@@ -43,7 +43,7 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
 
   return (
     <div
-      className="flex flex-col gap-y-4 w-[90%] mx-auto bg-white border-2 border-red-500 pb-8"
+      className="flex flex-col gap-y-4 w-[90%] mx-auto bg-gradient-to-t from-[#f8f8f8f8] to-[#ecececec] border-none "
       style={cardStyle}
     >
       <button
@@ -54,23 +54,26 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
           <img
             src={image}
             alt={title}
-            className="w-full object-cover aspect-[3/5]"
+            className="w-full object-cover aspect-[1/1]"
           />
         </div>
-        <div className="p-4 flex flex-col flex-grow">
-          <h2 className="text-lg font-semibold text-gray-800 truncate">
-            {title}
-          </h2>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">
+      </button>
+      <div className="flex flex-row items-start">
+        <div className="px-4 flex flex-col flex-grow text-left">
+          <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+          {/* <p className="text-sm text-gray-600 mt-1 line-clamp-2">
             {description}
-          </p>
+          </p> */}
           <div className="mt-2 font-bold text-indigo-600 text-md">
             €{price.toFixed(2)}
           </div>
         </div>
-      </button>
-      <div className="w-full flex justify-center">
-        <Button onClick={handleAddToCart} children="Add to Cart" />
+
+        <Button
+          onClick={handleAddToCart}
+          children="Add to Cart"
+          className="min-w-fit"
+        />
       </div>
     </div>
   );

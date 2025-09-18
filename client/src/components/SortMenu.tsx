@@ -34,7 +34,7 @@ const SortMenu: React.FC<SortMenuProps> = ({ sort, handleSortChange }) => {
   ];
 
   return (
-    <div className="flex mt-8 h-[40px] px-24 items-center justify-end">
+    <div className="flex  mt-8 h-[40px] items-center justify-end">
       <Menu.Root positioning={{ placement: "bottom-end", gutter: 8 }}>
         <Menu.Trigger asChild>
           <button
