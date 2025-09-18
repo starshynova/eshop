@@ -87,6 +87,7 @@ const Header: React.FC = () => {
                 <Menu.Trigger
                   className="self-start h-8 bg-transparent text-[#000000] text-lg px-1 uppercase focus:outline-none
                  border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
+                  onClick={() => navigate("/")}
                 >
                   Catalog
                 </Menu.Trigger>
@@ -97,7 +98,6 @@ const Header: React.FC = () => {
                       const hasSub =
                         Array.isArray(category.subcategories) &&
                         category.subcategories.length > 0;
-
                       if (!hasSub) {
                         return (
                           <Menu.Item

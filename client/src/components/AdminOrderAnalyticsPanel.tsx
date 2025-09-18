@@ -205,13 +205,17 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
               </tbody>
             </table>
           </div>
-          <div className="flex-1 min-w-[280px] bg-white border-2 border-gray-300 p-6 rounded-sm">
-            <h2 className="text-lg font-bold mb-3 uppercase">
+          <div className="flex-1 min-w-[280px] bg-white border-2 border-gray-300 rounded-sm py-6">
+            <h2 className="text-lg font-bold  pl-4 uppercase">
               Products without sales
             </h2>
-            <ul className="list-disc ml-6">
+            <ul className="list-none">
               {data.unsold_products.map((product) => (
-                <li key={product.id} className="py-1">
+                <li
+                  key={product.id}
+                  className="py-2 px-4 hover:bg-gray-200 cursor-pointer"
+                  onClick={() => setSelectedProductId(product.id)}
+                >
                   {product.title}
                 </li>
               ))}

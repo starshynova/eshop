@@ -93,9 +93,6 @@ const MainPage: React.FC = () => {
                 image={product.main_photo_url}
                 title={product.title}
                 price={product.price}
-                description={
-                  product.description || "No description available yet"
-                }
                 idx={idx}
               />
             ))}

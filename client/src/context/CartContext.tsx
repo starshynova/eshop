@@ -12,9 +12,9 @@ import Loader from "../components/Loader";
 type CartContextType = {
   count: number;
   loading: boolean;
-  refresh: () => Promise<void>; // перезагрузить count с бэка
-  addAndRefresh: (productId: string, stock?: number) => Promise<void>; // добавить и обновить count
-  setCount: (n: number) => void; // опционально, иногда удобно мгновенно обновить
+  refresh: () => Promise<void>; // reset count from back
+  addAndRefresh: (productId: string, stock?: number) => Promise<void>; // add and update count
+  setCount: (n: number) => void; // optionally, it is sometimes useful to update instantly
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
