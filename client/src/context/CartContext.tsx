@@ -8,6 +8,7 @@ import React, {
 import { API_BASE_URL } from "../config";
 import { useAuth } from "./AuthContext";
 import Loader from "../components/Loader";
+import { addToLocalCart, getLocalCartCount } from "../utils/localCart";
 
 type CartContextType = {
   count: number;
@@ -23,19 +24,17 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const [count, setCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const token = localStorage.getItem("token");
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated) {
-      setCount(0);
+      setCount(getLocalCartCount());
       return;
     }
-
+    const token = localStorage.getItem("token");
     if (!token) {
       setCount(0);
       return;
     }
-
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE_URL}/carts/count`, {
@@ -52,13 +51,28 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isAuthenticated]);
 
-  // Инициализируем count при монтировании и при смене авторизации
+  useEffect(() => {
+    if (!isAuthenticated) {
+      const handler = () => setCount(getLocalCartCount());
+      window.addEventListener("cart-updated", handler);
+      handler();
+      return () => window.removeEventListener("cart-updated", handler);
+    }
+  }, [isAuthenticated]);
+
+  // initialize count when mounting and when changing authorization
   useEffect(() => {
     void refresh();
   }, [refresh]);
 
+
   const addAndRefresh = useCallback(
     async (productId: string, stock: number = 1) => {
+      if (!isAuthenticated) {
+        addToLocalCart(productId, stock); // this will trigger cart-updated
+        setCount(getLocalCartCount());
+        return;
+      }
       const token = localStorage.getItem("token");
       if (!token) return;
 
@@ -72,22 +86,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           },
           body: JSON.stringify({ item_id: productId, stock }),
         });
-
         if (res.ok) {
           await refresh();
-        } else {
-          try {
-            const err = await res.json();
-            console.error("Add to cart failed:", err);
-          } catch {
-            console.error("Add to cart failed: HTTP", res.status);
-          }
         }
       } finally {
         setLoading(false);
       }
     },
-    [refresh],
+    [isAuthenticated, refresh]
   );
 
   return (
