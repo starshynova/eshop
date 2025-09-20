@@ -9,6 +9,7 @@ import Input from "../components/Input";
 import CustomDialog from "../components/CustomDialog";
 import { useAuth } from "../context/AuthContext";
 import { FcGoogle } from "react-icons/fc";
+import { useCart } from "../context/CartContext";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -18,6 +19,7 @@ const LoginPage = () => {
 
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { refresh } = useCart();
 
   const handleLogin = async () => {
     setError(null);
@@ -36,7 +38,8 @@ const LoginPage = () => {
         throw new Error(`Login failed: ${response.status}`);
       } else {
         console.log("Login successful:", data);
-        login(data.token);
+        await login(data.token);
+        await refresh();
         setIsOpen(true);
         setTimeout(() => {
           setIsOpen(false);

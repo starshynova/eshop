@@ -9,6 +9,7 @@ import { API_BASE_URL } from "../config";
 import { useAuth } from "./AuthContext";
 import Loader from "../components/Loader";
 import { addToLocalCart, getLocalCartCount } from "../utils/localCart";
+import { getLocalCart, clearLocalCart } from "../utils/localCart";
 
 type CartContextType = {
   count: number;
@@ -16,6 +17,7 @@ type CartContextType = {
   refresh: () => Promise<void>; // reset count from back
   addAndRefresh: (productId: string, stock?: number) => Promise<void>; // add and update count
   setCount: (n: number) => void; // optionally, it is sometimes useful to update instantly
+  // mergeGuestCartToUser: () => Promise<void>; // merge guest cart to user cart
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -62,8 +64,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
 
   // initialize count when mounting and when changing authorization
   useEffect(() => {
+  if (isAuthenticated) {
     void refresh();
-  }, [refresh]);
+  }
+}, [isAuthenticated]);
 
 
   const addAndRefresh = useCallback(
@@ -93,14 +97,61 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
       }
     },
-    [isAuthenticated, refresh]
+    [isAuthenticated, refresh],
   );
+
+  // const mergeGuestCartToUser = useCallback(async () => {
+  //   if (!isAuthenticated) return;
+
+  //   const token = localStorage.getItem("token");
+  //   if (!token) return;
+
+  //   const guestCart = getLocalCart(); // [{ productId, quantity }]
+  //   if (!guestCart || guestCart.length === 0) return;
+
+  //   type GuestCartItem = { productId: string; quantity: number };
+
+  //   setLoading(true);
+  //   try {
+  //     // Send each item to the server
+  //     await Promise.all(
+  //       guestCart.map((item: GuestCartItem) =>
+  //         fetch(`${API_BASE_URL}/carts/add`, {
+  //           method: "POST",
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //           body: JSON.stringify({
+  //             item_id: item.productId,
+  //             stock: item.quantity,
+  //           }),
+  //         }),
+  //       ),
+  //     );
+
+  //     clearLocalCart();
+  //     await refresh();
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, [isAuthenticated, refresh]);
+
+  if (loading) {
+    <Loader />;
+  }
 
   return (
     <CartContext.Provider
-      value={{ count, loading, refresh, addAndRefresh, setCount }}
+      value={{
+        count,
+        loading,
+        refresh,
+        addAndRefresh,
+        setCount,
+        // mergeGuestCartToUser,
+      }}
     >
-      {loading && <Loader />}
       {children}
     </CartContext.Provider>
   );

@@ -49,7 +49,7 @@ async def stripe_webhook(request: Request):
         )
         print(f"✅ Event type: {event['type']}")
     except stripe.error.SignatureVerificationError:
-        print("❌ Invalid signature")
+        print("Invalid signature")
         raise HTTPException(status_code=400, detail="Invalid signature")
 
     if event["type"] == "payment_intent.succeeded":
@@ -71,8 +71,8 @@ async def stripe_webhook(request: Request):
                 cart = cur.fetchall()
                 print(f"🛒 Cart contents: {cart}")
                 if not cart:
-                    print("❌ Cart is empty")
-                    raise HTTPException(400, "Корзина пуста")
+                    print("Cart is empty")
+                    raise HTTPException(400, "Cart is empty")
 
                 order_id = str(uuid.uuid4())
                 cur.execute(
@@ -85,8 +85,8 @@ async def stripe_webhook(request: Request):
                     cur.execute("SELECT price FROM items WHERE id = %s;", (item_id,))
                     row = cur.fetchone()
                     if not row:
-                        print(f"❌ Item not found: id={item_id}")
-                        raise HTTPException(400, f"Товар id={item_id} не найден")
+                        print(f"Item not found: id={item_id}")
+                        raise HTTPException(400, f"Item id={item_id} not found")
                     price_at_purchase = row[0]
 
                     cur.execute(
@@ -100,12 +100,12 @@ async def stripe_webhook(request: Request):
                         (stock, item_id, stock)
                     )
                     if cur.rowcount == 0:
-                        print(f"❌ Not enough stock for item_id={item_id}")
-                        raise HTTPException(400, f"Недостаточно товара id={item_id}")
+                        print(f"Not enough stock for item_id={item_id}")
+                        raise HTTPException(400, f"Not enough stock for id={item_id}")
 
                 cur.execute("DELETE FROM cart_item WHERE user_id = %s;", (user_id,))
-                print(f"✅ Cart cleared for user_id={user_id}")
-                print(f"🎉 Order finalized via webhook: {order_id}")
+                print(f"Cart cleared for user_id={user_id}")
+                print(f"Order finalized via webhook: {order_id}")
         except Exception as e:
             print(f"🔥 Error during order creation: {str(e)}")
             raise HTTPException(400, f"Ошибка при оформлении заказа: {str(e)}")

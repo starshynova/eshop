@@ -153,7 +153,6 @@
 //     );
 //   }
 
-
 //   return (
 //     <SearchQueryProvider>
 //       <Header />
@@ -315,7 +314,6 @@
 
 // export default CartPage;
 
-
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
 import Loader from "../components/Loader";
@@ -336,7 +334,7 @@ type CartItem = {
   id: string;
   title: string;
   price: number;
-  stock: number;    
+  stock: number;
   main_photo_url: string;
 };
 
@@ -349,12 +347,11 @@ const CartPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStock, setEditStock] = useState<number>(1);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const { refresh } = useCart();
+  const { refresh} = useCart();
   const token = localStorage.getItem("token");
   const stripePromise = loadStripe(`${STRIPE_PUBLISHABLE_KEY}`);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
-  
   useEffect(() => {
     const fetchCart = async () => {
       setLoading(true);
@@ -364,10 +361,11 @@ const CartPage: React.FC = () => {
           const res = await fetch(`${API_BASE_URL}/carts/items`, {
             headers: { Authorization: `Bearer ${token}` },
           });
-          if (!res.ok) throw new Error(`Failed to fetch cart items: ${res.status}`);
+          if (!res.ok)
+            throw new Error(`Failed to fetch cart items: ${res.status}`);
           const data = await res.json();
           setCartItems(data.items || []);
-          console.log(data)
+          console.log(data);
         } catch (err: any) {
           setError(err.message || "Unknown error");
           setCartItems([]);
@@ -376,34 +374,36 @@ const CartPage: React.FC = () => {
         }
         return;
       }
-      
+
       try {
-        const localCart = getLocalCart(); 
+        const localCart = getLocalCart();
         if (!localCart.length) {
           setCartItems([]);
           setLoading(false);
           return;
         }
-        const ids = localCart.map((i: { productId: string; quantity: number }) => i.productId);
+        const ids = localCart.map(
+          (i: { productId: string; quantity: number }) => i.productId,
+        );
 
-       
         const res = await fetch(`${API_BASE_URL}/products/batch`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ids }),
         });
         if (!res.ok) throw new Error("Failed to fetch products info");
-        const data = await res.json(); 
-        
+        const data = await res.json();
+
         const fullCart: CartItem[] = data.products.map((p: any) => {
-          const qty = localCart.find((x: any) => x.productId === p.id)?.quantity || 1;
+          const qty =
+            localCart.find((x: any) => x.productId === p.id)?.quantity || 1;
           return {
             ...p,
             stock: qty,
           };
         });
         setCartItems(fullCart);
-        clearLocalCart();
+        // clearLocalCart();
       } catch (err: any) {
         setError(err.message || "Unknown error");
         setCartItems([]);
@@ -414,7 +414,6 @@ const CartPage: React.FC = () => {
 
     fetchCart();
 
-    
     if (!isAuthenticated) {
       const handler = () => fetchCart();
       window.addEventListener("cart-updated", handler);
@@ -422,7 +421,15 @@ const CartPage: React.FC = () => {
     }
   }, [isAuthenticated]);
 
-  
+  // useEffect(() => {
+  //   if (!isAuthenticated) return;
+
+  //   const guestCart = getLocalCart();
+  //   if (!guestCart || guestCart.length === 0) return;
+
+  //   mergeGuestCartToUser();
+  // }, [isAuthenticated, mergeGuestCartToUser, refresh]);
+
   const handleProductCardClick = (productId: string) => {
     if (!productId) {
       console.error("Product ID is undefined!");
@@ -431,24 +438,22 @@ const CartPage: React.FC = () => {
     navigate(`/products/${productId}`);
   };
 
- 
   const handleRemoveItem = async (itemId: string) => {
     if (!isAuthenticated) {
-    
       let localCart = getLocalCart();
-      localCart = localCart.filter(i => i.productId !== itemId);
+      localCart = localCart.filter((i: { productId: string; quantity: number }) => i.productId !== itemId);
       setLocalCart(localCart);
-      setCartItems(prev => prev.filter(item => item.id !== itemId));
+      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
       return;
     }
-    
+
     try {
       const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to remove item");
-      setCartItems(prev => prev.filter(item => item.id !== itemId));
+      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
       await refresh();
     } catch (err: any) {
       setError(err.message || "Unknown error");
@@ -456,23 +461,22 @@ const CartPage: React.FC = () => {
     }
   };
 
-  
   const handleEditClick = (item: CartItem) => {
     setEditingId(item.id);
     setEditStock(item.stock);
   };
 
-  
   const handleEditSave = async (itemId: string) => {
     if (!isAuthenticated) {
-     
       let localCart = getLocalCart();
-      localCart = localCart.map(i =>
-        i.productId === itemId ? { ...i, quantity: editStock } : i
+      localCart = localCart.map((i: { productId: string; quantity: number }) =>
+        i.productId === itemId ? { ...i, quantity: editStock } : i,
       );
       setLocalCart(localCart);
-      setCartItems(prev =>
-        prev.map(item => (item.id === itemId ? { ...item, stock: editStock } : item))
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, stock: editStock } : item,
+        ),
       );
       setEditingId(null);
       return;
@@ -488,10 +492,10 @@ const CartPage: React.FC = () => {
         body: JSON.stringify({ stock: editStock }),
       });
       if (!res.ok) throw new Error("Failed to update stock");
-      setCartItems(prev =>
-        prev.map(item =>
-          item.id === itemId ? { ...item, stock: editStock } : item
-        )
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, stock: editStock } : item,
+        ),
       );
       setEditingId(null);
       await refresh();
@@ -502,7 +506,10 @@ const CartPage: React.FC = () => {
   };
 
   const handleCheckout = async () => {
-    const total = cartItems.reduce((sum, item) => sum + item.price * item.stock, 0);
+    const total = cartItems.reduce(
+      (sum, item) => sum + item.price * item.stock,
+      0,
+    );
     const res = await fetch(`${API_BASE_URL}/payments/create-payment`, {
       method: "POST",
       headers: {
@@ -519,23 +526,6 @@ const CartPage: React.FC = () => {
     const data = await res.json();
     setClientSecret(data.clientSecret);
   };
-
-//   const clearCart = async () => {
-//   if (isAuthenticated) {
-//     // Очистить корзину на сервере
-//     await fetch(`${API_BASE_URL}/carts/clear`, {
-//       method: "DELETE",
-//       headers: { Authorization: `Bearer ${token}` },
-//     });
-//     setCartItems([]);
-//     refresh();
-//   } else {
-//     // Очистить корзину гостя
-//     clearLocalCart();
-//     setCartItems([]);
-//   }
-//   setClientSecret(null); // сбросить форму оплаты
-// };
 
   if (error) {
     return (
@@ -681,44 +671,41 @@ const CartPage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              
-              {isAuthenticated ? (
-  clientSecret ? (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <StripeCheckoutForm
-        onPaymentSuccess={() => {
-          setClientSecret(null);
-          // Можно показать сообщение "Заказ успешно оформлен" или редирект
-        }}
-      />
-    </Elements>
-  ) : (
-    <Button
-      children="Checkout"
-      className="mt-8 w-full"
-      onClick={handleCheckout}
-    />
-  )
-) : (
-  clientSecret ? (
-    <Elements stripe={stripePromise} options={{ clientSecret }}>
-      <StripeCheckoutForm
-        onPaymentSuccess={() => {
-          clearLocalCart();
-          setCartItems([]);
-          setClientSecret(null);
-        }}
-      />
-    </Elements>
-  ) : (
-    <Button
-      children="Login to Checkout"
-      className="mt-8 w-full"
-      onClick={() => navigate("/login")}
-    />
-  )
-)}
 
+              {isAuthenticated ? (
+                clientSecret ? (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <StripeCheckoutForm
+                      // onPaymentSuccess={() => {
+                      //   setClientSecret(null);
+                      //   // Можно показать сообщение "Заказ успешно оформлен" или редирект
+                      // }}
+                    />
+                  </Elements>
+                ) : (
+                  <Button
+                    children="Checkout"
+                    className="mt-8 w-full"
+                    onClick={handleCheckout}
+                  />
+                )
+              ) : clientSecret ? (
+                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                  <StripeCheckoutForm
+                    // onPaymentSuccess={() => {
+                    //   clearLocalCart();
+                    //   setCartItems([]);
+                    //   setClientSecret(null);
+                    // }}
+                  />
+                </Elements>
+              ) : (
+                <Button
+                  children="Login to Checkout"
+                  className="mt-8 w-full"
+                  onClick={() => navigate("/login")}
+                />
+              )}
             </div>
           </div>
         )}
