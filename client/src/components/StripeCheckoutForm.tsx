@@ -8,7 +8,11 @@ import Button from "./Button";
 import CustomDialog from "./CustomDialog";
 import { useNavigate } from "react-router-dom";
 
-const StripeCheckoutForm: React.FC = () => {
+type StripeCheckoutFormProps = {
+  onPaymentSuccess?: () => void;
+};
+
+const StripeCheckoutForm: React.FC<StripeCheckoutFormProps> = ({ onPaymentSuccess }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -40,6 +44,10 @@ const StripeCheckoutForm: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, [error, navigate]);
+
+  if (onPaymentSuccess) {
+      onPaymentSuccess();
+    }
 
   return (
     <form onSubmit={handleSubmit}>

@@ -20,6 +20,11 @@ export const addToLocalCart = (productId: string, quantity = 1) => {
   window.dispatchEvent(new Event("cart-updated"));
 }
 
+export const setLocalCart = (cart: { productId: string; quantity: number }[]) => {
+  localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  window.dispatchEvent(new Event('cart-updated'));
+}
+
 export const clearLocalCart = () => {
   localStorage.removeItem(CART_KEY);
   window.dispatchEvent(new Event("cart-updated"));
