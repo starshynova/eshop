@@ -200,8 +200,8 @@ def login_user(credentials: UserLogin):
 
 @router.get("/oauth/google/login")
 async def google_login(request: Request):
-    redirect_uri = "http://localhost:8000/users/oauth/google/callback"
-    # redirect_uri = "https://server-little-butterfly-314.fly.dev/users/oauth/google/callback"
+    # redirect_uri = "http://localhost:8000/users/oauth/google/callback"
+    redirect_uri = "https://server-little-butterfly-314.fly.dev/users/oauth/google/callback"
     return await oauth.google.authorize_redirect(request, redirect_uri)
 
 

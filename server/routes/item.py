@@ -473,3 +473,46 @@ def create_product(data: dict = Body(...)):
     except Exception as e:
         print(f"Error creating product: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/batch")
+async def get_products_batch(ids: dict = Body(...)):
+    id_list = ids.get("ids", [])
+    if not id_list:
+        return {"products": []}
+    placeholders = ','.join(['%s'] * len(id_list))
+    query = f"""
+        SELECT
+            i.id, i.title, i.price, i.description, i.main_photo_url, i.stock,
+            c.id as category_id, c.category_name,
+            sc.id as subcategory_id, sc.subcategory_name
+        FROM items i
+        LEFT JOIN item_category ic ON i.id = ic.item_id
+        LEFT JOIN category c ON ic.category_id = c.id
+        LEFT JOIN item_subcategory isc ON i.id = isc.item_id
+        LEFT JOIN subcategory sc ON isc.subcategory_id = sc.id
+        WHERE i.id IN ({placeholders})
+    """
+    with get_db_cursor() as cur:
+        cur.execute(query, tuple(id_list))
+        rows = cur.fetchall()
+
+    products = [
+        {
+            "id": row[0],
+            "title": row[1],
+            "price": float(row[2]),
+            "description": row[3],
+            "main_photo_url": row[4],
+            "stock": row[5],
+            "category": {
+                "id": row[6],
+                "name": row[7]
+            } if row[6] else None,
+            "subcategory": {
+                "id": row[8],
+                "name": row[9]
+            } if row[8] else None,
+        }
+        for row in rows
+    ]
+    return {"products": products}

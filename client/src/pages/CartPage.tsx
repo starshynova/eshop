@@ -12,20 +12,22 @@ import { useCart } from "../context/CartContext";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import StripeCheckoutForm from "../components/StripeCheckoutForm";
+import { getLocalCart, setLocalCart } from "../utils/localCart";
+import { jwtDecode } from "jwt-decode";
 
 type CartItem = {
   id: string;
   title: string;
   price: number;
   stock: number;
-  image: string;
+  main_photo_url: string;
 };
 
 const CartPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>("");
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStock, setEditStock] = useState<number>(1);
@@ -36,30 +38,71 @@ const CartPage: React.FC = () => {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const fetchCartItems = async () => {
+    const fetchCart = async () => {
       setLoading(true);
-      try {
-        const res = await fetch(`${API_BASE_URL}/carts/items`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
 
-        if (!res.ok) {
-          throw new Error(`Failed to fetch cart items: ${res.status}`);
+      if (isAuthenticated) {
+        try {
+          const res = await fetch(`${API_BASE_URL}/carts/items`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (!res.ok)
+            throw new Error(`Failed to fetch cart items: ${res.status}`);
+          const data = await res.json();
+          setCartItems(data.items || []);
+          console.log(data);
+        } catch (err: any) {
+          setError(err.message || "Unknown error");
+          setCartItems([]);
+        } finally {
+          setLoading(false);
         }
+        return;
+      }
 
+      try {
+        const localCart = getLocalCart();
+        if (!localCart.length) {
+          setCartItems([]);
+          setLoading(false);
+          return;
+        }
+        const ids = localCart.map(
+          (i: { productId: string; quantity: number }) => i.productId,
+        );
+
+        const res = await fetch(`${API_BASE_URL}/products/batch`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids }),
+        });
+        if (!res.ok) throw new Error("Failed to fetch products info");
         const data = await res.json();
-        setCartItems(data.items || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
-        console.error(err);
+
+        const fullCart: CartItem[] = data.products.map((p: any) => {
+          const qty =
+            localCart.find((x: any) => x.productId === p.id)?.quantity || 1;
+          return {
+            ...p,
+            stock: qty,
+          };
+        });
+        setCartItems(fullCart);
+      } catch (err: any) {
+        setError(err.message || "Unknown error");
+        setCartItems([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCartItems();
+    fetchCart();
+
+    if (!isAuthenticated) {
+      const handler = () => fetchCart();
+      window.addEventListener("cart-updated", handler);
+      return () => window.removeEventListener("cart-updated", handler);
+    }
   }, [isAuthenticated]);
 
   const handleProductCardClick = (productId: string) => {
@@ -71,6 +114,16 @@ const CartPage: React.FC = () => {
   };
 
   const handleRemoveItem = async (itemId: string) => {
+    if (!isAuthenticated) {
+      let localCart = getLocalCart();
+      localCart = localCart.filter(
+        (i: { productId: string; quantity: number }) => i.productId !== itemId,
+      );
+      setLocalCart(localCart);
+      setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
         method: "DELETE",
@@ -79,8 +132,8 @@ const CartPage: React.FC = () => {
       if (!res.ok) throw new Error("Failed to remove item");
       setCartItems((prev) => prev.filter((item) => item.id !== itemId));
       await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+    } catch (err: any) {
+      setError(err.message || "Unknown error");
       console.error(err);
     }
   };
@@ -91,6 +144,21 @@ const CartPage: React.FC = () => {
   };
 
   const handleEditSave = async (itemId: string) => {
+    if (!isAuthenticated) {
+      let localCart = getLocalCart();
+      localCart = localCart.map((i: { productId: string; quantity: number }) =>
+        i.productId === itemId ? { ...i, quantity: editStock } : i,
+      );
+      setLocalCart(localCart);
+      setCartItems((prev) =>
+        prev.map((item) =>
+          item.id === itemId ? { ...item, stock: editStock } : item,
+        ),
+      );
+      setEditingId(null);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/carts/items/${itemId}`, {
         method: "PUT",
@@ -108,8 +176,8 @@ const CartPage: React.FC = () => {
       );
       setEditingId(null);
       await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+    } catch (err: any) {
+      setError(err.message || "Unknown error");
       console.error(err);
     }
   };
@@ -119,6 +187,19 @@ const CartPage: React.FC = () => {
       (sum, item) => sum + item.price * item.stock,
       0,
     );
+    console.log("Token before payment:", localStorage.getItem("token"));
+
+    if (!token) {
+      setError("User token not found. Please login again.");
+      return;
+    }
+    type MyJwtPayload = {
+      user_id: string;
+    };
+
+    const decoded = jwtDecode<MyJwtPayload>(token);
+    console.log("Decoded user_id:", decoded.user_id);
+    const user_id = decoded.user_id;
 
     const res = await fetch(`${API_BASE_URL}/payments/create-payment`, {
       method: "POST",
@@ -126,8 +207,10 @@ const CartPage: React.FC = () => {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-
-      body: JSON.stringify({ amount: total }),
+      body: JSON.stringify({
+        amount: total,
+        metadata: { user_id }, // 👈 добавь это
+      }),
     });
 
     if (!res.ok) {
@@ -135,42 +218,32 @@ const CartPage: React.FC = () => {
       return;
     }
     const data = await res.json();
+    console.log("Stripe clientSecret:", data.clientSecret);
     setClientSecret(data.clientSecret);
   };
 
-  if (loading) {
-    return <Loader />;
-  }
-
-  {
-    error && (
+  if (error) {
+    return (
       <CustomDialog
         isOpen={true}
-        onClose={() => navigate("/cart")}
+        onClose={() => {
+          setError(null);
+          navigate("/cart");
+        }}
         message={error}
         isVisibleButton={false}
       />
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <CustomDialog
-        isOpen={true}
-        onClose={() => navigate("/")}
-        message="You need to be logged in to view your cart."
-        buttonTitle="Go to login"
-        onClickButton={() => navigate("/login")}
-      />
-    );
+  if (loading) {
+    return <Loader />;
   }
 
   return (
     <SearchQueryProvider>
       <Header />
       <div className="absolute top-[100px] w-full h-[calc(100vh-80px)] flex flex-col px-8">
-        {loading && <Loader />}
-
         {cartItems.length === 0 ? (
           <div className="flex justify-center">
             <div className="flex flex-col gap-16 mt-16  w-fit">
@@ -197,7 +270,7 @@ const CartPage: React.FC = () => {
                       onClick={() => handleProductCardClick(item.id)}
                     >
                       <img
-                        src={item.image}
+                        src={item.main_photo_url}
                         alt={item.title}
                         className="h-32 object-cover rounded"
                       />
@@ -274,7 +347,6 @@ const CartPage: React.FC = () => {
                 </ul>
               </div>
             </div>
-
             <div className="w-[20%] bg-[#ededed] px-8 py-8 flex flex-col justify-between overflow-y-auto">
               <div>
                 <div className="border-b-4 border-black">
@@ -294,20 +366,34 @@ const CartPage: React.FC = () => {
                   </span>
                 </div>
               </div>
-              {clientSecret ? (
+
+              {isAuthenticated ? (
+                clientSecret ? (
+                  <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <StripeCheckoutForm />
+                  </Elements>
+                ) : (
+                  <Button
+                    children="Checkout"
+                    className="mt-8 w-full"
+                    onClick={handleCheckout}
+                  />
+                )
+              ) : clientSecret ? (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
                   <StripeCheckoutForm />
                 </Elements>
               ) : (
                 <Button
-                  children="Checkout"
+                  children="Login to Checkout"
                   className="mt-8 w-full"
-                  onClick={handleCheckout}
+                  onClick={() => navigate("/login")}
                 />
               )}
             </div>
           </div>
         )}
+
         <CustomDialog
           isOpen={!!deleteItemId}
           onClose={() => setDeleteItemId(null)}

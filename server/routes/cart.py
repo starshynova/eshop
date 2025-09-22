@@ -15,7 +15,7 @@ class CartItemOut(BaseModel):
     title: str
     price: float
     stock: int
-    image: str | None = None
+    main_photo_url: str | None = None
 
 class EditCartItemRequest(BaseModel):
     stock: conint(gt=0)
@@ -38,6 +38,7 @@ def add_to_cart(
         print("Add to cart error:", e)
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
+
 @router.get("/count")
 def get_cart_count(user_id: str = Depends(get_current_user_id)):
     with get_db_cursor() as cur:
@@ -54,7 +55,7 @@ def get_cart_count(user_id: str = Depends(get_current_user_id)):
 def get_cart_items(user_id: str = Depends(get_current_user_id)):
     """
     Возвращает список товаров в корзине текущего пользователя.
-    Формат: {"items": [ {id, title, price, stock, image}, ... ]}
+    Формат: {"items": [ {id, title, price, stock, main_photo_url}, ... ]}
     """
     try:
         with get_db_cursor() as cur:
@@ -66,7 +67,7 @@ def get_cart_items(user_id: str = Depends(get_current_user_id)):
                     i.title                  AS title,        -- или i.name
                     i.price                  AS price,
                     ci.stock              AS stock,
-                    i.main_photo_url         AS image         -- или i.image
+                    i.main_photo_url         AS main_photo_url         -- или i.image
                 FROM cart_item ci
                 JOIN items i ON i.id = ci.item_id
                 WHERE ci.user_id = %s
@@ -77,19 +78,18 @@ def get_cart_items(user_id: str = Depends(get_current_user_id)):
 
         items: List[CartItemOut] = []
         for r in rows:
-            # r = (id, title, price, stock, image)
+            # r = (id, title, price, stock, main_photo_url)
             items.append(CartItemOut(
                 id=str(r[0]),
                 title=r[1],
                 price=float(r[2]),
                 stock=int(r[3]),
-                image=r[4]
+                main_photo_url=r[4]
             ))
 
         return {"items": items}
 
     except Exception as e:
-        # на проде логируй e
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                             detail="Failed to fetch cart items")
 
@@ -126,3 +126,4 @@ def edit_cart_item(
         return {"status": "ok"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+

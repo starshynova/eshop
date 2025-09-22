@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   useStripe,
   useElements,
@@ -30,16 +30,6 @@ const StripeCheckoutForm: React.FC = () => {
     if (error) setError(error.message ?? "Payment error");
     setLoading(false);
   };
-
-  useEffect(() => {
-    if (!error) return;
-    const timer = setTimeout(() => {
-      setError(null);
-      navigate("/cart");
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, [error, navigate]);
 
   return (
     <form onSubmit={handleSubmit}>

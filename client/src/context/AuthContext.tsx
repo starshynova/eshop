@@ -2,18 +2,20 @@ import React, { createContext, useState, useContext } from "react";
 
 type AuthContextType = {
   isAuthenticated: boolean;
-  login: (token: string) => void;
+  login: (token: string) => Promise<void>;
   logout: () => void;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return !!localStorage.getItem("token");
   });
 
-  const login = (token: string) => {
+  const login = async (token: string) => {
     localStorage.setItem("token", token);
     setIsAuthenticated(true);
   };

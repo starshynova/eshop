@@ -33,7 +33,7 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
             )
             cart = cur.fetchall()
             if not cart:
-                raise HTTPException(400, "Ваша корзина пуста!")
+                raise HTTPException(400, "Your cart is empty!")
 
             # 2. Создать заказ
             order_id = str(uuid.uuid4())
@@ -70,7 +70,7 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
                     (stock, item_id, stock)
                 )
                 if cur.rowcount == 0:
-                    raise HTTPException(400, f"Недостаточно товара id={item_id}")
+                    raise HTTPException(400, f"Out of stock id={item_id}")
 
             # 3. Очистить корзину пользователя
             cur.execute(
@@ -78,14 +78,14 @@ def checkout_success(user_id: str = Depends(get_current_user_id)):
                 (user_id,)
             )
             print("Order created, returning to client", order_id)
-            return {"order_id": order_id, "message": "Заказ успешно создан"}
+            return {"order_id": order_id, "message": "Order successfully created"}
 
     except HTTPException as e:
         # HTTPException не заворачиваем заново, просто пробрасываем
         raise
     except Exception as e:
         # Все остальные ошибки заворачиваем в HTTPException
-        raise HTTPException(400, f"Ошибка при оформлении заказа: {str(e)}")
+        raise HTTPException(400, f"Error while placing your order: {str(e)}")
 
 
 @router.get("/my", response_model=List[OrderResponse])

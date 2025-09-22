@@ -7,14 +7,20 @@ import React, {
 } from "react";
 import { API_BASE_URL } from "../config";
 import { useAuth } from "./AuthContext";
+import {
+  addToLocalCart,
+  getLocalCartCount,
+  getLocalCart,
+  clearLocalCart,
+} from "../utils/localCart";
 import Loader from "../components/Loader";
 
 type CartContextType = {
   count: number;
   loading: boolean;
-  refresh: () => Promise<void>; // reset count from back
-  addAndRefresh: (productId: string, stock?: number) => Promise<void>; // add and update count
-  setCount: (n: number) => void; // optionally, it is sometimes useful to update instantly
+  refresh: () => Promise<void>;
+  addAndRefresh: (productId: string, stock?: number) => Promise<void>;
+  setCount: (n: number) => void;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -23,14 +29,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   const [count, setCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
-  const token = localStorage.getItem("token");
 
   const refresh = useCallback(async () => {
     if (!isAuthenticated) {
-      setCount(0);
+      setCount(getLocalCartCount());
       return;
     }
 
+    const token = localStorage.getItem("token");
     if (!token) {
       setCount(0);
       return;
@@ -52,13 +58,49 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [isAuthenticated]);
 
-  // Инициализируем count при монтировании и при смене авторизации
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    const syncCartAndRefresh = async () => {
+      if (!isAuthenticated) {
+        setCount(getLocalCartCount());
+        return;
+      }
+
+      const token = localStorage.getItem("token");
+      const guestCart = getLocalCart();
+
+      if (guestCart.length > 0 && token) {
+        await Promise.all(
+          guestCart.map((item: any) =>
+            fetch(`${API_BASE_URL}/carts/add`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+              body: JSON.stringify({
+                item_id: item.productId,
+                stock: item.quantity,
+              }),
+            }),
+          ),
+        );
+        clearLocalCart();
+      }
+
+      await refresh();
+    };
+
+    void syncCartAndRefresh();
+  }, [isAuthenticated]);
 
   const addAndRefresh = useCallback(
     async (productId: string, stock: number = 1) => {
+      if (!isAuthenticated) {
+        addToLocalCart(productId, stock);
+        setCount(getLocalCartCount());
+        return;
+      }
+
       const token = localStorage.getItem("token");
       if (!token) return;
 
@@ -72,29 +114,30 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           },
           body: JSON.stringify({ item_id: productId, stock }),
         });
-
         if (res.ok) {
           await refresh();
-        } else {
-          try {
-            const err = await res.json();
-            console.error("Add to cart failed:", err);
-          } catch {
-            console.error("Add to cart failed: HTTP", res.status);
-          }
         }
       } finally {
         setLoading(false);
       }
     },
-    [refresh],
+    [isAuthenticated, refresh],
   );
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <CartContext.Provider
-      value={{ count, loading, refresh, addAndRefresh, setCount }}
+      value={{
+        count,
+        loading,
+        refresh,
+        addAndRefresh,
+        setCount,
+      }}
     >
-      {loading && <Loader />}
       {children}
     </CartContext.Provider>
   );

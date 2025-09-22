@@ -49,7 +49,7 @@ const SearchPage = () => {
       <Header />
 
       {loading ? (
-          <Loader />
+        <Loader />
       ) : !term ? (
         <p className="p-8 text-center">
           Enter your query in the search bar above
