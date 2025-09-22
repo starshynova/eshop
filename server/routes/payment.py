@@ -19,6 +19,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")  # тестовый ключ
 class PaymentRequest(BaseModel):
     amount: float  # или int, если в центах
     currency: str = "eur"
+    metadata: dict[str, str] = {}
 
 @router.post("/create-payment")
 async def create_payment_intent(payment: PaymentRequest, user_id: str = Depends(get_current_user_id)):
@@ -28,7 +29,7 @@ async def create_payment_intent(payment: PaymentRequest, user_id: str = Depends(
             amount=amount_cents,
             currency=payment.currency,
             automatic_payment_methods={"enabled": True},
-            metadata={"user_id": user_id}
+            metadata=payment.metadata
         )
         return {"clientSecret": intent.client_secret}
     except Exception as e:
@@ -36,12 +37,12 @@ async def create_payment_intent(payment: PaymentRequest, user_id: str = Depends(
 
 @router.post("/webhook")
 async def stripe_webhook(request: Request):
-    print("🔥 Webhook endpoint triggered")
+    print("Webhook endpoint triggered")
     payload = await request.body()
     sig_header = request.headers.get("stripe-signature")
     webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
 
-    print("📩 Webhook received")
+    print("Webhook received")
 
     try:
         event = stripe.Webhook.construct_event(
