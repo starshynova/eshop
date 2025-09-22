@@ -87,7 +87,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         clearLocalCart();
       }
 
-      await refresh(); 
+      await refresh();
     };
 
     void syncCartAndRefresh();

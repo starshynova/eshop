@@ -6,7 +6,9 @@ type AuthContextType = {
   logout: () => void;
 };
 
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(
+  undefined,
+);
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
@@ -14,9 +16,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   });
 
   const login = async (token: string) => {
-  localStorage.setItem("token", token);
-  setIsAuthenticated(true);
-};
+    localStorage.setItem("token", token);
+    setIsAuthenticated(true);
+  };
 
   const logout = () => {
     localStorage.removeItem("token");

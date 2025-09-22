@@ -7,8 +7,6 @@ import {
 import Button from "./Button";
 import CustomDialog from "./CustomDialog";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-
 
 const StripeCheckoutForm: React.FC = () => {
   const stripe = useStripe();
@@ -16,8 +14,6 @@ const StripeCheckoutForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { refresh } = useCart();
-
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

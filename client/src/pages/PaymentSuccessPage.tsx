@@ -1,45 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import CustomDialog from "../components/CustomDialog";
-import { useEffect } from "react";
-import { useCart } from "../context/CartContext";
-import { clearLocalCart } from "../utils/localCart";
-
-// const PaymentSuccessPage: React.FC = () => {
-//   const navigate = useNavigate();
-//   return (
-//     <CustomDialog
-//       isOpen={true}
-//       onClose={() => navigate("/")}
-//       message="Thank you! The payment was successful. Your order has been placed"
-//       isVisibleButton={true}
-//       isVisibleButtonOutline={false}
-//       buttonTitle="go to the main page"
-//       onClickButton={() => navigate("/")}
-//     />
-//   );
-// };
-// export default PaymentSuccessPage;
 
 const PaymentSuccessPage: React.FC = () => {
   const navigate = useNavigate();
-  const { refresh } = useCart();
-
-  // useEffect(() => {
-  //   clearLocalCart(); // Clear guest cart
-  //   refresh();        // Refresh server cart
-  // }, [refresh]);
-
-
-  // useEffect(() => {
-  //   // Ждём немного, чтобы Stripe Webhook гарантированно сработал
-  //   const timer = setTimeout(() => {
-  //     refresh(); // Обновляем count и корзину
-  //   }, 2000);
-  //   return () => clearTimeout(timer);
-  // }, [refresh]);
-  // useEffect(() => {
-  //   refresh();
-  // }, [])
 
   return (
     <CustomDialog
@@ -48,8 +11,6 @@ const PaymentSuccessPage: React.FC = () => {
       message="Thank you! The payment was successful. Your order has been placed"
       isVisibleButton={false}
       isVisibleButtonOutline={false}
-      // buttonTitle="go to the main page"
-      // onClickButton={() => navigate("/")}
     />
   );
 };

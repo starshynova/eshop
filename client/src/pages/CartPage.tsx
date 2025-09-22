@@ -15,7 +15,6 @@ import StripeCheckoutForm from "../components/StripeCheckoutForm";
 import { getLocalCart, setLocalCart } from "../utils/localCart";
 import { jwtDecode } from "jwt-decode";
 
-
 type CartItem = {
   id: string;
   title: string;
@@ -33,7 +32,7 @@ const CartPage: React.FC = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStock, setEditStock] = useState<number>(1);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
-  const { refresh} = useCart();
+  const { refresh } = useCart();
   const token = localStorage.getItem("token");
   const stripePromise = loadStripe(`${STRIPE_PUBLISHABLE_KEY}`);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
@@ -117,7 +116,9 @@ const CartPage: React.FC = () => {
   const handleRemoveItem = async (itemId: string) => {
     if (!isAuthenticated) {
       let localCart = getLocalCart();
-      localCart = localCart.filter((i: { productId: string; quantity: number }) => i.productId !== itemId);
+      localCart = localCart.filter(
+        (i: { productId: string; quantity: number }) => i.productId !== itemId,
+      );
       setLocalCart(localCart);
       setCartItems((prev) => prev.filter((item) => item.id !== itemId));
       return;
@@ -188,20 +189,17 @@ const CartPage: React.FC = () => {
     );
     console.log("Token before payment:", localStorage.getItem("token"));
 
+    if (!token) {
+      setError("User token not found. Please login again.");
+      return;
+    }
+    type MyJwtPayload = {
+      user_id: string;
+    };
 
-
-if (!token) {
-  setError("User token not found. Please login again.");
-  return;
-}
-type MyJwtPayload = {
-  user_id: string;
-};
-
-const decoded = jwtDecode<MyJwtPayload>(token);
-console.log("Decoded user_id:", decoded.user_id);
-const user_id = decoded.user_id;
-
+    const decoded = jwtDecode<MyJwtPayload>(token);
+    console.log("Decoded user_id:", decoded.user_id);
+    const user_id = decoded.user_id;
 
     const res = await fetch(`${API_BASE_URL}/payments/create-payment`, {
       method: "POST",
@@ -213,9 +211,7 @@ const user_id = decoded.user_id;
         amount: total,
         metadata: { user_id }, // 👈 добавь это
       }),
-
     });
-    
 
     if (!res.ok) {
       setError("Error during payment initiation");
@@ -374,8 +370,7 @@ const user_id = decoded.user_id;
               {isAuthenticated ? (
                 clientSecret ? (
                   <Elements stripe={stripePromise} options={{ clientSecret }}>
-                    <StripeCheckoutForm
-                    />
+                    <StripeCheckoutForm />
                   </Elements>
                 ) : (
                   <Button
@@ -386,8 +381,7 @@ const user_id = decoded.user_id;
                 )
               ) : clientSecret ? (
                 <Elements stripe={stripePromise} options={{ clientSecret }}>
-                  <StripeCheckoutForm
-                  />
+                  <StripeCheckoutForm />
                 </Elements>
               ) : (
                 <Button
