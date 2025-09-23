@@ -8,6 +8,10 @@ primary_region = 'ams'
 
 [build]
 
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 [http_service]
   internal_port = 8080
   force_https = true

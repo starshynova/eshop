@@ -6,8 +6,14 @@ from dotenv import load_dotenv
 from pathlib import Path
 # from starlette.middleware.proxy_headers import ProxyHeadersMiddleware
 
+<<<<<<< Updated upstream
 app = FastAPI()
 # app.add_middleware(ProxyHeadersMiddleware)
+=======
+
+app = FastAPI(trust_env=True)
+
+>>>>>>> Stashed changes
 
 origins = [
     "http://localhost:5173",
@@ -51,6 +57,16 @@ app.include_router(order_router)
 app.include_router(analytics_router)
 
 @app.middleware("http")
+async def force_https_redirects(request: Request, call_next):
+    response = await call_next(request)
+    if "location" in response.headers:
+        location = response.headers["location"]
+        if location.startswith("http://"):
+            response.headers["location"] = location.replace("http://", "https://", 1)
+    return response
+
+
+@app.middleware("http")
 async def log_requests(request: Request, call_next):
     print(f"📡 Incoming request: {request.method} {request.url}")
     response = await call_next(request)
@@ -64,4 +80,4 @@ def read_root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("server:app", host="0.0.0.0", port=8080, proxy_headers=True)
