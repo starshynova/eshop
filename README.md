@@ -31,20 +31,20 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and S
 2. Detailed product page
 3. Search by name and description
 4. Shopping cart:
-   a. works for non-logged-in users (guest cart via localStorage)
-   b. cart synchronisation after login (cart from localStorage → to database)
-   c. product count badge on all pages
-   d. automatic clearing after payment
+   - works for non-logged-in users (guest cart via localStorage)
+   - cart synchronisation after login (cart from localStorage → to database)
+   - product count badge on all pages
+   - automatic clearing after payment
 5. Order processing:
-   a. Stripe Payments (creation of PaymentIntent, front-end payment, confirmation)
-   b. saving the order after successful payment
+   - Stripe Payments (creation of PaymentIntent, front-end payment, confirmation)
+   - saving the order after successful payment
 6. Authorisation:
-   a. Email/password (with JWT tokens, bcrypt)
-   b. OAuth (Google)
+   - Email/password (with JWT tokens, bcrypt)
+   - OAuth (Google)
 7. User role:
-   a. user information
-   b. order history
-   c. changing personal data
+   - user information
+   - order history
+   - changing personal data
 8. Admin role:
-   a. adding, editing, and deleting products
-   b. user management
+   - adding, editing, and deleting products
+   - user management
