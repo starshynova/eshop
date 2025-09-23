@@ -12,6 +12,7 @@ app = FastAPI()
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "https://eshop-star.netlify.app"
 ]
 
 env_path = Path(__file__).resolve().parent.parent.parent / '.env'

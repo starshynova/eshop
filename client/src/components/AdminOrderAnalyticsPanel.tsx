@@ -231,7 +231,7 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4 uppercase">Product Details</h2>
         <ProductDetailsTable
           productId={selectedProductId}
-          token={token}
+          token={token ?? undefined}
           onClose={() => {
             setSelectedProduct(null);
             setRefreshKey((k) => k + 1);
