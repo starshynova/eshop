@@ -11,7 +11,7 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and S
 ### Client side
 
 1. React.ts
-2.Tailwind CSS
+2. Tailwind CSS
 3. React Context
 4. React Router
 
