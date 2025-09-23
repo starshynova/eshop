@@ -22,10 +22,11 @@ interface Step2Data {
   city: string;
 }
 
-enum Step {
-  Credentials = 1,
-  Profile,
-}
+const Step = {
+  Credentials: 1,
+  Profile: 2,
+} as const;
+type Step = typeof Step[keyof typeof Step];
 
 const RegisterPage: React.FC = () => {
   const [step, setStep] = useState<Step>(Step.Credentials);

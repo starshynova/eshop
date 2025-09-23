@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import Button from "../components/Button";
