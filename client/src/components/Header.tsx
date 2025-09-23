@@ -71,7 +71,7 @@ const Header: React.FC = () => {
       <div className="w-full sticky top-0 z-50 bg-white shadow-md">
         <div className="h-[80px] flex items-center justify-between px-8">
           <div
-            className="flex w-[60%] items-center justify-start gap-8"
+            className="flex flex-1 items-center justify-start gap-8"
             onMouseEnter={() => setLeftHover(true)}
             onMouseLeave={() => setLeftHover(false)}
           >
@@ -187,8 +187,16 @@ const Header: React.FC = () => {
               children="about us"
             />
           </div>
+          <div className="flex-1 flex justify-center">
+            <div
+              className="text-5xl font-bold cursor-pointer uppercase"
+              onClick={() => navigate("/")}
+            >
+              eshop
+            </div>
+          </div>
 
-          <div className="w-[30%] flex flex-row gap-8 items-center justify-end">
+          <div className="flex flex-1 flex-row gap-8 items-center justify-end">
             {role === "admin" && (
               <ButtonSecond
                 onClick={() => navigate("/admin/dashboard")}
