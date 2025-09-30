@@ -27,6 +27,11 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and S
 ### Third party service
 1. Stripe
 
+### Production
+1. Client side - Netlify.com
+2. Server side - Fly.io
+3. Database - Neon.com
+
 
 ## User features
 
@@ -57,3 +62,7 @@ This release includes responsive design and delivery functionality
 
 #### Release 3
 This release includes semantic search based on a vector database.
+
+## Author
+Project developed by Lidiia Starshynova
+Email: **l.starshynova@gmail.com** 
