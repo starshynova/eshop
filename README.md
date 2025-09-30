@@ -6,7 +6,7 @@ Desktop only
 ## Overview
 
 **ESHOP** is a powerful online store with advanced product search, category/subcategory support, a convenient shopping cart for guests and authorised users, secure payments, and a modern UI.
-The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and Stripe.
+The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, Stripe, OAuth, AWS S3.
 
 
 ## Tech Stack
