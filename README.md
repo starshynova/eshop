@@ -1,5 +1,8 @@
 You can try this app by visiting [ESHOP](https://eshop-star.netlify.app/)
 
+#### Release 1
+Desktop only
+
 ## Overview
 
 **ESHOP** is a powerful online store with advanced product search, category/subcategory support, a convenient shopping cart for guests and authorised users, secure payments, and a modern UI.
@@ -48,3 +51,9 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and S
 8. Admin role:
    - adding, editing, and deleting products
    - user management
+
+#### Release 2 - in process
+This release includes responsive design and delivery functionality
+
+#### Release 3
+This release includes semantic search based on a vector database.
