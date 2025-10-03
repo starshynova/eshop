@@ -5,14 +5,9 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-<<<<<<< Updated upstream
-app = FastAPI()
-# app.add_middleware(ProxyHeadersMiddleware)
-=======
 
 app = FastAPI(trust_env=True)
 
->>>>>>> Stashed changes
 
 origins = [
     "http://localhost:5173",
