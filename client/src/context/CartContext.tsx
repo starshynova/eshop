@@ -125,7 +125,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   if (loading) {
-    return <Loader />;
+    return (
+      <CartContext.Provider
+        value={{ count, loading, refresh, addAndRefresh, setCount }}
+      >
+        {children}
+        {loading && <Loader />}
+      </CartContext.Provider>
+    );
   }
 
   return (
