@@ -13,10 +13,11 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, Strip
 
 ### Client side
 
-1. React.ts
-2. Tailwind CSS
-3. React Context
-4. React Router
+1. TypeScript
+2. React
+4. React Context
+5. React Router
+6. Tailwind CSS
 
 ### Server side
 
