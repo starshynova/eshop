@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
 import Button from "../components/Button";
@@ -21,6 +21,16 @@ const LoginPage = () => {
   const { login } = useAuth();
   const { refresh } = useCart();
 
+  useEffect(() => {
+    if (isOpen) {
+      const timer = setTimeout(() => {
+        setIsOpen(false);
+        navigate("/");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   const handleLogin = async () => {
     setError(null);
     try {
@@ -37,14 +47,9 @@ const LoginPage = () => {
         setError(data.message || "Login failed");
         throw new Error(`Login failed: ${response.status}`);
       } else {
-        console.log("Login successful:", data);
         await login(data.token);
-        await refresh();
         setIsOpen(true);
-        setTimeout(() => {
-          setIsOpen(false);
-          navigate("/");
-        }, 2000);
+        await refresh();
       }
     } catch (err) {
       console.error("Error during login:", err);
@@ -55,6 +60,17 @@ const LoginPage = () => {
   const handleGoogleLogin = () => {
     window.location.href = `${API_BASE_URL}/users/oauth/google/login`;
   };
+
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
 
   return (
     <>
