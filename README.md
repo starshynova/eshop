@@ -56,6 +56,7 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, Strip
 8. Admin role:
    - adding, editing, and deleting products
    - user management
+   - product and sales analytics
 
 #### Release 2 - in process
 This release includes responsive design and delivery functionality
