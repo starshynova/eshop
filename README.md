@@ -1,19 +1,23 @@
 You can try this app by visiting [ESHOP](https://eshop-star.netlify.app/)
 
+#### Release 1
+Desktop only
+
 ## Overview
 
 **ESHOP** is a powerful online store with advanced product search, category/subcategory support, a convenient shopping cart for guests and authorised users, secure payments, and a modern UI.
-The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and Stripe.
+The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, Stripe, OAuth, AWS S3.
 
 
 ## Tech Stack
 
 ### Client side
 
-1. React.ts
-2. Tailwind CSS
-3. React Context
-4. React Router
+1. TypeScript
+2. React
+4. React Context
+5. React Router
+6. Tailwind CSS
 
 ### Server side
 
@@ -23,6 +27,11 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and S
 
 ### Third party service
 1. Stripe
+
+### Production
+1. Client side - Netlify.com
+2. Server side - Fly.io
+3. Database - Neon.com
 
 
 ## User features
@@ -48,3 +57,14 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, and S
 8. Admin role:
    - adding, editing, and deleting products
    - user management
+   - product and sales analytics
+
+#### Release 2 - in process
+This release includes responsive design and delivery functionality
+
+#### Release 3
+This release includes semantic search based on a vector database.
+
+## Author
+Project developed by Lidiia Starshynova
+Email: **l.starshynova@gmail.com** 
