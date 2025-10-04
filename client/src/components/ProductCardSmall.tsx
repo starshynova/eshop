@@ -22,7 +22,6 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { addAndRefresh } = useCart();
-  console.log("Rendering ProductCardSmall:", { title, price, stock, idx });
 
   const handleProductCardClick = () => {
     if (!id) {

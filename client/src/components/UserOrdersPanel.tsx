@@ -7,7 +7,7 @@ type OrderItem = {
   id: string;
   title: string;
   price: number;
-  stock: number;
+  quantity: number;
   main_photo_url: string;
 };
 
@@ -83,10 +83,10 @@ const UserOrdersPanel: React.FC = () => {
                   />
                   <div className="flex-1 flex flex-col items-start">
                     <div className="font-semibold">{item.title}</div>
-                    <div className="text-gray-600">Stock: {item.stock}</div>
+                    <div className="text-gray-600">Quantity: {item.quantity}</div>
                   </div>
                   <div className="font-bold">
-                    € {(item.price * item.stock).toFixed(2)}{" "}
+                    € {(item.price * item.quantity).toFixed(2)}{" "}
                   </div>
                 </button>
               ))}

@@ -19,7 +19,7 @@ type CartContextType = {
   count: number;
   loading: boolean;
   refresh: () => Promise<void>;
-  addAndRefresh: (productId: string, stock?: number) => Promise<void>;
+  addAndRefresh: (productId: string, quantity?: number) => Promise<void>;
   setCount: (n: number) => void;
 };
 
@@ -79,7 +79,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               },
               body: JSON.stringify({
                 item_id: item.productId,
-                stock: item.quantity,
+                quantity: item.quantity,
               }),
             }),
           ),
@@ -94,9 +94,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [isAuthenticated]);
 
   const addAndRefresh = useCallback(
-    async (productId: string, stock: number = 1) => {
+    async (productId: string, quantity: number = 1) => {
       if (!isAuthenticated) {
-        addToLocalCart(productId, stock);
+        addToLocalCart(productId, quantity);
         setCount(getLocalCartCount());
         return;
       }
@@ -112,7 +112,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({ item_id: productId, stock }),
+          body: JSON.stringify({ item_id: productId, quantity: quantity }),
         });
         if (res.ok) {
           await refresh();
