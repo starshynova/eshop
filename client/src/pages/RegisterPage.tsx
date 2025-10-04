@@ -6,6 +6,7 @@ import { SearchQueryProvider } from "../context/SearchQueryContext";
 import { API_BASE_URL } from "../config";
 import { useNavigate } from "react-router-dom";
 import CustomDialog from "../components/CustomDialog";
+import { useAuth } from "../context/AuthContext";
 
 interface Step1Data {
   email: string;
@@ -45,7 +46,7 @@ const RegisterPage: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-
+const { login } = useAuth();
   const navigate = useNavigate();
 
   const validateStep1 = () => {
@@ -111,7 +112,8 @@ const RegisterPage: React.FC = () => {
         throw new Error(`Registration failed: ${response.status}`);
       }
       const data = await response.json();
-      localStorage.setItem("token", data.token);
+      // localStorage.setItem("token", data.token);
+      await login(data.token);
       setIsOpen(true);
       setTimeout(() => {
         setIsOpen(false);
