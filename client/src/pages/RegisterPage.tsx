@@ -46,7 +46,7 @@ const RegisterPage: React.FC = () => {
   });
   const [error, setError] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-const { login } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const validateStep1 = () => {
