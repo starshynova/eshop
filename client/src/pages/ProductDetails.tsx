@@ -122,7 +122,9 @@ const ProductDetails: React.FC = () => {
           <h1 className="text-4xl font-bold text-black uppercase mt-4">
             {product.title}
           </h1>
-          <div className="mt-4 text-black text-xl">€{product.price}</div>
+          <div className="mt-4 text-black text-xl">
+            €{product.price.toFixed(2)}
+          </div>
           <div className="mt-8" />
           {product.stock > 0 ? (
             <Button

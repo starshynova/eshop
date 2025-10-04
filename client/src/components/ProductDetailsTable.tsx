@@ -248,8 +248,10 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
                         }))
                       }
                     />
+                  ) : product.price !== undefined && product.price !== null ? (
+                    `€ ${Number(product.price).toFixed(2)}`
                   ) : (
-                    product.price
+                    "—"
                   )}
                 </td>
               </tr>
