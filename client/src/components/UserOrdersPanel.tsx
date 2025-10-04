@@ -85,7 +85,9 @@ const UserOrdersPanel: React.FC = () => {
                     <div className="font-semibold">{item.title}</div>
                     <div className="text-gray-600">Stock: {item.stock}</div>
                   </div>
-                  <div className="font-bold">€ {item.price * item.stock} </div>
+                  <div className="font-bold">
+                    € {(item.price * item.stock).toFixed(2)}{" "}
+                  </div>
                 </button>
               ))}
             </div>
