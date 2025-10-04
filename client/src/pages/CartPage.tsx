@@ -20,6 +20,7 @@ type CartItem = {
   title: string;
   price: number;
   stock: number;
+  quantity: number;
   main_photo_url: string;
 };
 
@@ -49,7 +50,14 @@ const CartPage: React.FC = () => {
           if (!res.ok)
             throw new Error(`Failed to fetch cart items: ${res.status}`);
           const data = await res.json();
+          console.log("FROM API:", data.items);
           setCartItems(data.items || []);
+//           setCartItems(
+//   (data.items || []).map((item: CartItem) => ({
+//     ...item,
+//     quantity: 1, // заглушка, чтобы не было NaN
+//   }))
+// );
           console.log(data);
         } catch (err: any) {
           setError(err.message || "Unknown error");
@@ -83,11 +91,17 @@ const CartPage: React.FC = () => {
           const qty =
             localCart.find((x: any) => x.productId === p.id)?.quantity || 1;
           return {
-            ...p,
-            stock: qty,
+            id: p.id,
+            title: p.title,
+            price: p.price,
+            stock: p.stock,
+            quantity: qty,
+            main_photo_url: p.main_photo_url,
           };
         });
+
         setCartItems(fullCart);
+        console.log("fullCart:", cartItems);
       } catch (err: any) {
         setError(err.message || "Unknown error");
         setCartItems([]);
@@ -140,7 +154,7 @@ const CartPage: React.FC = () => {
 
   const handleEditClick = (item: CartItem) => {
     setEditingId(item.id);
-    setEditStock(item.stock);
+    setEditStock(item.quantity);
   };
 
   const handleEditSave = async (itemId: string) => {
@@ -152,7 +166,7 @@ const CartPage: React.FC = () => {
       setLocalCart(localCart);
       setCartItems((prev) =>
         prev.map((item) =>
-          item.id === itemId ? { ...item, stock: editStock } : item,
+          item.id === itemId ? { ...item, quantity: editStock } : item,
         ),
       );
       setEditingId(null);
@@ -184,7 +198,7 @@ const CartPage: React.FC = () => {
 
   const handleCheckout = async () => {
     const total = cartItems.reduce(
-      (sum, item) => sum + item.price * item.stock,
+      (sum, item) => sum + item.price * item.quantity,
       0,
     );
     console.log("Token before payment:", localStorage.getItem("token"));
@@ -209,7 +223,7 @@ const CartPage: React.FC = () => {
       },
       body: JSON.stringify({
         amount: total,
-        metadata: { user_id }, // 👈 добавь это
+        metadata: { user_id },
       }),
     });
 
@@ -239,6 +253,8 @@ const CartPage: React.FC = () => {
   if (loading) {
     return <Loader />;
   }
+
+  console.log("cartItems:", cartItems);
 
   return (
     <SearchQueryProvider>
@@ -280,8 +296,19 @@ const CartPage: React.FC = () => {
                             <h3 className="text-lg  font-semibold">
                               {item.title}
                             </h3>
-                            <p className="text-gray-600">
+                            {/* <p className="text-gray-600">
                               Price: €{item.price.toFixed(2)}
+                            </p>
+                            <p className="text-gray-600">Stock: {item.stock}</p> */}
+                            <p className="text-gray-600">
+                              Price:{" "}
+                              {item.stock === 0 ? (
+                                <span className="text-red-500 font-bold">
+                                  Out of stock
+                                </span>
+                              ) : (
+                                <>€{item.price.toFixed(2)}</>
+                              )}
                             </p>
                             <p className="text-gray-600">Stock: {item.stock}</p>
                           </div>
@@ -340,7 +367,14 @@ const CartPage: React.FC = () => {
                         </div>
                       </div>
                       <div className="font-bold">
-                        €{(item.price * item.stock).toFixed(2)}
+                        {item.stock === 0 ? (
+                          <span className="text-red-500 font-bold">
+                            Out of stock
+                          </span>
+                        ) : (
+                          <>€{(item.price * item.quantity).toFixed(2)}</>
+                        )}
+                        {/* €{(item.price * item.stock).toFixed(2)} */}
                       </div>
                     </li>
                   ))}
@@ -357,8 +391,9 @@ const CartPage: React.FC = () => {
                 <div className="mt-4 flex justify-end border-b-2 border-black pb-4">
                   <span className="text-lg font-bold text-gray-700">
                     {cartItems
+                      .filter((item) => item.stock > 0)
                       .reduce(
-                        (total, item) => total + item.price * item.stock,
+                        (total, item) => total + item.price * item.quantity,
                         0,
                       )
                       .toFixed(2)}{" "}
