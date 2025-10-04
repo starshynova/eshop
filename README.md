@@ -45,7 +45,7 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, Strip
    - product count badge on all pages
    - automatic clearing after payment
 5. Order processing:
-   - Stripe Payments (creation of PaymentIntent, front-end payment, confirmation)
+   - Stripe Payments (card number for successful payment - 4242 4242 4242 4242)
    - saving the order after successful payment
 6. Authorisation:
    - Email/password (with JWT tokens, bcrypt)
