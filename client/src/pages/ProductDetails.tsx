@@ -123,12 +123,19 @@ const ProductDetails: React.FC = () => {
             {product.title}
           </h1>
           <div className="mt-4 text-black text-xl">€{product.price}</div>
-          <div className="border-t-[1px] border-gray-400 w-full mt-8" />
-          <Button
-            className="mt-8"
-            children="Add to Cart"
-            onClick={handleAddToCart}
-          />
+          <div className="mt-8" />
+          {product.stock > 0 ? (
+            <Button
+              onClick={handleAddToCart}
+              children="Add to Cart"
+              className="min-w-fit"
+              disabled={false}
+            />
+          ) : (
+            <span className="text-red-500 font-semibold py-2 uppercase">
+              out of stock
+            </span>
+          )}
           <div className="border-t-[1px] border-gray-400 w-full mt-8" />
           <Accordion.Root collapsible>
             <Accordion.Item value="description">

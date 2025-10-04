@@ -11,6 +11,7 @@ type Product = {
   id: string;
   title: string;
   price: number;
+  stock: number;
   description?: string;
   main_photo_url: string;
 };
@@ -93,6 +94,7 @@ const MainPage: React.FC = () => {
                 image={product.main_photo_url}
                 title={product.title}
                 price={product.price}
+                stock={product.stock}
                 idx={idx}
               />
             ))}

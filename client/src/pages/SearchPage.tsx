@@ -9,6 +9,7 @@ interface Product {
   id: number;
   title: string;
   price: number;
+  stock: number;
   description?: string;
   main_photo_url: string;
 }
@@ -67,6 +68,7 @@ const SearchPage = () => {
                 image={product.main_photo_url}
                 title={product.title}
                 price={product.price}
+                stock={product.stock}
                 idx={idx}
               />
             ))}

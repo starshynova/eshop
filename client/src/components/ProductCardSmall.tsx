@@ -8,6 +8,7 @@ type ProductCardProps = {
   image: string;
   title: string;
   price: number;
+  stock: number;
   idx: number;
 };
 
@@ -16,10 +17,12 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
   image,
   title,
   price,
+  stock,
   idx,
 }) => {
   const navigate = useNavigate();
   const { addAndRefresh } = useCart();
+  console.log("Rendering ProductCardSmall:", { title, price, stock, idx });
 
   const handleProductCardClick = () => {
     if (!id) {
@@ -59,19 +62,23 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
       <div className="flex flex-row items-start">
         <div className="px-4 flex flex-col flex-grow text-left">
           <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-          {/* <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-            {description}
-          </p> */}
           <div className="mt-2 font-bold text-indigo-600 text-md">
             €{price.toFixed(2)}
           </div>
         </div>
 
-        <Button
-          onClick={handleAddToCart}
-          children="Add to Cart"
-          className="min-w-fit"
-        />
+        {stock > 0 ? (
+          <Button
+            onClick={handleAddToCart}
+            children="Add to Cart"
+            className="min-w-fit"
+            disabled={false}
+          />
+        ) : (
+          <span className="text-red-500 font-semibold px-4 py-2 uppercase">
+            out of stock
+          </span>
+        )}
       </div>
     </div>
   );

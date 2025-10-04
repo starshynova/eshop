@@ -4,7 +4,7 @@ export type ProductDetails = {
   description: string;
   price: number;
   stock: number;
-  main_photo_url?: string; // если у товара есть основное фото
+  main_photo_url?: string;
   category?: { id: number; name: string } | string;
   subcategory?: { id: number; name: string } | string;
 };
