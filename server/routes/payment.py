@@ -65,12 +65,12 @@ async def stripe_webhook(request: Request):
             with get_db_cursor() as cur:
                 cur.execute("SELECT id FROM orders WHERE payment_intent_id = %s;", (payment_intent_id,))
                 if cur.fetchone():
-                    print("⚠️ Order already processed for this payment_intent_id")
+                    print("Order already processed for this payment_intent_id")
                     return {"status": "already processed"}
 
-                cur.execute("SELECT item_id, stock FROM cart_item WHERE user_id = %s;", (user_id,))
+                cur.execute("SELECT item_id, quantity FROM cart_item WHERE user_id = %s;", (user_id,))
                 cart = cur.fetchall()
-                print(f"🛒 Cart contents: {cart}")
+                print(f"Cart contents: {cart}")
                 if not cart:
                     print("Cart is empty")
                     raise HTTPException(400, "Cart is empty")
@@ -80,9 +80,9 @@ async def stripe_webhook(request: Request):
                     "INSERT INTO orders (id, user_id, status, payment_intent_id) VALUES (%s, %s, %s, %s);",
                     (order_id, user_id, "paid", payment_intent_id)
                 )
-                print(f"📦 Created order: {order_id}")
+                print(f"Created order: {order_id}")
 
-                for item_id, stock in cart:
+                for item_id, quantity in cart:
                     cur.execute("SELECT price FROM items WHERE id = %s;", (item_id,))
                     row = cur.fetchone()
                     if not row:
@@ -91,14 +91,14 @@ async def stripe_webhook(request: Request):
                     price_at_purchase = row[0]
 
                     cur.execute(
-                        """INSERT INTO order_item (order_id, item_id, stock, price_at_purchase)
+                        """INSERT INTO order_item (order_id, item_id, quantity, price_at_purchase)
                            VALUES (%s, %s, %s, %s);""",
-                        (order_id, item_id, stock, price_at_purchase)
+                        (order_id, item_id, quantity, price_at_purchase)
                     )
 
                     cur.execute(
                         "UPDATE items SET stock = stock - %s WHERE id = %s AND stock >= %s;",
-                        (stock, item_id, stock)
+                        (quantity, item_id, quantity)
                     )
                     if cur.rowcount == 0:
                         print(f"Not enough stock for item_id={item_id}")
@@ -109,6 +109,6 @@ async def stripe_webhook(request: Request):
                 print(f"Order finalized via webhook: {order_id}")
         except Exception as e:
             print(f"🔥 Error during order creation: {str(e)}")
-            raise HTTPException(400, f"Ошибка при оформлении заказа: {str(e)}")
+            raise HTTPException(400, f"Error during order processing: {str(e)}")
 
     return {"status": "success"}

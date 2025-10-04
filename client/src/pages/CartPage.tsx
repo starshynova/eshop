@@ -31,7 +31,7 @@ const CartPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editStock, setEditStock] = useState<number>(1);
+  const [editQuantity, setEditQuantity] = useState<number>(1);
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
   const { refresh } = useCart();
   const token = localStorage.getItem("token");
@@ -146,19 +146,19 @@ const CartPage: React.FC = () => {
 
   const handleEditClick = (item: CartItem) => {
     setEditingId(item.id);
-    setEditStock(item.quantity);
+    setEditQuantity(item.quantity);
   };
 
   const handleEditSave = async (itemId: string) => {
     if (!isAuthenticated) {
       let localCart = getLocalCart();
       localCart = localCart.map((i: { productId: string; quantity: number }) =>
-        i.productId === itemId ? { ...i, quantity: editStock } : i,
+        i.productId === itemId ? { ...i, quantity: editQuantity } : i,
       );
       setLocalCart(localCart);
       setCartItems((prev) =>
         prev.map((item) =>
-          item.id === itemId ? { ...item, quantity: editStock } : item,
+          item.id === itemId ? { ...item, quantity: editQuantity } : item,
         ),
       );
       setEditingId(null);
@@ -172,12 +172,12 @@ const CartPage: React.FC = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ stock: editStock }),
+        body: JSON.stringify({ quantity: editQuantity }),
       });
-      if (!res.ok) throw new Error("Failed to update stock");
+      if (!res.ok) throw new Error("Failed to update quantity");
       setCartItems((prev) =>
         prev.map((item) =>
-          item.id === itemId ? { ...item, stock: editStock } : item,
+          item.id === itemId ? { ...item, quantity: editQuantity } : item,
         ),
       );
       setEditingId(null);
@@ -288,10 +288,6 @@ const CartPage: React.FC = () => {
                             <h3 className="text-lg  font-semibold">
                               {item.title}
                             </h3>
-                            {/* <p className="text-gray-600">
-                              Price: €{item.price.toFixed(2)}
-                            </p>
-                            <p className="text-gray-600">Stock: {item.stock}</p> */}
                             <p className="text-gray-600">
                               Price:{" "}
                               {item.stock === 0 ? (
@@ -302,7 +298,7 @@ const CartPage: React.FC = () => {
                                 <>€{item.price.toFixed(2)}</>
                               )}
                             </p>
-                            <p className="text-gray-600">Stock: {item.stock}</p>
+                            <p className="text-gray-600">Quantity: {item.quantity}</p>
                           </div>
                           <div className="flex flex-row items-center">
                             <ButtonSecond
@@ -319,9 +315,9 @@ const CartPage: React.FC = () => {
                                 <input
                                   type="number"
                                   min={1}
-                                  value={editStock}
+                                  value={editQuantity}
                                   onChange={(e) =>
-                                    setEditStock(Number(e.target.value))
+                                    setEditQuantity(Number(e.target.value))
                                   }
                                   className="w-16 border-black border-[1px] rounded-sm px-2"
                                   onClick={(e) => e.stopPropagation()}
@@ -366,7 +362,6 @@ const CartPage: React.FC = () => {
                         ) : (
                           <>€{(item.price * item.quantity).toFixed(2)}</>
                         )}
-                        {/* €{(item.price * item.stock).toFixed(2)} */}
                       </div>
                     </li>
                   ))}

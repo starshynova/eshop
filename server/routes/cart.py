@@ -29,10 +29,10 @@ def add_to_cart(
     try:
         with get_db_cursor() as cur:
             cur.execute("""
-                    INSERT INTO cart_item (user_id, item_id, stock)
+                    INSERT INTO cart_item (user_id, item_id, quantity)
                     VALUES (%s, %s, %s)
                     ON CONFLICT (user_id, item_id)
-                    DO UPDATE SET stock = cart_item.stock + EXCLUDED.quantity;
+                    DO UPDATE SET quantity = cart_item.quantity + EXCLUDED.quantity;
                 """, (user_id, req.item_id, req.quantity))
         return {"status": "ok"}
     except Exception as e:
@@ -117,7 +117,7 @@ def edit_cart_item(
         with get_db_cursor() as cur:
             cur.execute("""
                 UPDATE cart_item
-                SET stock = %s
+                SET quantity = %s
                 WHERE user_id = %s AND item_id = %s
             """, (req.quantity, user_id, item_id))
         return {"status": "ok"}
