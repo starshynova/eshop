@@ -50,15 +50,7 @@ const CartPage: React.FC = () => {
           if (!res.ok)
             throw new Error(`Failed to fetch cart items: ${res.status}`);
           const data = await res.json();
-          console.log("FROM API:", data.items);
           setCartItems(data.items || []);
-//           setCartItems(
-//   (data.items || []).map((item: CartItem) => ({
-//     ...item,
-//     quantity: 1, // заглушка, чтобы не было NaN
-//   }))
-// );
-          console.log(data);
         } catch (err: any) {
           setError(err.message || "Unknown error");
           setCartItems([]);
