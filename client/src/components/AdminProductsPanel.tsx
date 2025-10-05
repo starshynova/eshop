@@ -33,7 +33,6 @@ const AdminProductsPanel: React.FC = () => {
         if (!response.ok) setError("Failed to fetch products");
         const data: ProductDetails[] = await response.json();
         setProducts(data);
-        console.log(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {

@@ -93,7 +93,6 @@ const CartPage: React.FC = () => {
         });
 
         setCartItems(fullCart);
-        console.log("fullCart:", cartItems);
       } catch (err: any) {
         setError(err.message || "Unknown error");
         setCartItems([]);
@@ -193,7 +192,6 @@ const CartPage: React.FC = () => {
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
-    console.log("Token before payment:", localStorage.getItem("token"));
 
     if (!token) {
       setError("User token not found. Please login again.");
@@ -204,7 +202,6 @@ const CartPage: React.FC = () => {
     };
 
     const decoded = jwtDecode<MyJwtPayload>(token);
-    console.log("Decoded user_id:", decoded.user_id);
     const user_id = decoded.user_id;
 
     const res = await fetch(`${API_BASE_URL}/payments/create-payment`, {
@@ -224,9 +221,12 @@ const CartPage: React.FC = () => {
       return;
     }
     const data = await res.json();
-    console.log("Stripe clientSecret:", data.clientSecret);
     setClientSecret(data.clientSecret);
   };
+
+  if (loading) {
+    return <Loader />;
+  }
 
   if (error) {
     return (
@@ -241,12 +241,6 @@ const CartPage: React.FC = () => {
       />
     );
   }
-
-  if (loading) {
-    return <Loader />;
-  }
-
-  console.log("cartItems:", cartItems);
 
   return (
     <SearchQueryProvider>

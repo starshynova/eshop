@@ -4,6 +4,7 @@ import ProductCardSmall from "../components/ProductCardSmall";
 import { API_BASE_URL } from "../config";
 import Header from "../components/Header";
 import Loader from "../components/Loader";
+import CustomDialog from "../components/CustomDialog";
 
 interface Product {
   id: number;
@@ -20,6 +21,7 @@ const SearchPage = () => {
   const mode = searchParams.get("mode") ?? "regular";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!term) return;
@@ -37,6 +39,7 @@ const SearchPage = () => {
         const data = await response.json();
         setProducts(data);
       } catch (error) {
+        setError("Failed to load products. Please try again later.");
         console.error("Error loading products:", error);
       } finally {
         setLoading(false);
@@ -45,13 +48,28 @@ const SearchPage = () => {
     fetchProducts();
   }, [term, mode]);
 
+  if (loading) {
+    return <Loader />;
+  }
+
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => {
+          setError(null);
+        }}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
+
   return (
     <>
       <Header />
 
-      {loading ? (
-        <Loader />
-      ) : !term ? (
+      {!term ? (
         <p className="p-8 text-center">
           Enter your query in the search bar above
         </p>
