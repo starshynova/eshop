@@ -66,6 +66,7 @@ const AddProductTable: React.FC<AddProductTableProps> = ({ onClose }) => {
         throw new Error(`Adding product failed: ${response.status}`);
       }
     } catch (err) {
+      console.error(err);
       setError("Error during adding product. Please try again later.");
     }
     setLoading(false);

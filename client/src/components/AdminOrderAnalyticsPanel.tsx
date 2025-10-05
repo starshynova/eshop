@@ -228,7 +228,6 @@ const AdminOrderAnalyticsPanel: React.FC = () => {
   return (
     <div className="p-4 w-full">
       <div className="flex flex-col w-full border-2 border-gray-300 p-8 rounded-sm bg-white">
-        <h2 className="text-2xl font-bold mb-4 uppercase">Product Details</h2>
         <ProductDetailsTable
           productId={selectedProductId}
           token={token ?? undefined}

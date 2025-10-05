@@ -9,7 +9,6 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
 }
 
 const InputSmall: React.FC<InputProps> = ({
-  //   label,
   error = false,
   errorText = "Error",
   helperText,

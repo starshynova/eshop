@@ -39,7 +39,7 @@ const ProductDetailsTable: React.FC<ProductDetailsTableProps> = ({
         const data = await res.json();
         setProduct(data);
       } catch (err) {
-        setError("Failed to load product");
+        setError(err instanceof Error ? err.message : "Failed to load product");
       } finally {
         setLoading(false);
       }

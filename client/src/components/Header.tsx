@@ -28,7 +28,6 @@ const Header: React.FC = () => {
   const toggleSearch = () => setSearchMenuOpen((open) => !open);
   const [openCategoryId, setOpenCategoryId] = useState<string | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
-
   const [leftHover, setLeftHover] = useState(false);
   const role = getUserRole();
   const { isAuthenticated } = useAuth();
@@ -61,7 +60,6 @@ const Header: React.FC = () => {
         console.error("Error getting categories:", error);
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -70,7 +68,7 @@ const Header: React.FC = () => {
       <div className="w-full sticky top-0 z-50 bg-white shadow-md">
         <div className="h-[80px] flex items-center justify-between px-8">
           <div
-            className="flex flex-1 items-center justify-start gap-8"
+            className="flex flex-1 items-center justify-start gap-8 relative"
             onMouseEnter={() => setLeftHover(true)}
             onMouseLeave={() => setLeftHover(false)}
           >
@@ -81,8 +79,9 @@ const Header: React.FC = () => {
                 setCatalogOpen(false);
                 setOpenCategoryId(null);
               }}
+              className="relative"
             >
-              <Menu.Root open={catalogOpen}>
+              <Menu.Root open={catalogOpen} positioning={{ gutter: -0 }}>
                 <Menu.Trigger
                   className="self-start h-8 bg-transparent text-[#000000] text-lg px-1 uppercase focus:outline-none
                  border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
@@ -90,13 +89,13 @@ const Header: React.FC = () => {
                 >
                   Catalog
                 </Menu.Trigger>
-
                 <Menu.Positioner>
                   <Menu.Content>
                     {categories.map((category) => {
                       const hasSub =
                         Array.isArray(category.subcategories) &&
                         category.subcategories.length > 0;
+
                       if (!hasSub) {
                         return (
                           <Menu.Item
@@ -106,12 +105,14 @@ const Header: React.FC = () => {
                           >
                             <ButtonSecond
                               children={category.category_name}
-                              className="py-2 h-auto"
-                              onClick={() =>
+                              className="py-2 h-auto text-left w-full"
+                              onClick={() => {
                                 navigate(
                                   `/?category_name=${category.category_name}`,
-                                )
-                              }
+                                );
+                                setCatalogOpen(false);
+                                setOpenCategoryId(null);
+                              }}
                             />
                           </Menu.Item>
                         );
@@ -132,16 +133,17 @@ const Header: React.FC = () => {
                             open={openCategoryId === category.id}
                           >
                             <Menu.TriggerItem
-                              className="flex items-center justify-between px-1 pb-2 bg-transparent text-[#000000] text-lg focus:outline-none
+                              className="flex items-center justify-between px-1 py-2 bg-transparent text-[#000000] text-lg focus:outline-none
                              uppercase border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
-                              onClick={() =>
+                              onClick={() => {
                                 navigate(
                                   `/?category_name=${category.category_name}`,
-                                )
-                              }
+                                );
+                                setCatalogOpen(false);
+                                setOpenCategoryId(null);
+                              }}
                             >
                               {category.category_name}
-
                               {openCategoryId === category.id ? (
                                 <ChevronDownIcon size={16} />
                               ) : (
@@ -155,12 +157,14 @@ const Header: React.FC = () => {
                                   <Menu.Item
                                     key={subcat.id}
                                     value={subcat.subcategory_name}
-                                    onClick={() =>
+                                    onClick={() => {
                                       navigate(
                                         `/?subcategory_name=${subcat.subcategory_name}`,
-                                      )
-                                    }
-                                    className="flex items-center justify-between px-4 py-2 bg-transparent text-[#000000] text-sm uppercase focus:outline-none
+                                      );
+                                      setCatalogOpen(false);
+                                      setOpenCategoryId(null);
+                                    }}
+                                    className="flex items-center justify-between px-4 py-3 bg-transparent text-[#000000] text-sm uppercase focus:outline-none
                                    border-b-2 border-b-transparent hover:border-b-[#000000] transition-colors cursor-pointer"
                                   >
                                     {subcat.subcategory_name}
