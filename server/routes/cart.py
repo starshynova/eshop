@@ -21,6 +21,25 @@ class CartItemOut(BaseModel):
 class EditCartItemRequest(BaseModel):
     quantity: conint(gt=0)
 
+# @router.post("/add")
+# def add_to_cart(
+#     req: AddToCartRequest,
+#     user_id: str = Depends(get_current_user_id)
+# ):
+#     try:
+#         with get_db_cursor() as cur:
+#             cur.execute("""
+#                     INSERT INTO cart_item (user_id, item_id, quantity)
+#                     VALUES (%s, %s, %s)
+#                     ON CONFLICT (user_id, item_id)
+#                     DO UPDATE SET quantity = cart_item.quantity + EXCLUDED.quantity;
+#                 """, (user_id, req.item_id, req.quantity))
+#         return {"status": "ok"}
+#     except Exception as e:
+#         print("Add to cart error:", e)
+#         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
 @router.post("/add")
 def add_to_cart(
     req: AddToCartRequest,
@@ -28,16 +47,40 @@ def add_to_cart(
 ):
     try:
         with get_db_cursor() as cur:
+            # Получаем текущий остаток на складе
+            cur.execute("SELECT stock FROM items WHERE id = %s", (req.item_id,))
+            row = cur.fetchone()
+            if not row:
+                raise HTTPException(status_code=404, detail="Item not found")
+            stock = row[0]
+
+            # Узнаём, сколько уже есть в корзине у пользователя
             cur.execute("""
-                    INSERT INTO cart_item (user_id, item_id, quantity)
-                    VALUES (%s, %s, %s)
-                    ON CONFLICT (user_id, item_id)
-                    DO UPDATE SET quantity = cart_item.quantity + EXCLUDED.quantity;
-                """, (user_id, req.item_id, req.quantity))
+                SELECT quantity FROM cart_item WHERE user_id = %s AND item_id = %s
+            """, (user_id, req.item_id))
+            cart_row = cur.fetchone()
+            current_quantity = cart_row[0] if cart_row else 0
+
+            new_total_quantity = current_quantity + req.quantity
+            if new_total_quantity > stock:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Not enough stock. Available: {stock}, you want to add: {new_total_quantity}"
+                )
+
+            # Теперь можно добавлять/обновлять
+            cur.execute("""
+                INSERT INTO cart_item (user_id, item_id, quantity)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (user_id, item_id)
+                DO UPDATE SET quantity = EXCLUDED.quantity;
+            """, (user_id, req.item_id, new_total_quantity))
         return {"status": "ok"}
+    except HTTPException:
+        raise  # чтобы не ловить и не терять detail
     except Exception as e:
         print("Add to cart error:", e)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/count")

@@ -10,6 +10,7 @@ import { Plus, Minus } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import CustomDialog from "../components/CustomDialog";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type ProductProps = {
   id: string;
@@ -29,6 +30,7 @@ const ProductDetails: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [isDisabled, setIsDisabled] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -53,9 +55,17 @@ const ProductDetails: React.FC = () => {
   }, [id]);
 
   const handleAddToCart = async () => {
-    if (!id) return;
-    await addAndRefresh(id, 1);
-  };
+      if (!id) return;
+      const result = await addAndRefresh(id, 1);
+      console.log("result: ", result);
+      if (!result || !result.success) {
+        toast.error(result?.error || "An error occurred from front.");
+        setIsDisabled(true);
+        console.log(result?.error || "An error occurred from front.");
+      } else {
+        toast.success("Product added to cart!");
+      }
+    };
 
   if (isLoading) return <Loader />;
   if (error) {
@@ -130,8 +140,8 @@ const ProductDetails: React.FC = () => {
             <Button
               onClick={handleAddToCart}
               children="Add to Cart"
-              className="min-w-fit"
-              disabled={false}
+              className={`min-w-fit ${isDisabled ? "bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400 hover:text-gray-200" : ""}`}
+              disabled={isDisabled}
             />
           ) : (
             <span className="text-red-500 font-semibold py-2 uppercase">

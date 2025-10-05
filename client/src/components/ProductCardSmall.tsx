@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import Button from "./Button";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
+import { toast } from "react-toastify";
 
 type ProductCardProps = {
   id: string;
@@ -22,6 +23,7 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const { addAndRefresh } = useCart();
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const handleProductCardClick = () => {
     if (!id) {
@@ -33,7 +35,15 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
 
   const handleAddToCart = async () => {
     if (!id) return;
-    await addAndRefresh(id, 1);
+    const result = await addAndRefresh(id, 1);
+    console.log("result: ", result);
+    if (!result || !result.success) {
+      toast.error(result?.error || "An error occurred from front.");
+      setIsDisabled(true);
+      console.log(result?.error || "An error occurred from front.");
+    } else {
+      toast.success("Product added to cart!");
+    }
   };
 
   const cardStyle = {
@@ -70,8 +80,8 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
           <Button
             onClick={handleAddToCart}
             children="Add to Cart"
-            className="min-w-fit"
-            disabled={false}
+            className={`min-w-fit ${isDisabled ? "bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400 hover:text-gray-200" : ""}`}
+            disabled={isDisabled}
           />
         ) : (
           <span className="text-red-500 font-semibold px-4 py-2 uppercase">
