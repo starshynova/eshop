@@ -112,7 +112,6 @@ const RegisterPage: React.FC = () => {
         throw new Error(`Registration failed: ${response.status}`);
       }
       const data = await response.json();
-      // localStorage.setItem("token", data.token);
       await login(data.token);
       setIsOpen(true);
       setTimeout(() => {

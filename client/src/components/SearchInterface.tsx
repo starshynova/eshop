@@ -18,7 +18,6 @@ const SearchInterface: React.FC<Props> = ({ show, onClose }) => {
     if (!q.trim()) return;
     navigate({
       pathname: "/search",
-      // отправляем имя term (алиас для q на бэкенде) и mode
       search: createSearchParams({
         term: q.trim(),
         mode: "regular",
@@ -32,7 +31,6 @@ const SearchInterface: React.FC<Props> = ({ show, onClose }) => {
     if (!q.trim()) return;
     navigate({
       pathname: "/search",
-      // отправляем имя term (алиас для q на бэкенде) и mode
       search: createSearchParams({
         term: q.trim(),
         mode: "semantic",
@@ -45,17 +43,16 @@ const SearchInterface: React.FC<Props> = ({ show, onClose }) => {
 
   return (
     <div className="flex w-full flex-row py-4 px-20 gap-8 z-10 bg-white">
-      {/* Обычный поиск */}
       <div className="w-[50%] p-6">
         <div className="flex items-center mb-4">
           <MagnifyingGlassIcon
-            className="w-6 h-6 text-blue-600 mr-2"
+            className="w-6 h-6 text-indigo-600 mr-2"
             aria-hidden="true"
           />
           <h2 className="text-lg uppercase">Regular search</h2>
         </div>
         <SearchInputTxt
-          placeholder="Search..."
+          placeholder="Regular search..."
           onSearch={handleRegularSearch}
         />
       </div>

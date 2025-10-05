@@ -28,12 +28,12 @@ def get_orders_analytics():
             total_orders = cur.fetchone()[0]
 
             # 2. Количество проданных товаров (штук)
-            cur.execute("SELECT COALESCE(SUM(stock),0) FROM order_item;")
+            cur.execute("SELECT COALESCE(SUM(quantity),0) FROM order_item;")
             total_items_sold = cur.fetchone()[0]
 
             # 3. Сумма заказов по каждому order_id (для чеков)
             cur.execute("""
-                SELECT order_id, SUM(stock * price_at_purchase) as total
+                SELECT order_id, SUM(quantity * price_at_purchase) as total
                 FROM order_item
                 GROUP BY order_id
             """)
@@ -45,7 +45,7 @@ def get_orders_analytics():
 
             # 4. Топ-10 самых продаваемых товаров
             cur.execute("""
-                SELECT i.id, i.title, SUM(oi.stock) as sold
+                SELECT i.id, i.title, SUM(oi.quantity) as sold
                 FROM order_item oi
                 JOIN items i ON oi.item_id = i.id
                 GROUP BY i.id, i.title
@@ -77,7 +77,7 @@ def get_orders_analytics():
 
             # 7. Продажи по категориям
             cur.execute("""
-                SELECT c.category_name, COALESCE(SUM(oi.stock * oi.price_at_purchase),0) as revenue
+                SELECT c.category_name, COALESCE(SUM(oi.quantity * oi.price_at_purchase),0) as revenue
                 FROM order_item oi
                 JOIN items i ON oi.item_id = i.id
                 JOIN item_category ic ON i.id = ic.item_id
@@ -92,7 +92,7 @@ def get_orders_analytics():
 
             # 8. Продажи по подкатегориям
             cur.execute("""
-                SELECT sc.subcategory_name, COALESCE(SUM(oi.stock * oi.price_at_purchase),0) as revenue
+                SELECT sc.subcategory_name, COALESCE(SUM(oi.quantity * oi.price_at_purchase),0) as revenue
                 FROM order_item oi
                 JOIN items i ON oi.item_id = i.id
                 JOIN item_subcategory isc ON i.id = isc.item_id
