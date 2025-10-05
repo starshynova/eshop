@@ -39,11 +39,11 @@ const SortMenu: React.FC<SortMenuProps> = ({ sort, handleSortChange }) => {
         <Menu.Trigger asChild>
           <button
             type="button"
-            className="px-4 py-1 bg-white text-[16px] rounded
-                     border-b-2 border-b-transparent hover:border-b-[#d0ff00]
+            className="px-4 py-1 bg-white text-[16px] rounded-sm
+                     border-b-2 border-b-transparent hover:border-b-[#000000]
                      transition-colors cursor-pointer
                      outline-none focus-visible:outline-none
-                     focus-visible:border-b-2 focus-visible:border-b-[#d0ff00]"
+                     focus-visible:border-b-2 focus-visible:border-b-[#000000]"
           >
             {`Sort: ${labelByValue[String(sort ?? "undefined")]}`}
           </button>
@@ -64,7 +64,7 @@ const SortMenu: React.FC<SortMenuProps> = ({ sort, handleSortChange }) => {
                     onClick={() => handleSortChange(value)}
                     className="block w-full px-4 py-2 text-left cursor-pointer
                   data-[highlighted]:border-b-2
-                             data-[highlighted]:border-b-[#d0ff00]"
+                             data-[highlighted]:border-b-[#000000]"
                   >
                     <div className="flex items-center justify-between">
                       <span>{label}</span>
