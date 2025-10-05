@@ -39,6 +39,7 @@ from routes.cart import router as cart_router
 from routes.payment import router as payment_router
 from routes.order import router as order_router
 from routes.analytics import router as analytics_router
+from routes.check_email import router as check_email
 
 app.include_router(item_router)
 # app.include_router(init_qdrant_router)
@@ -49,6 +50,7 @@ app.include_router(cart_router)
 app.include_router(payment_router)
 app.include_router(order_router)
 app.include_router(analytics_router)
+app.include_router(check_email)
 
 @app.middleware("http")
 async def force_https_redirects(request: Request, call_next):
@@ -68,7 +70,6 @@ async def log_requests(request: Request, call_next):
 
 @app.get("/")
 def read_root():
-    print("✅ FastAPI server started")
     return {"message": "Server is running!"}
 
 if __name__ == "__main__":

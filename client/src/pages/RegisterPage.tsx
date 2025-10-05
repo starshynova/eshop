@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Button from "../components/Button";
+import ButtonOutline from "../components/ButtonOutline";
 import Input from "../components/Input";
 import Header from "../components/Header";
 import { SearchQueryProvider } from "../context/SearchQueryContext";
@@ -68,8 +69,30 @@ const RegisterPage: React.FC = () => {
     return true;
   };
 
-  const handleNext = () => {
-    if (validateStep1()) setStep(Step.Profile);
+  const checkEmailExists = async (email: string) => {
+    const response = await fetch(
+      `${API_BASE_URL}/check-email?email=${encodeURIComponent(email)}`,
+    );
+    if (!response.ok) {
+      setError("Error checking email. Please try again later.");
+      throw new Error(`Error checking email: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.exists;
+  };
+
+  const handleNext = async () => {
+    if (!validateStep1()) return;
+    try {
+      const exists = await checkEmailExists(step1.email);
+      if (exists) {
+        setError("This email address is already registered.");
+        return;
+      }
+      setStep(Step.Profile);
+    } catch (err) {
+      setError("Error checking email. Please try again later.");
+    }
   };
 
   const handleRegister = async () => {
@@ -124,11 +147,21 @@ const RegisterPage: React.FC = () => {
     }
   };
 
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => setError(null)}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
+
   return (
     <>
       <SearchQueryProvider>
         <Header />
-
         <div className="w-[30%] max-w-md mx-auto mt-20 p-6 bg-white rounded-lg shadow-lg justify-center items-center">
           {step === Step.Credentials && (
             <div className="flex flex-col gap-4">
@@ -161,7 +194,7 @@ const RegisterPage: React.FC = () => {
                 }
                 className="w-full px-3 py-2 border rounded"
               />
-              {error && <p className="text-red-600">{error}</p>}
+              {/* {error && <p className="text-red-600">{error}</p>} */}
               <div className="flex w-full justify-end">
                 <Button
                   className="justify-end w-[45%]"
@@ -241,7 +274,7 @@ const RegisterPage: React.FC = () => {
                 className="w-full px-3 py-2 border rounded"
               />
               <div className="flex w-full flex-row gap-4">
-                <Button
+                <ButtonOutline
                   className="flex-1"
                   onClick={() => setStep(Step.Credentials)}
                   children="Back"

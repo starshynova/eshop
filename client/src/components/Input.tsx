@@ -36,7 +36,7 @@ const Input: React.FC<InputProps> = ({
 
       <Field.Input
         id={inputId}
-        className={`w-full h-12 rounded-sm px-3 pt-2 pb-1 border-2 focus:outline-none
+        className={`w-full h-12 rounded-sm px-3 pt-2 pb-1 border-2 focus:outline-none focus:bg-white bg-white
           ${error ? "border-red-500 focus:border-red-500" : "border-black focus:border-black"}
           ${className}`}
         {...inputProps}
