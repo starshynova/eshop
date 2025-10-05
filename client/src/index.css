@@ -9,3 +9,13 @@ body {
   color: #000000;
   font-family: "Urbanist", sans-serif;
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:active {
+  background-color: #fff !important;
+  -webkit-box-shadow: 0 0 0 1000px #fff inset !important;
+  box-shadow: 0 0 0 1000px #fff inset !important;
+  color: #222 !important;
+}

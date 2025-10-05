@@ -29,8 +29,6 @@ env_path = Path(__file__).resolve().parent.parent.parent / '.env'
 load_dotenv(dotenv_path=env_path)
 
 def get_connection():
-    print("Подключение к NeonDB...")
-    print("DB_HOST =", os.getenv("DB_HOST"))
     return psycopg2.connect(
         dbname=os.getenv("POSTGRES_DB"),
         user=os.getenv("POSTGRES_USER"),
@@ -42,5 +40,4 @@ def get_connection():
 
 if __name__ == "__neondb__":
     conn = get_connection()
-    print("✅ Подключение к NeonDB установлено!")
     conn.close()

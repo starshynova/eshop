@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status, Depends, Body
+from fastapi import APIRouter, HTTPException, status, Depends, Body, Query, Path
 from pydantic import BaseModel, EmailStr, constr
 import uuid
 from datetime import datetime, timezone, timedelta
@@ -351,7 +351,6 @@ def update_user_profile(user_id: str, data = Body(...), current_user = Depends(g
     return resp
 
 
-# ====================== 2. Смена пароля ======================
 
 @router.patch("/me/password")
 def change_my_password(data = Body(...), current_user = Depends(get_current_user)):
@@ -518,3 +517,5 @@ def admin_delete_user(user_id: str, current_user = Depends(get_current_user)):
         raise HTTPException(status_code=500, detail="Failed to delete user")
 
     return {"message": "User deleted"}
+
+
