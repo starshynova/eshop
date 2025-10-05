@@ -55,17 +55,15 @@ const ProductDetails: React.FC = () => {
   }, [id]);
 
   const handleAddToCart = async () => {
-      if (!id) return;
-      const result = await addAndRefresh(id, 1);
-      console.log("result: ", result);
-      if (!result || !result.success) {
-        toast.error(result?.error || "An error occurred from front.");
-        setIsDisabled(true);
-        console.log(result?.error || "An error occurred from front.");
-      } else {
-        toast.success("Product added to cart!");
-      }
-    };
+    if (!id) return;
+    const result = await addAndRefresh(id, 1);
+    if (!result || !result.success) {
+      toast.error(result?.error || "An error occurred.");
+      setIsDisabled(true);
+    } else {
+      toast.success("Product added to cart!");
+    }
+  };
 
   if (isLoading) return <Loader />;
   if (error) {

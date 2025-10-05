@@ -36,11 +36,9 @@ const ProductCardSmall: React.FC<ProductCardProps> = ({
   const handleAddToCart = async () => {
     if (!id) return;
     const result = await addAndRefresh(id, 1);
-    console.log("result: ", result);
     if (!result || !result.success) {
-      toast.error(result?.error || "An error occurred from front.");
+      toast.error(result?.error || "An error occurred.");
       setIsDisabled(true);
-      console.log(result?.error || "An error occurred from front.");
     } else {
       toast.success("Product added to cart!");
     }

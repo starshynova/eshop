@@ -50,7 +50,6 @@ const AdminUsersPanel: React.FC = () => {
 
         const data: UserDetails[] = await response.json();
         setUsers(data);
-        console.log("Fetched users:", data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       }
@@ -144,6 +143,16 @@ const AdminUsersPanel: React.FC = () => {
   };
 
   if (loading) return <Loader />;
+  if (error) {
+    return (
+      <CustomDialog
+        isOpen={true}
+        onClose={() => navigate("/admin/dashboard")}
+        message={error}
+        isVisibleButton={false}
+      />
+    );
+  }
 
   return (
     <div className="p-4 w-full">
@@ -410,14 +419,6 @@ const AdminUsersPanel: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
-      {error && (
-        <CustomDialog
-          isOpen={true}
-          onClose={() => navigate("/admin/dashboard")}
-          message={error}
-          isVisibleButton={false}
-        />
       )}
       <CustomDialog
         isOpen={isDeleteAccountDialogOpen}

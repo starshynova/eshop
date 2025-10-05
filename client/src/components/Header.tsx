@@ -39,7 +39,6 @@ const Header: React.FC = () => {
       return;
     }
     const token = localStorage.getItem("token");
-    console.log("Token:", token);
     if (!token) {
       console.error("No token found in localStorage");
       return;
@@ -178,14 +177,8 @@ const Header: React.FC = () => {
               </Menu.Root>
             </div>
 
-            <ButtonSecond
-              onClick={() => console.log("Delivery page")}
-              children="delivery"
-            />
-            <ButtonSecond
-              onClick={() => console.log("About page")}
-              children="about us"
-            />
+            <ButtonSecond children="delivery" disabled={true} />
+            <ButtonSecond children="about us" disabled={true} />
           </div>
           <div className="flex-1 flex justify-center">
             <div

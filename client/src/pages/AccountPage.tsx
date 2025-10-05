@@ -24,7 +24,6 @@ const AccountPage: React.FC = () => {
 
   const handleLogOut = () => {
     logout();
-    console.log("User logged out");
     setIsOpen(true);
     setTimeout(() => {
       setIsOpen(false);
@@ -34,7 +33,6 @@ const AccountPage: React.FC = () => {
 
   useEffect(() => {
     if (!userId) {
-      console.log("User ID is not provided in the URL parameters.");
       navigate("/login");
       return;
     }
@@ -46,7 +44,6 @@ const AccountPage: React.FC = () => {
           throw new Error(`Failed to fetch user details: ${response.status}`);
         }
         const data = await response.json();
-        console.log("User Details:", data);
 
         const userData: UserDetails = {
           id: data.id,

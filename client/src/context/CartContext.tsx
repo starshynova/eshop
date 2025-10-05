@@ -119,7 +119,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         });
         if (!res.ok) {
           const data = await res.json();
-          console.log("data: ", data);
           return {
             success: false,
             error: data.detail || "Error adding product",

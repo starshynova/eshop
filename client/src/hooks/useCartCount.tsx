@@ -21,9 +21,8 @@ export default function useCartCount() {
         setCount(0);
         return;
       }
-
       setLoading(true);
-      // <Loader />
+
       try {
         const response = await fetch(`${API_BASE_URL}/carts/count`, {
           headers: { Authorization: `Bearer ${token}` },
