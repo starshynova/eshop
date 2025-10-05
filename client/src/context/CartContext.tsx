@@ -8,7 +8,7 @@ import React, {
 import { API_BASE_URL } from "../config";
 import { useAuth } from "./AuthContext";
 import {
-  addToLocalCart,
+  addToLocalCartWithStockCheck,
   getLocalCartCount,
   getLocalCart,
   clearLocalCart,
@@ -19,7 +19,10 @@ type CartContextType = {
   count: number;
   loading: boolean;
   refresh: () => Promise<void>;
-  addAndRefresh: (productId: string, quantity?: number) => Promise<void>;
+  addAndRefresh: (
+    productId: string,
+    quantity?: number,
+  ) => Promise<{ success: boolean; error?: any } | undefined>;
   setCount: (n: number) => void;
 };
 
@@ -86,7 +89,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         );
         clearLocalCart();
       }
-
       await refresh();
     };
 
@@ -96,13 +98,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const addAndRefresh = useCallback(
     async (productId: string, quantity: number = 1) => {
       if (!isAuthenticated) {
-        addToLocalCart(productId, quantity);
+        const result = await addToLocalCartWithStockCheck(productId, quantity);
+        if (!result || !result.success) return result;
         setCount(getLocalCartCount());
-        return;
+        return { success: true };
       }
 
       const token = localStorage.getItem("token");
-      if (!token) return;
+      if (!token) return { success: false, error: "User not authenticated" };
 
       setLoading(true);
       try {
@@ -114,9 +117,18 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
           },
           body: JSON.stringify({ item_id: productId, quantity: quantity }),
         });
-        if (res.ok) {
-          await refresh();
+        if (!res.ok) {
+          const data = await res.json();
+          console.log("data: ", data);
+          return {
+            success: false,
+            error: data.detail || "Error adding product",
+          };
         }
+        await refresh();
+        return { success: true };
+      } catch (e: any) {
+        return { success: false, error: e.message || "Unknown error" };
       } finally {
         setLoading(false);
       }

@@ -83,7 +83,9 @@ const UserOrdersPanel: React.FC = () => {
                   />
                   <div className="flex-1 flex flex-col items-start">
                     <div className="font-semibold">{item.title}</div>
-                    <div className="text-gray-600">Quantity: {item.quantity}</div>
+                    <div className="text-gray-600">
+                      Quantity: {item.quantity}
+                    </div>
                   </div>
                   <div className="font-bold">
                     € {(item.price * item.quantity).toFixed(2)}{" "}

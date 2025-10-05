@@ -10,6 +10,8 @@ import CartPage from "./pages/CartPage";
 import AccountPage from "./pages/AccountPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import AdminDashboard from "./pages/AdminDashboard";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const App: React.FC = () => (
   <BrowserRouter>
@@ -25,6 +27,18 @@ const App: React.FC = () => (
       <Route path="/payment/success" element={<PaymentSuccessPage />} />
       <Route path="/admin/dashboard" element={<AdminDashboard />} />
     </Routes>
+    <ToastContainer
+      position="top-right"
+      autoClose={3000}
+      hideProgressBar={false}
+      newestOnTop={false}
+      closeOnClick
+      rtl={false}
+      pauseOnFocusLoss
+      draggable
+      pauseOnHover
+      theme="light"
+    />
   </BrowserRouter>
 );
 
