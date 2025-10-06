@@ -34,30 +34,52 @@ The project is built with React.ts, Tailwind, Python, FastAPI, PostgreSQL, Strip
 3. Database - Neon.com
 
 
-## User features
+## Features
+If you need administrator access, feel free to reach out to me via email.
 
-1. Product catalogue with filtering by categories and subcategories
-2. Detailed product page
-3. Search by name and description
-4. Shopping cart:
-   - works for non-logged-in users (guest cart via localStorage)
-   - cart synchronisation after login (cart from localStorage → to database)
-   - product count badge on all pages
-   - automatic clearing after payment
-5. Order processing:
-   - Stripe Payments (card number for successful payment - 4242 4242 4242 4242)
-   - saving the order after successful payment
-6. Authorisation:
-   - Email/password (with JWT tokens, bcrypt)
-   - OAuth (Google)
-7. User role:
-   - user information
-   - order history
-   - changing personal data
-8. Admin role:
-   - adding, editing, and deleting products
-   - user management
-   - product and sales analytics
+### User Roles
+
+1. Guest (Unregistered User)
+   - Browse the product catalog and view detailed product information
+   - Add products to the cart (cart is stored in LocalStorage)
+   - Must register or log in to complete a purchase
+2. Registered User
+   - All guest features
+   - Complete orders and pay online via Stripe (card number for successful payment - 4242 4242 4242 4242)
+   - Cart is synchronized with the server and preserved between sessions
+   - View order history
+   - Update delivery contact information
+   - Change/set password (for both email/password and Google authentication)
+   - Secure logout
+3. Administrator
+   - Manage users (edit delivery details, change roles)
+   - Manage products (add, edit, update images via AWS S3)
+   - Access sales and order analytics
+   - Manage product categories
+
+### Core Features
+
+1. Registration and Authentication
+   - Email/password with email validation (JWT, bcrypt)
+   - Google login (OAuth)
+   - Guest cart is automatically migrated to the user’s account upon login
+2. Cart
+   - Stock availability is checked before adding or purchasing products
+   - Out-of-stock items cannot be added to the cart
+   - Cart automatically updates if product availability changes
+   - If an item in the cart becomes unavailable, the user is notified and it is not included in the order total
+3. Payment
+   - Stripe integration: payment intent creation and transaction processing
+4. Catalog and Search
+   - Filtering by categories and subcategories
+   - Search by product name and description (semantic search coming soon)
+5. Analytics (Administrator):
+   - General statistics: total orders, products sold, average, maximum, and minimum order value.
+   - Top 10 best-selling products.
+   - Sales by category.
+   - Products with minimal stock (less than 5) and products with no sales.
+   - Ability to navigate to product details directly from analytics charts.
+
 
 #### Release 2 - in process
 This release includes responsive design and delivery functionality
