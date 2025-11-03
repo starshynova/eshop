@@ -22,10 +22,10 @@ secret_key_session_middleware=os.getenv("SECRET_KEY_SESSION_MIDDLEWARE")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,       # вместо ["*"]
-    allow_credentials=True,     # без куки и авторизации, если не нужно
-    allow_methods=["*"],         # GET, POST, PUT и т. д.
-    allow_headers=["*"],         # Content-Type и прочие
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.add_middleware(SessionMiddleware, secret_key=secret_key_session_middleware)
@@ -52,14 +52,14 @@ app.include_router(order_router)
 app.include_router(analytics_router)
 app.include_router(check_email)
 
-@app.middleware("http")
-async def force_https_redirects(request: Request, call_next):
-    response = await call_next(request)
-    if "location" in response.headers:
-        location = response.headers["location"]
-        if location.startswith("http://"):
-            response.headers["location"] = location.replace("http://", "https://", 1)
-    return response
+# @app.middleware("http")
+# async def force_https_redirects(request: Request, call_next):
+#     response = await call_next(request)
+#     if "location" in response.headers:
+#         location = response.headers["location"]
+#         if location.startswith("http://"):
+#             response.headers["location"] = location.replace("http://", "https://", 1)
+#     return response
 
 
 @app.middleware("http")
